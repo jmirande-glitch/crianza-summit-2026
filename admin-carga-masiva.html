@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Carga masiva — Crianza Summit 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#F7F3EC;
+    --bg-card:#FFFFFF;
+    --text:#1A1208;
+    --text-secondary:#6B6258;
+    --accent:#D85A30;
+    --accent-dark:#B84823;
+    --border:#E5DDD0;
+    --green:#3D7A4F;
+    --green-light:#E8F3EA;
+    --red:#C44536;
+    --red-light:#FBEAE7;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:22px;font-weight:700;margin:0 0 4px}
+  .subtitle{color:var(--text-secondary);font-size:14px;margin:0 0 28px}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:16px}
+  label:first-child{margin-top:0}
+  input,select,textarea{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    background:var(--bg);
+    color:var(--text);
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{min-height:180px;resize:vertical;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6}
+  .hint{font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.5}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:white;border:none;border-radius:8px;
+    padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:inherit;width:100%;margin-top:18px;transition:background .15s;
+  }
+  .btn:hover{background:var(--accent-dark)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg);color:var(--text)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #gate{text-align:center;padding-top:60px}
+  #gate input{text-align:center;letter-spacing:.1em;max-width:280px;margin:0 auto}
+  #gate .btn{max-width:280px;margin:16px auto 0}
+  .error-text{color:var(--red);font-size:13px;margin-top:8px;display:none}
+  #app{display:none}
+  .preview-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+  .preview-table th{text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase}
+  .preview-table td{padding:8px;border-bottom:1px solid var(--border)}
+  .preview-table tr.row-error td{color:var(--red)}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px}
+  .badge-ok{background:var(--green-light);color:var(--green)}
+  .badge-error{background:var(--red-light);color:var(--red)}
+  .summary{display:flex;gap:16px;margin-top:16px;font-size:14px}
+  .summary b{font-size:20px;display:block}
+  #result-panel{display:none}
+  .qr-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .qr-item{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:8px}
+  .qr-item img{width:56px;height:56px;border-radius:6px}
+  .qr-item .info{flex:1;min-width:0}
+  .qr-item .name{font-weight:600;font-size:13px}
+  .qr-item .meta{font-size:12px;color:var(--text-secondary)}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div id="gate">
+    <h1>Carga masiva de inscriptos</h1>
+    <p class="subtitle">Acceso restringido — Crianza Summit 2026</p>
+    <input type="password" id="pass-input" placeholder="Clave de administrador" onkeydown="if(event.key==='Enter')checkAccess()">
+    <div class="error-text" id="pass-error">Clave incorrecta.</div>
+    <button class="btn" onclick="checkAccess()">Ingresar</button>
+  </div>
+
+  <div id="app">
+    <h1>Carga masiva de inscriptos</h1>
+    <p class="subtitle">Para instituciones, cortesías o pagos por fuera de MercadoPago.</p>
+
+    <div class="card">
+      <label for="bulk-text">Lista de personas</label>
+      <textarea id="bulk-text" placeholder="Juan Pérez, juan@colegio.edu.ar
+María Gómez, maria@colegio.edu.ar
+Pedro Ruiz, pedro@colegio.edu.ar"></textarea>
+      <div class="hint">Una persona por línea: <b>Nombre completo, mail</b>. También podés pegar directo desde Excel/Sheets (nombre y mail separados por tabulación).</div>
+
+      <div class="row">
+        <div>
+          <label for="bulk-ticket">Tipo de entrada</label>
+          <select id="bulk-ticket">
+            <option value="dia1">Día 1 — Charlas</option>
+            <option value="dia2">Día 2 — Talleres</option>
+            <option value="ambos" selected>Ambos días</option>
+          </select>
+        </div>
+        <div>
+          <label for="bulk-monto">Monto (por persona)</label>
+          <input type="number" id="bulk-monto" value="0" placeholder="0 si es cortesía">
+        </div>
+      </div>
+
+      <label for="bulk-origen">Origen / referencia (opcional)</label>
+      <input type="text" id="bulk-origen" placeholder="Ej: Colegio San Martín">
+
+      <button class="btn btn-secondary" onclick="previewBulk()">Vista previa</button>
+    </div>
+
+    <div class="card" id="preview-card" style="display:none">
+      <div style="font-weight:700;font-size:15px">Vista previa</div>
+      <div class="summary">
+        <div><b id="preview-valid-count">0</b><span style="color:var(--text-secondary)">válidos</span></div>
+        <div><b id="preview-error-count" style="color:var(--red)">0</b><span style="color:var(--text-secondary)">con error</span></div>
+      </div>
+      <table class="preview-table" id="preview-table"></table>
+      <button class="btn" id="confirm-btn" onclick="confirmBulkLoad()">Cargar todos</button>
+    </div>
+
+    <div class="card" id="result-panel">
+      <div style="font-weight:700;font-size:15px;margin-bottom:4px">✅ Carga completada</div>
+      <div class="summary">
+        <div><b id="result-success-count">0</b><span style="color:var(--text-secondary)">cargados</span></div>
+        <div><b id="result-fail-count" style="color:var(--red)">0</b><span style="color:var(--text-secondary)">con error</span></div>
+      </div>
+      <div class="qr-list" id="result-qr-list"></div>
+      <button class="btn btn-secondary" onclick="resetForm()">Cargar otra lista</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SB_URL='https://gcgsgypcqysedwtsrsur.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjZ3NneXBjcXlzZWR3dHNyc3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDI4NjEsImV4cCI6MjA5NjA3ODg2MX0.tFqH0Yh31KOUyLXTAMMcXMd5bRQQSYkkdp_d5mPAywY';
+const ADMIN_PASS='tiendida2026';
+const SHEETS_WEBHOOK_URL='https://script.google.com/macros/s/AKfycbxkYduv-RYE86T9oFrOEqtzsfD7sSMaqu2LnIuImEDUD-_LtFZjfzcOfe1hoZMJk1ef/exec';
+
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+function checkAccess(){
+  const val=document.getElementById('pass-input').value.trim();
+  const err=document.getElementById('pass-error');
+  if(val===ADMIN_PASS){
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+  }else{
+    err.style.display='block';
+  }
+}
+
+function generateQrCode(){
+  return 'CS26-'+Math.random().toString(36).substring(2,10).toUpperCase();
+}
+
+function parseBulkText(raw){
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  return lines.map(line=>{
+    // soporta separador por coma o por tab (pegado desde sheets)
+    let parts;
+    if(line.includes('\t')) parts=line.split('\t');
+    else parts=line.split(',');
+
+    const nombre=(parts[0]||'').trim();
+    const email=(parts[1]||'').trim().toLowerCase();
+    const isValidEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    return {
+      raw:line,
+      nombre,
+      email,
+      valid: nombre.length>0 && isValidEmail,
+      errorMsg: !nombre.length ? 'Falta el nombre' : (!isValidEmail ? 'Mail inválido' : '')
+    };
+  });
+}
+
+let currentParsed=[];
+
+function previewBulk(){
+  const raw=document.getElementById('bulk-text').value;
+  currentParsed=parseBulkText(raw);
+
+  const validCount=currentParsed.filter(p=>p.valid).length;
+  const errorCount=currentParsed.length-validCount;
+
+  document.getElementById('preview-valid-count').textContent=validCount;
+  document.getElementById('preview-error-count').textContent=errorCount;
+
+  const table=document.getElementById('preview-table');
+  table.innerHTML=`
+    <tr><th>Nombre</th><th>Mail</th><th>Estado</th></tr>
+    ${currentParsed.map(p=>`
+      <tr class="${p.valid?'':'row-error'}">
+        <td>${p.nombre||'—'}</td>
+        <td>${p.email||'—'}</td>
+        <td>${p.valid?'<span class="badge badge-ok">OK</span>':`<span class="badge badge-error">${p.errorMsg}</span>`}</td>
+      </tr>
+    `).join('')}
+  `;
+
+  document.getElementById('preview-card').style.display='block';
+  document.getElementById('confirm-btn').disabled = validCount===0;
+  document.getElementById('preview-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function confirmBulkLoad(){
+  const btn=document.getElementById('confirm-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Cargando...';
+
+  const ticketType=document.getElementById('bulk-ticket').value;
+  const monto=parseFloat(document.getElementById('bulk-monto').value)||0;
+  const origen=document.getElementById('bulk-origen').value.trim();
+
+  const validEntries=currentParsed.filter(p=>p.valid);
+  const results=[];
+
+  for(const entry of validEntries){
+    const qrCode=generateQrCode();
+    try{
+      const {error}=await sb.from('cs26_inscriptos_pagos').upsert({
+        email:entry.email,
+        nombre:entry.nombre,
+        ticket_type:ticketType,
+        monto,
+        mp_payment_id:'bulk-'+(origen?origen.replace(/\s+/g,'_'):'manual')+'-'+Date.now(),
+        qr_code:qrCode
+      },{onConflict:'email'});
+
+      if(error){
+        results.push({...entry,success:false,error:error.message});
+      }else{
+        results.push({...entry,success:true,qrCode});
+        try{
+          await fetch(SHEETS_WEBHOOK_URL,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              email:entry.email,nombre:entry.nombre,ticket_type:ticketType,monto,
+              mp_payment_id:'Carga masiva'+(origen?' / '+origen:''),
+              qr_code:qrCode,
+              fecha:new Date().toISOString()
+            })
+          });
+        }catch(sheetErr){console.error('Sheet error:',sheetErr);}
+      }
+    }catch(err){
+      results.push({...entry,success:false,error:String(err)});
+    }
+  }
+
+  showResults(results);
+}
+
+function showResults(results){
+  const successCount=results.filter(r=>r.success).length;
+  const failCount=results.length-successCount;
+
+  document.getElementById('result-success-count').textContent=successCount;
+  document.getElementById('result-fail-count').textContent=failCount;
+
+  const list=document.getElementById('result-qr-list');
+  list.innerHTML=results.map(r=>{
+    if(r.success){
+      return `<div class="qr-item">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(r.qrCode)}" alt="QR">
+        <div class="info">
+          <div class="name">${r.nombre}</div>
+          <div class="meta">${r.email} · ${r.qrCode}</div>
+        </div>
+        <span class="badge badge-ok">Cargado</span>
+      </div>`;
+    }else{
+      return `<div class="qr-item">
+        <div class="info">
+          <div class="name">${r.nombre}</div>
+          <div class="meta">${r.email} · ${r.error}</div>
+        </div>
+        <span class="badge badge-error">Error</span>
+      </div>`;
+    }
+  }).join('');
+
+  document.getElementById('preview-card').style.display='none';
+  document.getElementById('result-panel').style.display='block';
+  document.getElementById('result-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetForm(){
+  document.getElementById('bulk-text').value='';
+  document.getElementById('bulk-monto').value='0';
+  document.getElementById('bulk-origen').value='';
+  document.getElementById('preview-card').style.display='none';
+  document.getElementById('result-panel').style.display='none';
+  currentParsed=[];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
