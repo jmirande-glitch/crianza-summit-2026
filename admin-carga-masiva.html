@@ -240,7 +240,7 @@ async function confirmBulkLoad(){
   for(const entry of validEntries){
     const qrCode=generateQrCode();
     try{
-      const {error}=await sb.from('cs26_inscriptos_pagos').upsert({
+      const result=await sb.from('cs26_inscriptos_pagos').upsert({
         email:entry.email,
         nombre:entry.nombre,
         ticket_type:ticketType,
@@ -249,8 +249,8 @@ async function confirmBulkLoad(){
         qr_code:qrCode
       },{onConflict:'email'});
 
-      if(error){
-        results.push({...entry,success:false,error:error.message});
+      if(result.error){
+        results.push({...entry,success:false,error:result.error.message||'Error desconocido'});
       }else{
         results.push({...entry,success:true,qrCode});
         try{
@@ -267,7 +267,7 @@ async function confirmBulkLoad(){
         }catch(sheetErr){console.error('Sheet error:',sheetErr);}
       }
     }catch(err){
-      results.push({...entry,success:false,error:String(err)});
+      results.push({...entry,success:false,error:err?.message||String(err)});
     }
   }
 
