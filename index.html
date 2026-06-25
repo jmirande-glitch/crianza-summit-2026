@@ -589,10 +589,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-tertiary);min-height:1
           <i class="ti ti-brand-whatsapp" style="font-size:16px;color:#25D366"></i> Escribinos por WhatsApp
         </a>
       </div>
-      <div id="day2-video-block" style="display:none;position:relative;min-height:420px;border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px;background:#0a1420">
-        <video id="day2-bg-video" src="https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/bienvenida.mp4" autoplay muted loop playsinline webkit-playsinline style="position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px);object-fit:cover;filter:grayscale(.6) brightness(.5) blur(3px);opacity:.55"></video>
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,20,32,.4),rgba(10,20,32,.85))"></div>
-      </div>
       <div id="prog-basic-day1"></div>
       <div id="prog-basic-day2" style="display:none"></div>
     </div>
@@ -1413,7 +1409,6 @@ function setPTab(day){
   document.getElementById('prog-basic-day1').style.display=day==='day1'?'':'none';
   document.getElementById('prog-basic-day2').style.display='none';
   document.getElementById('prog-day2-notice').style.display=day==='day2'?'flex':'none';
-  document.getElementById('day2-video-block').style.display=day==='day2'?'block':'none';
   document.getElementById('ptab-day1').className='tab-btn'+(day==='day1'?' active':'');
   document.getElementById('ptab-day2').className='tab-btn'+(day==='day2'?' active':'');
 }
@@ -2143,20 +2138,7 @@ function closeWelcomeVideo(){
 }
 
 // ---- INIT ----
-// ---- VIDEO DE FONDO DÍA 2 (recorte en cámara lenta) ----
-const DAY2_BG_CLIP_START=23;  // segundos donde arranca el recorte
-const DAY2_BG_CLIP_END=33;    // segundos donde corta y vuelve a loopear
-function setupDay2BgVideo(){
-  const v=document.getElementById('day2-bg-video');
-  if(!v)return;
-  v.playbackRate=0.6; // cámara lenta
-  v.addEventListener('loadedmetadata',()=>{ v.currentTime=DAY2_BG_CLIP_START; });
-  v.addEventListener('timeupdate',()=>{
-    if(v.currentTime>=DAY2_BG_CLIP_END){ v.currentTime=DAY2_BG_CLIP_START; }
-  });
-}
-
-goVideo(0);countdown();updateCTA();renderLogoCarousel();showWelcomeVideo();setupDay2BgVideo();
+goVideo(0);countdown();updateCTA();renderLogoCarousel();showWelcomeVideo();
 loadSupabaseData();subscribeRealtime();initAuth();
 
 // Restaurar la sección si el usuario refresca la página
