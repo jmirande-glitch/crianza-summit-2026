@@ -99,11 +99,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .cd-sep{font-size:24px;opacity:.3;padding:0 2px}
 
 /* DAY CARDS */
-.day-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.day-card{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:14px;cursor:pointer;transition:all .2s}
+.day-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;align-items:stretch}
+.day-card{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;justify-content:space-between;height:100%}
 .day-card:hover{border-color:var(--accent)}
+.day-top{margin-bottom:10px}
+.day-bottom{margin-top:auto}
 .day-num{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700}
-.day-date{font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:20px;font-weight:700;margin:3px 0}
+.day-date{font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:17px;line-height:1.25;font-weight:700;margin:3px 0}
 .day-desc{font-size:11px;color:var(--text-secondary);line-height:1.4}
 .day-pill{display:inline-block;margin-top:8px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
 
@@ -520,16 +522,24 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <div class="day-cards">
       <div class="day-card" onclick="goProgramaDay('day1')">
-        <div class="day-num">Día 1</div>
-        <div class="day-date">4 ago</div>
-        <div class="day-desc">Charlas magistrales para toda la familia</div>
-        <div class="day-pill badge-accent">Público general</div>
+        <div class="day-top">
+          <div class="day-num">4 ago</div>
+          <div class="day-date">Jornada Abierta<br>de Impacto</div>
+        </div>
+        <div class="day-bottom">
+          <div class="day-desc">Encuentro abierto a familias, docentes, profesionales y comunidad en general.</div>
+          <div class="day-pill badge-accent">Público general</div>
+        </div>
       </div>
       <div class="day-card" onclick="goProgramaDay('day2')">
-        <div class="day-num">Día 2</div>
-        <div class="day-date">5 ago</div>
-        <div class="day-desc">Talleres para profesionales e instituciones</div>
-        <div class="day-pill badge-teal">Profesional</div>
+        <div class="day-top">
+          <div class="day-num">5 ago</div>
+          <div class="day-date">Jornada<br>Formativa</div>
+        </div>
+        <div class="day-bottom">
+          <div class="day-desc">Talleres independientes destinados a estudiantes, comunidad de familias y equipos de profesionales de educación y salud.</div>
+          <div class="day-pill badge-teal">Profesional</div>
+        </div>
       </div>
     </div>
 
