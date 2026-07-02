@@ -1149,6 +1149,18 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         <input id="discount-code-input" type="text" placeholder="Código de descuento (opcional)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onblur="applyDiscountCode()">
       </div>
       <div id="discount-code-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+
+      <div id="gaceta-toggle" onclick="toggleGacetaBlock()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding:10px 12px;border-radius:var(--radius-md);border:1.5px dashed var(--border);background:var(--bg-secondary)">
+        <span style="font-size:12.5px;font-weight:600">¿Sos suscriptor de Club La Gaceta?</span>
+        <i id="gaceta-toggle-icon" class="ti ti-chevron-down" style="font-size:16px;color:var(--text-secondary)"></i>
+      </div>
+      <div id="gaceta-block" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px">
+          <input id="gaceta-dni-input" type="text" inputmode="numeric" placeholder="Tu DNI (sin puntos)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+          <button id="gaceta-verify-btn" type="button" onclick="verifyGacetaSocio()" style="padding:10px 16px;border-radius:var(--radius-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer">Verificar</button>
+        </div>
+        <div id="gaceta-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+      </div>
     </div>
 
     <button id="confirm-payment-btn" class="cta-btn" style="display:none;margin-top:10px" onclick="confirmTicketPayment()">
@@ -2124,6 +2136,81 @@ let appliedDiscountCode=null;
 let selectedTicketType=null;
 let currentLead=null; // {nombre, email, telefono}
 
+// ---- CLUB LA GACETA (verificación de socio, 20% Día 1, excluyente con el código de descuento) ----
+const CHECK_GACETA_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/check-gaceta-socio';
+const GACETA_DISCOUNT_PERCENT=20;
+let gacetaVerifiedDni=null; // solo para mostrar el precio en pantalla; mp-create-preference vuelve a verificar del lado del servidor
+
+function toggleGacetaBlock(){
+  const block=document.getElementById('gaceta-block');
+  const icon=document.getElementById('gaceta-toggle-icon');
+  if(!block)return;
+  const open=block.style.display!=='none';
+  block.style.display=open?'none':'block';
+  if(icon)icon.className=open?'ti ti-chevron-down':'ti ti-chevron-up';
+}
+
+async function verifyGacetaSocio(){
+  const input=document.getElementById('gaceta-dni-input');
+  const msgEl=document.getElementById('gaceta-msg');
+  const btn=document.getElementById('gaceta-verify-btn');
+  const dni=(input.value||'').replace(/\D/g,'');
+
+  gacetaVerifiedDni=null;
+  updateTicketPricesDisplay();
+  updateConfirmButtonText();
+
+  if(!dni||dni.length<6){
+    msgEl.style.display='block';
+    msgEl.style.color='var(--red)';
+    msgEl.textContent='Ingresá un DNI válido.';
+    return;
+  }
+
+  btn.disabled=true;
+  const originalText=btn.textContent;
+  btn.textContent='Verificando...';
+  msgEl.style.display='none';
+
+  try{
+    const res=await fetch(CHECK_GACETA_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({documento:dni})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'No se pudo verificar');
+
+    msgEl.style.display='block';
+    if(data.habilitado){
+      gacetaVerifiedDni=dni;
+      msgEl.style.color='var(--green)';
+      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento aplicado.`+(appliedDiscountCode?' (No se combina con el código de descuento; se aplica el mayor.)':'');
+    }else{
+      gacetaVerifiedDni=null;
+      msgEl.style.color='var(--red)';
+      msgEl.textContent=data.mensaje||'No encontramos una suscripción activa con ese DNI.';
+    }
+  }catch(err){
+    console.error('verifyGacetaSocio error:',err);
+    msgEl.style.display='block';
+    msgEl.style.color='var(--red)';
+    msgEl.textContent='No pudimos verificar en este momento. Podés continuar sin el descuento.';
+  }finally{
+    btn.disabled=false;
+    btn.textContent=originalText;
+    updateTicketPricesDisplay();
+    updateConfirmButtonText();
+  }
+}
+
+// Devuelve el mejor descuento aplicable (código vs. socio La Gaceta), sin acumular ambos.
+function getBestDiscountPercent(ticketType){
+  const codeDiscount=(appliedDiscountCode&&DISCOUNT_CODES[appliedDiscountCode]&&DISCOUNT_CODES[appliedDiscountCode].applies.includes(ticketType))?DISCOUNT_CODES[appliedDiscountCode].percent:0;
+  const gacetaDiscount=(gacetaVerifiedDni&&ticketType==='dia1')?GACETA_DISCOUNT_PERCENT:0;
+  return Math.max(codeDiscount,gacetaDiscount);
+}
+
 function fmtPrice(n){return'$'+Math.round(n).toLocaleString('es-AR');}
 
 function openDia2Whatsapp(){
@@ -2148,11 +2235,20 @@ function resetTicketSelection(){
   selectedTicketType=null;
   appliedDiscountCode=null;
   currentLead=null;
+  gacetaVerifiedDni=null;
   document.querySelectorAll('#ticket-modal .ticket-option').forEach(b=>b.classList.remove('selected'));
   const input=document.getElementById('discount-code-input');
   if(input)input.value='';
   const msgEl=document.getElementById('discount-code-msg');
   if(msgEl)msgEl.style.display='none';
+  const gacetaInput=document.getElementById('gaceta-dni-input');
+  if(gacetaInput)gacetaInput.value='';
+  const gacetaMsg=document.getElementById('gaceta-msg');
+  if(gacetaMsg)gacetaMsg.style.display='none';
+  const gacetaBlock=document.getElementById('gaceta-block');
+  if(gacetaBlock)gacetaBlock.style.display='none';
+  const gacetaIcon=document.getElementById('gaceta-toggle-icon');
+  if(gacetaIcon)gacetaIcon.className='ti ti-chevron-down';
   document.getElementById('lead-nombre-input').value='';
   document.getElementById('lead-email-input').value='';
   document.getElementById('lead-tel-input').value='';
@@ -2225,14 +2321,14 @@ function updateTicketPricesDisplay(){
   const regular=DIA1_REGULAR_PRICE;
   const basePrice=getDia1BasePrice();
   const earlyActive=isEarlyBirdActive();
-  const discount=(appliedDiscountCode&&DISCOUNT_CODES[appliedDiscountCode]&&DISCOUNT_CODES[appliedDiscountCode].applies.includes('dia1'))?DISCOUNT_CODES[appliedDiscountCode]:null;
-  const finalPrice=discount?Math.round(basePrice*(1-discount.percent/100)):basePrice;
+  const discountPercent=getBestDiscountPercent('dia1');
+  const finalPrice=discountPercent?Math.round(basePrice*(1-discountPercent/100)):basePrice;
 
   let html='';
   if(earlyActive){
     html+=`<span style="text-decoration:line-through;font-size:12px;opacity:.5;font-weight:400">${fmtPrice(regular)}</span>`;
   }
-  if(discount){
+  if(discountPercent){
     html+=`<br><span style="text-decoration:line-through;font-size:12px;opacity:.5;font-weight:400">${fmtPrice(basePrice)}</span>`;
   }
   html+=`<br>${fmtPrice(finalPrice)}`;
@@ -2243,8 +2339,8 @@ function updateConfirmButtonText(){
   const textEl=document.getElementById('confirm-payment-text');
   if(!textEl||!selectedTicketType)return;
   const basePrice=getDia1BasePrice();
-  const discount=(appliedDiscountCode&&DISCOUNT_CODES[appliedDiscountCode]&&DISCOUNT_CODES[appliedDiscountCode].applies.includes(selectedTicketType))?DISCOUNT_CODES[appliedDiscountCode]:null;
-  const finalPrice=discount?Math.round(basePrice*(1-discount.percent/100)):basePrice;
+  const discountPercent=getBestDiscountPercent(selectedTicketType);
+  const finalPrice=discountPercent?Math.round(basePrice*(1-discountPercent/100)):basePrice;
   textEl.textContent=`Continuar al pago — ${fmtPrice(finalPrice)}`;
 }
 
@@ -2287,6 +2383,7 @@ async function confirmTicketPayment(){
       body:JSON.stringify({
         ticket_type:selectedTicketType,
         discount_code:appliedDiscountCode||undefined,
+        gaceta_dni:gacetaVerifiedDni||undefined,
         nombre:currentLead.nombre,
         email:currentLead.email,
         telefono:currentLead.telefono
