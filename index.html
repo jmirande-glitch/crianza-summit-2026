@@ -1298,12 +1298,35 @@ const sb=supabase.createClient(SB_URL,SB_KEY,{
 let userToken=localStorage.getItem('cs26_token');
 if(!userToken){userToken='u_'+Math.random().toString(36).substr(2,12);localStorage.setItem('cs26_token',userToken);}
 
-const SPEAKER_PASS='tiendida2026';
-const ADMIN_PASS='tiendida2026';
+const ADMIN_ACTION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/admin-action';
 const SHEETS_WEBHOOK_URL='https://script.google.com/macros/s/AKfycbxkYduv-RYE86T9oFrOEqtzsfD7sSMaqu2LnIuImEDUD-_LtFZjfzcOfe1hoZMJk1ef/exec';
 let currentUser=null;        // {email, name, avatar}
 let userHasAccess=false;     // true si está en cs26_inscriptos_pagos
 let adminUnlocked=sessionStorage.getItem('cs26_admin')==='1';
+let adminPass=sessionStorage.getItem('cs26_admin_pass')||''; // se manda a admin-action en cada llamada; nunca es la fuente de verdad (eso vive server-side)
+
+// Llama a la edge function admin-action. Todas las escrituras administrativas
+// (alta manual, check-in, etc.) pasan por acá — la clave se revalida siempre
+// del lado del servidor, nunca se confía en lo que diga el navegador.
+async function callAdminAction(action,extra={}){
+  const res=await fetch(ADMIN_ACTION_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,password:adminPass,...extra})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    if(res.status===401){
+      // La clave guardada ya no es válida (o nunca lo fue): forzamos a re-loguear.
+      adminUnlocked=false;
+      adminPass='';
+      sessionStorage.removeItem('cs26_admin');
+      sessionStorage.removeItem('cs26_admin_pass');
+    }
+    throw new Error(data.error||'Error de administración');
+  }
+  return data;
+}
 
 let enrollments=new Set(),ratings={},comments={},pubComments={},sessionCounts={},userDatos={};
 const EVENT_START=new Date('2026-08-04T09:00:00-03:00');
@@ -1898,11 +1921,21 @@ function renderLogoCarousel(){
 
 // ---- GALLERY (admin only) ----
 let galleryItems=JSON.parse(localStorage.getItem('cs26_gallery')||'[]');
-function checkAdminAndShowGallery(){
+async function checkAdminAndShowGallery(){
   if(adminUnlocked){showGallery();return;}
   const pass=prompt('Clave de administrador:');
-  if(pass===ADMIN_PASS){adminUnlocked=true;sessionStorage.setItem('cs26_admin','1');showGallery();}
-  else if(pass!==null)toast('Clave incorrecta');
+  if(pass===null)return;
+  try{
+    adminPass=pass;
+    await callAdminAction('check_password');
+    adminUnlocked=true;
+    sessionStorage.setItem('cs26_admin','1');
+    sessionStorage.setItem('cs26_admin_pass',pass);
+    showGallery();
+  }catch(err){
+    adminPass='';
+    toast('Clave incorrecta');
+  }
 }
 function showGallery(){
   document.getElementById('gallery-section').style.display='';
@@ -1943,15 +1976,19 @@ function handleLogoTap(){
   }
 }
 
-function checkAcredAccess(){
+async function checkAcredAccess(){
   const val=document.getElementById('acred-pass-input')?.value.trim();
   const err=document.getElementById('acred-pass-error');
-  if(val===ADMIN_PASS){
+  err.style.display='none';
+  try{
+    adminPass=val;
+    await callAdminAction('check_password');
     adminUnlocked=true;
     sessionStorage.setItem('cs26_admin','1');
-    err.style.display='none';
+    sessionStorage.setItem('cs26_admin_pass',val);
     showAcredScanner();
-  }else{
+  }catch(e){
+    adminPass='';
     err.style.display='block';
   }
 }
@@ -1982,7 +2019,9 @@ function lockoutAcred(){
     qrScanner.stop().then(()=>{qrScanner.clear();qrScanner=null;}).catch(()=>{});
   }
   adminUnlocked=false;
+  adminPass='';
   sessionStorage.removeItem('cs26_admin');
+  sessionStorage.removeItem('cs26_admin_pass');
   document.getElementById('acred-gate').style.display='';
   document.getElementById('acred-scanner-view').style.display='none';
   document.getElementById('acred-pass-input').value='';
@@ -2000,9 +2039,9 @@ async function onQrScanSuccess(decodedText){
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:24px;animation:spin 1s linear infinite"></i><div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">Verificando...</div>`;
 
   try{
-    const {data:record,error}=await sb.from('cs26_inscriptos_pagos').select('*').eq('qr_code',decodedText).maybeSingle();
+    const {record}=await callAdminAction('lookup_qr',{qr_code:decodedText});
 
-    if(error||!record){
+    if(!record){
       resultEl.style.background='var(--red-light)';
       resultEl.innerHTML=`<i class="ti ti-x" style="font-size:32px;color:var(--red)"></i><div style="font-weight:700;margin-top:8px;color:var(--red)">Código inválido</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">No encontramos este QR en el sistema</div>`;
       return;
@@ -2039,24 +2078,18 @@ async function confirmCheckin(qrCode){
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:24px;animation:spin 1s linear infinite"></i><div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">Acreditando...</div>`;
 
   try{
-    const {data:record}=await sb.from('cs26_inscriptos_pagos').select('*').eq('qr_code',qrCode).maybeSingle();
-    if(!record||record.checked_in){
+    const {record,already}=await callAdminAction('checkin',{qr_code:qrCode});
+    if(!record){
+      resultEl.style.background='var(--red-light)';
+      resultEl.innerHTML=`<i class="ti ti-x" style="font-size:32px;color:var(--red)"></i><div style="font-weight:700;margin-top:8px;color:var(--red)">Código inválido</div>`;
+      return;
+    }
+    if(already){
       resultEl.style.background='var(--amber-light)';
       resultEl.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:32px;color:var(--amber)"></i><div style="font-weight:700;margin-top:8px;color:var(--amber)">Ya fue acreditado</div>`;
       updateAcredStats();
       return;
     }
-
-    const checkedInAt=new Date().toISOString();
-    await sb.from('cs26_inscriptos_pagos').update({checked_in:true,checked_in_at:checkedInAt}).eq('qr_code',qrCode);
-
-    try{
-      await fetch(SHEETS_WEBHOOK_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'checkin',qr_code:qrCode,checked_in_at:checkedInAt})
-      });
-    }catch(sheetErr){console.error('Sheet checkin error:',sheetErr);}
 
     const ticketLabels={dia1:'Día 1 — Charlas',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
     const label=ticketLabels[record.ticket_type]||record.ticket_type;
@@ -2075,7 +2108,7 @@ let acredCheckedInList=[];
 
 async function updateAcredStats(){
   try{
-    const {data}=await sb.from('cs26_inscriptos_pagos').select('nombre,ticket_type,checked_in,checked_in_at');
+    const {data}=await callAdminAction('stats');
     if(!data)return;
     const checkedIn=data.filter(r=>r.checked_in);
     acredCheckedInList=checkedIn.sort((a,b)=>new Date(b.checked_in_at)-new Date(a.checked_in_at));
@@ -2095,10 +2128,6 @@ function toggleManualEntry(){
   icon.className=isOpen?'ti ti-cash':'ti ti-chevron-up';
 }
 
-function generateManualQrCode(){
-  return 'CS26-'+Math.random().toString(36).substring(2,10).toUpperCase();
-}
-
 async function saveManualEntry(){
   const nombre=document.getElementById('me-nombre')?.value.trim();
   const email=document.getElementById('me-email')?.value.trim();
@@ -2114,43 +2143,20 @@ async function saveManualEntry(){
   resultEl.style.display='block';
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:20px;animation:spin 1s linear infinite"></i>`;
 
-  const qrCode=generateManualQrCode();
-
   try{
-    const {error}=await sb.from('cs26_inscriptos_pagos').upsert({
-      email,
-      nombre,
-      ticket_type:ticketType,
-      monto,
-      mp_payment_id:'manual-'+Date.now(),
-      qr_code:qrCode
-    },{onConflict:'email'});
+    const {results}=await callAdminAction('register',{records:[{nombre,email,ticket_type:ticketType,monto}]});
+    const r=results&&results[0];
 
-    if(error){
-      console.error(error);
-      resultEl.innerHTML=`<div style="color:var(--red);font-size:13px">Error al guardar: ${error.message}</div>`;
+    if(!r||!r.success){
+      resultEl.innerHTML=`<div style="color:var(--red);font-size:13px">Error al guardar: ${r?.error||'desconocido'}</div>`;
       return;
     }
-
-    // Reflejar también en el Google Sheet
-    try{
-      await fetch(SHEETS_WEBHOOK_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          email,nombre,ticket_type:ticketType,monto,
-          mp_payment_id:'Manual / Efectivo',
-          qr_code:qrCode,
-          fecha:new Date().toISOString()
-        })
-      });
-    }catch(sheetErr){console.error('Sheet manual entry error:',sheetErr);}
 
     resultEl.innerHTML=`
       <div style="color:var(--green);font-weight:600;font-size:13px;margin-bottom:8px"><i class="ti ti-check"></i> ${nombre} guardado/a correctamente</div>
       <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Ya puede iniciar sesión con ${email} y va a ver su QR en Mi Agenda.</div>
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCode)}" alt="QR" style="width:120px;margin:0 auto;display:block">
-      <div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Código: ${qrCode}</div>`;
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(r.qrCode)}" alt="QR" style="width:120px;margin:0 auto;display:block">
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Código: ${r.qrCode}</div>`;
 
     document.getElementById('me-nombre').value='';
     document.getElementById('me-email').value='';
