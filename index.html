@@ -514,7 +514,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <img id="topbar-logo-img" src="https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light-top-bar.png" class="topbar-logo" alt="Crianza Summit" onclick="handleLogoTap()" style="cursor:pointer">
+    <img id="topbar-logo-img" src="https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light-top-bar.png" class="topbar-logo" alt="Crianza Summit" style="cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none" onmousedown="startLogoPress()" onmouseup="endLogoPress()" onmouseleave="cancelLogoPress()" ontouchstart="startLogoPress()" ontouchend="endLogoPress()" ontouchcancel="cancelLogoPress()">
     <div class="topbar-actions">
       <div id="user-area"></div>
       <span class="sync-dot" id="sync-dot"></span>
@@ -1127,6 +1127,10 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <!-- SCANNER -->
     <div id="acred-scanner-view" style="display:none">
+      <a href="admin-carga-masiva.html" target="_blank" class="btn" style="width:100%;justify-content:center;margin-bottom:14px;text-decoration:none">
+        <i class="ti ti-upload"></i>Carga masiva institucional
+      </a>
+
       <button class="btn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="toggleManualEntry()">
         <i class="ti ti-cash" id="manual-entry-icon"></i>Cargar pago manual (efectivo / otro)
       </button>
@@ -1959,21 +1963,30 @@ function handleGalleryUpload(e){
 if(adminUnlocked)setTimeout(showGallery,100);
 
 // ---- ACREDITACIÓN (admin) ----
-let logoTapCount=0;
-let logoTapTimer=null;
-function handleLogoTap(){
-  logoTapCount++;
-  clearTimeout(logoTapTimer);
-  logoTapTimer=setTimeout(()=>{logoTapCount=0;},2000);
-  if(logoTapCount>=5){
-    logoTapCount=0;
+let logoPressTimer=null;
+let logoLongPressFired=false;
+function startLogoPress(){
+  logoLongPressFired=false;
+  clearTimeout(logoPressTimer);
+  logoPressTimer=setTimeout(()=>{
+    logoLongPressFired=true;
+    logoPressTimer=null;
     goPage('page-acreditacion');
     if(adminUnlocked)showAcredScanner();
-    return;
+  },1200);
+}
+function endLogoPress(){
+  if(logoPressTimer){
+    clearTimeout(logoPressTimer);
+    logoPressTimer=null;
   }
-  if(logoTapCount===1){
+  if(!logoLongPressFired){
     goPage('page-home');
   }
+}
+function cancelLogoPress(){
+  clearTimeout(logoPressTimer);
+  logoPressTimer=null;
 }
 
 async function checkAcredAccess(){
