@@ -196,13 +196,9 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .video-speaker-txt{font-size:11px;color:var(--text-secondary);margin-top:2px}
 
 /* GALLERY */
-.gallery-section{margin-bottom:12px}
-.gallery-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .gallery-item{aspect-ratio:1;border-radius:var(--radius-md);background:var(--bg-secondary);border:0.5px solid var(--border);overflow:hidden;cursor:pointer;position:relative}
 .gallery-item img{width:100%;height:100%;object-fit:cover}
-.gallery-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:var(--text-secondary)}
-.gallery-add i{font-size:24px}
 
 /* PROGRAMA — BASIC VIEW (pública) */
 .prog-basic-card{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:14px;margin-bottom:10px}
@@ -617,12 +613,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
           <button class="v-arrow" onclick="nextVideo()"><i class="ti ti-chevron-right"></i></button>
         </div>
       </div>
-    </div>
-
-    <!-- GALLERY 2025 (solo admin) -->
-    <div class="gallery-section" id="gallery-section" style="display:none">
-      <div class="gallery-label"><i class="ti ti-photo" style="font-size:14px;color:var(--accent)"></i>Crianza Summit 2025</div>
-      <div class="gallery-grid" id="gallery-grid"></div>
     </div>
 
     <div class="card">
@@ -1976,45 +1966,6 @@ function renderLogoCarousel(){
   const all=[...SPONSOR_LOGOS,...SPONSOR_LOGOS];
   track.innerHTML=all.map(l=>`<img src="${l.url}" alt="${l.name}" title="${l.name}" onerror="this.style.display='none'">`).join('');
 }
-
-// ---- GALLERY (admin only) ----
-let galleryItems=JSON.parse(localStorage.getItem('cs26_gallery')||'[]');
-async function checkAdminAndShowGallery(){
-  if(adminUnlocked){showGallery();return;}
-  const pass=prompt('Clave de administrador:');
-  if(pass===null)return;
-  try{
-    adminPass=pass;
-    await callAdminAction('check_password');
-    adminUnlocked=true;
-    sessionStorage.setItem('cs26_admin','1');
-    sessionStorage.setItem('cs26_admin_pass',pass);
-    showGallery();
-  }catch(err){
-    adminPass='';
-    toast('Clave incorrecta');
-  }
-}
-function showGallery(){
-  document.getElementById('gallery-section').style.display='';
-  renderGallery();
-}
-function renderGallery(){
-  const grid=document.getElementById('gallery-grid');if(!grid)return;
-  const addBtn=`<label class="gallery-item gallery-add" style="cursor:pointer"><input type="file" accept="image/*,video/*" multiple style="display:none" onchange="handleGalleryUpload(event)"><i class="ti ti-plus"></i><span>Subir</span></label>`;
-  grid.innerHTML=addBtn+galleryItems.map(item=>`<div class="gallery-item" onclick="openLightbox('${item.url}')"><img src="${item.url}" alt="" loading="lazy"></div>`).join('');
-}
-function handleGalleryUpload(e){
-  Array.from(e.target.files).forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{galleryItems.unshift({url:ev.target.result});if(galleryItems.length>20)galleryItems=galleryItems.slice(0,20);localStorage.setItem('cs26_gallery',JSON.stringify(galleryItems));renderGallery();};
-    r.readAsDataURL(file);
-  });
-  toast(`📸 Foto${e.target.files.length>1?'s':''} agregada${e.target.files.length>1?'s':''}`);
-}
-
-// Mostrar galería si ya está autenticado
-if(adminUnlocked)setTimeout(showGallery,100);
 
 // ---- ACREDITACIÓN (admin) ----
 let logoPressTimer=null;
