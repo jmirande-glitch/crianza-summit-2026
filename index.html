@@ -7,6 +7,24 @@
 <title>Crianza Summit 2026</title>
 <meta property="og:title" content="Crianza Summit 2026 · Tucumán">
 <meta property="og:description" content="El encuentro más grande de crianza consciente del NOA. 4 y 5 de agosto, Shopping Solar del Cerro, Yerba Buena.">
+<!-- Meta Pixel Code -->
+<!-- ⚠️ Reemplazar TU_PIXEL_ID_AQUI por el Pixel ID real cuando lo crees en Meta Events Manager -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', 'TU_PIXEL_ID_AQUI');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=TU_PIXEL_ID_AQUI&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2177,6 +2195,9 @@ function openTicketModal(){
   document.getElementById('ticket-modal').classList.add('open');
   document.body.style.overflow='hidden';
   resetTicketSelection();
+  if(typeof fbq==='function'){
+    fbq('track','ViewContent',{content_name:'Crianza Summit 2026 - Día 1',content_category:'Entradas',currency:'ARS'});
+  }
 }
 function closeTicketModal(){
   document.getElementById('ticket-modal').classList.remove('open');
@@ -2445,6 +2466,21 @@ async function confirmTicketPayment(){
     .then(({error})=>{ if(error)console.error('Lead insert error:',error); })
     .catch(err=>console.error('Lead insert exception:',err));
 
+  // ---- Meta Pixel: InitiateCheckout ----
+  const basePriceForPixel=getDia1BasePrice();
+  const discountPercentForPixel=getBestDiscountPercent(selectedTicketType);
+  const finalPriceForPixel=discountPercentForPixel?Math.round(basePriceForPixel*(1-discountPercentForPixel/100)):basePriceForPixel;
+  // event_id propio para poder deduplicar contra Conversions API (server-side) más adelante.
+  const fbEventId='cs26-'+(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));
+  if(typeof fbq==='function'){
+    fbq('track','InitiateCheckout',{
+      content_name:'Crianza Summit 2026 - Día 1',
+      content_category:'Entradas',
+      currency:'ARS',
+      value:finalPriceForPixel
+    },{eventID:fbEventId});
+  }
+
   try{
     const res=await fetch(MP_PREFERENCE_URL,{
       method:'POST',
@@ -2455,13 +2491,25 @@ async function confirmTicketPayment(){
         gaceta_dni:gacetaVerifiedDni||undefined,
         nombre:currentLead.nombre,
         email:currentLead.email,
-        telefono:currentLead.telefono
+        telefono:currentLead.telefono,
+        fb_event_id:fbEventId
       })
     });
     const data=await res.json();
     if(!res.ok||!data.init_point){
       throw new Error(data.error||'No se pudo generar el pago');
     }
+    // Guardamos lo necesario para disparar el evento Purchase cuando el
+    // usuario vuelva del pago (?pago=ok). Se borra apenas se usa, para no
+    // duplicar el evento si refresca la página.
+    try{
+      sessionStorage.setItem('cs26_pending_purchase',JSON.stringify({
+        value:finalPriceForPixel,
+        currency:'ARS',
+        content_name:'Crianza Summit 2026 - Día 1',
+        eventID:fbEventId
+      }));
+    }catch(e){ console.warn('No se pudo guardar cs26_pending_purchase:',e); }
     window.location.href=data.init_point;
   }catch(err){
     console.error(err);
@@ -2616,6 +2664,26 @@ if(initialHash&&validPages.includes(initialHash)){
     if(initialHash==='acreditacion'&&adminUnlocked)showAcredScanner();
   },50);
 }
+
+// ---- Meta Pixel: Purchase al volver de MercadoPago (?pago=ok) ----
+// El evento se guardó en confirmTicketPayment() justo antes del redirect.
+// Se borra apenas se dispara para no duplicarlo si el usuario refresca.
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('pago')!=='ok')return;
+  let pending=null;
+  try{ pending=JSON.parse(sessionStorage.getItem('cs26_pending_purchase')||'null'); }catch(e){}
+  if(!pending)return;
+  sessionStorage.removeItem('cs26_pending_purchase');
+  if(typeof fbq==='function'){
+    fbq('track','Purchase',{
+      content_name:pending.content_name,
+      content_category:'Entradas',
+      currency:pending.currency,
+      value:pending.value
+    },{eventID:pending.eventID});
+  }
+})();
 
 // MODAL GALERÍA SPONSORS (Summit 2025)
 function openGalleryModal(){
