@@ -1113,102 +1113,118 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
   <!-- ACREDITACIÓN (admin) -->
   <div class="page" id="page-acreditacion">
-    <div class="sec-head"><div class="sec-title-big">Acreditación</div></div>
+    <div class="sec-head"><div class="sec-title-big">Admin</div></div>
 
     <!-- GATE -->
     <div id="acred-gate" class="lock-gate" style="margin-top:12px">
       <i class="gate-icon ti ti-shield-lock"></i>
       <h3>Acceso de organizador</h3>
-      <p>Ingresá la clave de administrador para escanear los QR de acceso.</p>
+      <p>Ingresá la clave de administrador para gestionar inscripciones y acreditación.</p>
       <input type="password" class="lock-input" id="acred-pass-input" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')checkAcredAccess()">
       <div class="lock-error" id="acred-pass-error">Clave incorrecta.</div>
       <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="checkAcredAccess()"><i class="ti ti-arrow-right"></i>Ingresar</button>
     </div>
 
-    <!-- SCANNER -->
+    <!-- PANEL ADMIN -->
     <div id="acred-scanner-view" style="display:none">
-      <a href="admin-carga-masiva.html" target="_blank" class="btn" style="width:100%;justify-content:center;margin-bottom:14px;text-decoration:none">
-        <i class="ti ti-upload"></i>Carga masiva institucional
-      </a>
+      <div class="tab-bar" style="margin-bottom:14px">
+        <button class="tab-btn active" id="admtab-inscripcion" onclick="setAdminTab('inscripcion')">📋 Inscripción</button>
+        <button class="tab-btn" id="admtab-acreditacion" onclick="setAdminTab('acreditacion')">✅ Acreditación</button>
+      </div>
 
-      <button class="btn" style="width:100%;justify-content:center;margin-bottom:14px" onclick="toggleManualEntry()">
-        <i class="ti ti-cash" id="manual-entry-icon"></i>Cargar pago manual (efectivo / otro)
-      </button>
-
-      <div id="manual-entry-form" style="display:none;margin-bottom:16px">
-        <div class="card">
-          <div class="card-title"><i class="ti ti-user-plus"></i>Nuevo registro manual</div>
-          <input type="text" id="me-nombre" class="datos-input" placeholder="Nombre y apellido *">
-          <input type="email" id="me-email" class="datos-input" placeholder="Mail (con el que va a iniciar sesión) *">
-          <select id="me-ticket" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
-            <option value="dia1">Día 1 — Charlas</option>
-            <option value="dia2">Día 2 — Talleres</option>
-            <option value="ambos">Ambos días</option>
-          </select>
-          <input type="number" id="me-monto" class="datos-input" placeholder="Monto (0 si es cortesía)" value="0">
-          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="saveManualEntry()"><i class="ti ti-device-floppy"></i>Guardar y generar QR</button>
-          <div id="manual-entry-result" style="display:none;margin-top:12px;text-align:center"></div>
+      <!-- INSCRIPCIÓN -->
+      <div id="tab-inscripcion">
+        <div class="metric-grid" style="margin-bottom:14px">
+          <div class="metric"><div class="metric-val" id="insc-total">...</div><div class="metric-lbl">inscriptos</div></div>
+          <div class="metric"><div class="metric-val" id="insc-monto">...</div><div class="metric-lbl">recaudado</div></div>
         </div>
-      </div>
 
-      <div id="acred-mode-select" style="display:grid;gap:10px;margin-bottom:14px">
-        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showAcredCodeForm()">
-          <i class="ti ti-keyboard"></i>Cargar código
-        </button>
-        <button class="btn" style="width:100%;justify-content:center" onclick="showAcredCamera()">
-          <i class="ti ti-camera"></i>Habilitar cámara
-        </button>
-        <button class="btn" style="width:100%;justify-content:center;opacity:.7;border-style:dashed" onclick="showAcredException()">
-          <i class="ti ti-alert-triangle"></i>Casos excepcionales
-        </button>
-      </div>
+        <a href="admin-carga-masiva.html" target="_blank" class="btn" style="width:100%;justify-content:center;margin-bottom:14px;text-decoration:none">
+          <i class="ti ti-upload"></i>Carga masiva institucional
+        </a>
 
-      <div id="acred-code-form" style="display:none;margin-bottom:14px">
-        <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
-        <div class="card">
-          <div class="card-title"><i class="ti ti-keyboard"></i>Cargar código manualmente</div>
-          <div style="display:flex;align-items:stretch;margin-top:10px">
-            <span style="padding:11px 0 11px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-right:none;border-radius:var(--radius-md) 0 0 var(--radius-md);font-family:'Gotham Rounded','DM Sans',sans-serif;font-weight:700;color:var(--text-secondary);display:flex;align-items:center">CS26-</span>
-            <input type="text" id="acred-code-input" placeholder="XXXXXXXX" style="flex:1;min-width:0;padding:11px 14px;border:1px solid var(--border);border-radius:0 var(--radius-md) var(--radius-md) 0;font-family:'Gotham Rounded','DM Sans',sans-serif;text-transform:uppercase;background:var(--bg-primary);color:var(--text-primary)" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')submitAcredCode()">
+        <button class="btn" style="width:100%;justify-content:center" onclick="toggleManualEntry()">
+          <i class="ti ti-cash" id="manual-entry-icon"></i>Cargar pago manual (efectivo / otro)
+        </button>
+
+        <div id="manual-entry-form" style="display:none;margin-top:16px">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-user-plus"></i>Nuevo registro manual</div>
+            <input type="text" id="me-nombre" class="datos-input" placeholder="Nombre y apellido *">
+            <input type="email" id="me-email" class="datos-input" placeholder="Mail (con el que va a iniciar sesión) *">
+            <select id="me-ticket" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
+              <option value="dia1">Día 1 — Charlas</option>
+              <option value="dia2">Día 2 — Talleres</option>
+              <option value="ambos">Ambos días</option>
+            </select>
+            <input type="number" id="me-monto" class="datos-input" placeholder="Monto (0 si es cortesía)" value="0">
+            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="saveManualEntry()"><i class="ti ti-device-floppy"></i>Guardar y generar QR</button>
+            <div id="manual-entry-result" style="display:none;margin-top:12px;text-align:center"></div>
           </div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="submitAcredCode()"><i class="ti ti-check"></i>Buscar</button>
         </div>
       </div>
 
-      <div id="acred-camera-view" style="display:none;margin-bottom:14px">
-        <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
-        <p class="sec-sub" style="margin-bottom:12px">Apuntá la cámara al código QR del asistente.</p>
-        <div id="qr-reader" style="border-radius:var(--radius-lg);overflow:hidden"></div>
-      </div>
-
-      <div id="acred-exception-form" style="display:none;margin-bottom:14px">
-        <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
-        <div class="card" style="border-color:#D97706">
-          <div class="card-title" style="color:#B45309"><i class="ti ti-alert-triangle"></i>Caso excepcional</div>
-          <p style="font-size:11.5px;color:var(--text-secondary);margin:6px 0 10px">Usar solo si la persona no tiene ni el QR ni el código a mano. Confirmá bien el nombre antes de acreditar.</p>
-          <input type="text" id="acred-search-input" class="datos-input" placeholder="Nombre o mail" onkeydown="if(event.key==='Enter')searchAcredException()">
-          <button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="searchAcredException()"><i class="ti ti-search"></i>Buscar</button>
-          <div id="acred-search-results" style="margin-top:12px;display:none"></div>
+      <!-- ACREDITACIÓN -->
+      <div id="tab-acreditacion" style="display:none">
+        <div class="metric-grid" style="margin-bottom:14px">
+          <div class="metric" onclick="toggleAcredList()" style="cursor:pointer">
+            <div class="metric-val" id="acred-total">...</div>
+            <div class="metric-lbl">acreditados <i class="ti ti-chevron-down" id="acred-list-chevron" style="font-size:11px"></i></div>
+          </div>
+          <div class="metric"><div class="metric-val" id="acred-pending">...</div><div class="metric-lbl">pendientes</div></div>
         </div>
-      </div>
 
-      <div id="acred-result" style="display:none;border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:14px"></div>
-
-      <div class="metric-grid" style="margin-bottom:14px">
-        <div class="metric" onclick="toggleAcredList()" style="cursor:pointer">
-          <div class="metric-val" id="acred-total">...</div>
-          <div class="metric-lbl">acreditados <i class="ti ti-chevron-down" id="acred-list-chevron" style="font-size:11px"></i></div>
+        <div id="acred-list-panel" style="display:none;margin-bottom:14px">
+          <div class="card" style="padding:12px">
+            <div id="acred-list-content" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
         </div>
-        <div class="metric"><div class="metric-val" id="acred-pending">...</div><div class="metric-lbl">pendientes</div></div>
-      </div>
 
-      <div id="acred-list-panel" style="display:none;margin-bottom:14px">
-        <div class="card" style="padding:12px">
-          <div id="acred-list-content" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div id="acred-mode-select" style="display:grid;gap:10px;margin-bottom:14px">
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showAcredCodeForm()">
+            <i class="ti ti-keyboard"></i>Cargar código
+          </button>
+          <button class="btn" style="width:100%;justify-content:center" onclick="showAcredCamera()">
+            <i class="ti ti-camera"></i>Habilitar cámara
+          </button>
+          <button class="btn" style="width:100%;justify-content:center;opacity:.7;border-style:dashed" onclick="showAcredException()">
+            <i class="ti ti-alert-triangle"></i>Casos excepcionales
+          </button>
         </div>
+
+        <div id="acred-code-form" style="display:none;margin-bottom:14px">
+          <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-keyboard"></i>Cargar código manualmente</div>
+            <div style="display:flex;align-items:stretch;margin-top:10px">
+              <span style="padding:11px 0 11px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-right:none;border-radius:var(--radius-md) 0 0 var(--radius-md);font-family:'Gotham Rounded','DM Sans',sans-serif;font-weight:700;color:var(--text-secondary);display:flex;align-items:center">CS26-</span>
+              <input type="text" id="acred-code-input" placeholder="XXXXXXXX" style="flex:1;min-width:0;padding:11px 14px;border:1px solid var(--border);border-radius:0 var(--radius-md) var(--radius-md) 0;font-family:'Gotham Rounded','DM Sans',sans-serif;text-transform:uppercase;background:var(--bg-primary);color:var(--text-primary)" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')submitAcredCode()">
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="submitAcredCode()"><i class="ti ti-check"></i>Buscar</button>
+          </div>
+        </div>
+
+        <div id="acred-camera-view" style="display:none;margin-bottom:14px">
+          <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
+          <p class="sec-sub" style="margin-bottom:12px">Apuntá la cámara al código QR del asistente.</p>
+          <div id="qr-reader" style="border-radius:var(--radius-lg);overflow:hidden"></div>
+        </div>
+
+        <div id="acred-exception-form" style="display:none;margin-bottom:14px">
+          <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
+          <div class="card" style="border-color:#D97706">
+            <div class="card-title" style="color:#B45309"><i class="ti ti-alert-triangle"></i>Caso excepcional</div>
+            <p style="font-size:11.5px;color:var(--text-secondary);margin:6px 0 10px">Usar solo si la persona no tiene ni el QR ni el código a mano. Confirmá bien el nombre antes de acreditar.</p>
+            <input type="text" id="acred-search-input" class="datos-input" placeholder="Nombre o mail" onkeydown="if(event.key==='Enter')searchAcredException()">
+            <button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="searchAcredException()"><i class="ti ti-search"></i>Buscar</button>
+            <div id="acred-search-results" style="margin-top:12px;display:none"></div>
+          </div>
+        </div>
+
+        <div id="acred-result" style="display:none;border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:14px"></div>
       </div>
 
-      <button class="btn" style="width:100%;justify-content:center" onclick="lockoutAcred()"><i class="ti ti-logout"></i>Cerrar sesión de acreditación</button>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:6px" onclick="lockoutAcred()"><i class="ti ti-logout"></i>Cerrar sesión</button>
     </div>
   </div>
 
@@ -2048,6 +2064,7 @@ async function showAcredScanner(){
   document.getElementById('acred-gate').style.display='none';
   document.getElementById('acred-scanner-view').style.display='';
   await updateAcredStats();
+  setAdminTab('inscripcion');
   backToAcredModes();
 }
 
@@ -2233,10 +2250,28 @@ async function confirmCheckin(qrCode){
 let acredListOpen=false;
 let acredCheckedInList=[];
 
+function setAdminTab(tab){
+  const isInsc=tab==='inscripcion';
+  document.getElementById('tab-inscripcion').style.display=isInsc?'block':'none';
+  document.getElementById('tab-acreditacion').style.display=isInsc?'none':'block';
+  document.getElementById('admtab-inscripcion').className='tab-btn'+(isInsc?' active':'');
+  document.getElementById('admtab-acreditacion').className='tab-btn'+(isInsc?'':' active');
+  if(!isInsc)backToAcredModes();
+}
+
 async function updateAcredStats(){
   try{
     const {data}=await callAdminAction('stats');
     if(!data)return;
+
+    // Inscripción
+    const totalMonto=data.reduce((sum,r)=>sum+(Number(r.monto)||0),0);
+    const inscTotalEl=document.getElementById('insc-total');
+    const inscMontoEl=document.getElementById('insc-monto');
+    if(inscTotalEl)inscTotalEl.textContent=data.length;
+    if(inscMontoEl)inscMontoEl.textContent='$'+totalMonto.toLocaleString('es-AR');
+
+    // Acreditación
     const checkedIn=data.filter(r=>r.checked_in);
     acredCheckedInList=checkedIn.sort((a,b)=>new Date(b.checked_in_at)-new Date(a.checked_in_at));
     const total=checkedIn.length;
