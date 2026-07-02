@@ -1152,12 +1152,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
             <div class="card-title"><i class="ti ti-user-plus"></i>Nuevo registro manual</div>
             <input type="text" id="me-nombre" class="datos-input" placeholder="Nombre y apellido *">
             <input type="email" id="me-email" class="datos-input" placeholder="Mail (con el que va a iniciar sesión) *">
+            <input type="tel" id="me-celular" class="datos-input" placeholder="Celular">
             <select id="me-ticket" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
-              <option value="dia1">Día 1 — Charlas</option>
+              <option value="dia1" selected>Día 1 — Charlas</option>
               <option value="dia2">Día 2 — Talleres</option>
               <option value="ambos">Ambos días</option>
             </select>
-            <input type="number" id="me-monto" class="datos-input" placeholder="Monto (0 si es cortesía)" value="0">
+            <input type="number" id="me-monto" class="datos-input" placeholder="Monto (solo números, 0 si es cortesía)">
             <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="saveManualEntry()"><i class="ti ti-device-floppy"></i>Guardar y generar QR</button>
             <div id="manual-entry-result" style="display:none;margin-top:12px;text-align:center"></div>
           </div>
@@ -2293,6 +2294,7 @@ function toggleManualEntry(){
 async function saveManualEntry(){
   const nombre=document.getElementById('me-nombre')?.value.trim();
   const email=document.getElementById('me-email')?.value.trim();
+  const celular=document.getElementById('me-celular')?.value.trim();
   const ticketType=document.getElementById('me-ticket')?.value;
   const monto=parseFloat(document.getElementById('me-monto')?.value)||0;
   const resultEl=document.getElementById('manual-entry-result');
@@ -2306,7 +2308,7 @@ async function saveManualEntry(){
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:20px;animation:spin 1s linear infinite"></i>`;
 
   try{
-    const {results}=await callAdminAction('register',{records:[{nombre,email,ticket_type:ticketType,monto}]});
+    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,ticket_type:ticketType,monto}]});
     const r=results&&results[0];
 
     if(!r||!r.success){
@@ -2316,13 +2318,14 @@ async function saveManualEntry(){
 
     resultEl.innerHTML=`
       <div style="color:var(--green);font-weight:600;font-size:13px;margin-bottom:8px"><i class="ti ti-check"></i> ${nombre} guardado/a correctamente</div>
-      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Ya puede iniciar sesión con ${email} y va a ver su QR en Mi Agenda.</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Le mandamos un mail a ${email} con su código de acceso. Ya puede iniciar sesión con ese mail y ver su QR en Mi gestión.</div>
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(r.qrCode)}" alt="QR" style="width:120px;margin:0 auto;display:block">
       <div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Código: ${r.qrCode}</div>`;
 
     document.getElementById('me-nombre').value='';
     document.getElementById('me-email').value='';
-    document.getElementById('me-monto').value='0';
+    document.getElementById('me-celular').value='';
+    document.getElementById('me-monto').value='';
     updateAcredStats();
   }catch(err){
     console.error(err);
