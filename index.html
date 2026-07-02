@@ -1151,9 +1151,46 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         </div>
       </div>
 
-      <p class="sec-sub" style="margin-bottom:12px">Apuntá la cámara al código QR del asistente.</p>
+      <div id="acred-mode-select" style="display:grid;gap:10px;margin-bottom:14px">
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showAcredCodeForm()">
+          <i class="ti ti-keyboard"></i>Cargar código
+        </button>
+        <button class="btn" style="width:100%;justify-content:center" onclick="showAcredCamera()">
+          <i class="ti ti-camera"></i>Habilitar cámara
+        </button>
+        <button class="btn" style="width:100%;justify-content:center;opacity:.7;border-style:dashed" onclick="showAcredException()">
+          <i class="ti ti-alert-triangle"></i>Casos excepcionales
+        </button>
+      </div>
 
-      <div id="qr-reader" style="border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px"></div>
+      <div id="acred-code-form" style="display:none;margin-bottom:14px">
+        <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-keyboard"></i>Cargar código manualmente</div>
+          <div style="display:flex;align-items:stretch;margin-top:10px">
+            <span style="padding:11px 0 11px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-right:none;border-radius:var(--radius-md) 0 0 var(--radius-md);font-family:'Gotham Rounded','DM Sans',sans-serif;font-weight:700;color:var(--text-secondary);display:flex;align-items:center">CS26-</span>
+            <input type="text" id="acred-code-input" placeholder="XXXXXXXX" style="flex:1;min-width:0;padding:11px 14px;border:1px solid var(--border);border-radius:0 var(--radius-md) var(--radius-md) 0;font-family:'Gotham Rounded','DM Sans',sans-serif;text-transform:uppercase;background:var(--bg-primary);color:var(--text-primary)" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')submitAcredCode()">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="submitAcredCode()"><i class="ti ti-check"></i>Buscar</button>
+        </div>
+      </div>
+
+      <div id="acred-camera-view" style="display:none;margin-bottom:14px">
+        <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
+        <p class="sec-sub" style="margin-bottom:12px">Apuntá la cámara al código QR del asistente.</p>
+        <div id="qr-reader" style="border-radius:var(--radius-lg);overflow:hidden"></div>
+      </div>
+
+      <div id="acred-exception-form" style="display:none;margin-bottom:14px">
+        <button onclick="backToAcredModes()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-chevron-left"></i>Volver</button>
+        <div class="card" style="border-color:#D97706">
+          <div class="card-title" style="color:#B45309"><i class="ti ti-alert-triangle"></i>Caso excepcional</div>
+          <p style="font-size:11.5px;color:var(--text-secondary);margin:6px 0 10px">Usar solo si la persona no tiene ni el QR ni el código a mano. Confirmá bien el nombre antes de acreditar.</p>
+          <input type="text" id="acred-search-input" class="datos-input" placeholder="Nombre o mail" onkeydown="if(event.key==='Enter')searchAcredException()">
+          <button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="searchAcredException()"><i class="ti ti-search"></i>Buscar</button>
+          <div id="acred-search-results" style="margin-top:12px;display:none"></div>
+        </div>
+      </div>
 
       <div id="acred-result" style="display:none;border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:14px"></div>
 
@@ -2011,6 +2048,30 @@ async function showAcredScanner(){
   document.getElementById('acred-gate').style.display='none';
   document.getElementById('acred-scanner-view').style.display='';
   await updateAcredStats();
+  backToAcredModes();
+}
+
+function backToAcredModes(){
+  document.getElementById('acred-mode-select').style.display='grid';
+  document.getElementById('acred-code-form').style.display='none';
+  document.getElementById('acred-camera-view').style.display='none';
+  document.getElementById('acred-exception-form').style.display='none';
+  const resultEl=document.getElementById('acred-result');
+  if(resultEl)resultEl.style.display='none';
+  stopAcredCamera();
+}
+
+function showAcredCodeForm(){
+  document.getElementById('acred-mode-select').style.display='none';
+  document.getElementById('acred-code-form').style.display='block';
+  const input=document.getElementById('acred-code-input');
+  input.value='';
+  input.focus();
+}
+
+async function showAcredCamera(){
+  document.getElementById('acred-mode-select').style.display='none';
+  document.getElementById('acred-camera-view').style.display='block';
   if(!qrScanner){
     qrScanner=new Html5Qrcode("qr-reader");
     try{
@@ -2027,10 +2088,63 @@ async function showAcredScanner(){
   }
 }
 
-function lockoutAcred(){
+function stopAcredCamera(){
   if(qrScanner){
-    qrScanner.stop().then(()=>{qrScanner.clear();qrScanner=null;}).catch(()=>{});
+    try{
+      const stopResult=qrScanner.stop();
+      if(stopResult&&typeof stopResult.then==='function'){
+        stopResult.then(()=>{try{qrScanner.clear();}catch(e){}}).catch(()=>{});
+      }
+    }catch(e){
+      // El scanner puede no estar corriendo (ej: se negó el permiso de cámara).
+    }
+    qrScanner=null;
   }
+}
+
+function showAcredException(){
+  document.getElementById('acred-mode-select').style.display='none';
+  document.getElementById('acred-exception-form').style.display='block';
+  document.getElementById('acred-search-input').value='';
+  document.getElementById('acred-search-results').style.display='none';
+  document.getElementById('acred-search-input').focus();
+}
+
+function submitAcredCode(){
+  const suffix=document.getElementById('acred-code-input').value.trim().toUpperCase();
+  if(!suffix){toast('Ingresá el código');return;}
+  onQrScanSuccess('CS26-'+suffix);
+}
+
+async function searchAcredException(){
+  const query=document.getElementById('acred-search-input').value.trim();
+  const resultsEl=document.getElementById('acred-search-results');
+  if(!query){toast('Escribí un nombre o mail');return;}
+  resultsEl.style.display='block';
+  resultsEl.innerHTML='<div style="text-align:center;padding:12px"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i></div>';
+  try{
+    const {results}=await callAdminAction('search',{query});
+    if(!results||results.length===0){
+      resultsEl.innerHTML='<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:8px">No encontramos a nadie con ese dato.</div>';
+      return;
+    }
+    resultsEl.innerHTML=results.map(r=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px;cursor:pointer" onclick="onQrScanSuccess('${r.qr_code}')">
+        <div>
+          <div style="font-size:13px;font-weight:600">${r.nombre}</div>
+          <div style="font-size:11px;color:var(--text-secondary)">${r.email}${r.checked_in?' · ya acreditado':''}</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;opacity:.5"></i>
+      </div>
+    `).join('');
+  }catch(err){
+    console.error(err);
+    resultsEl.innerHTML='<div style="font-size:12px;color:var(--red);text-align:center;padding:8px">Error al buscar.</div>';
+  }
+}
+
+function lockoutAcred(){
+  stopAcredCamera();
   adminUnlocked=false;
   adminPass='';
   sessionStorage.removeItem('cs26_admin');
