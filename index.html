@@ -6,7 +6,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
 <title>Crianza Summit 2026</title>
 <meta property="og:title" content="Crianza Summit 2026 · Tucumán">
-<meta property="og:description" content="El encuentro más grande de crianza consciente del NOA. 4 y 5 de agosto, Yerba Buena.">
+<meta property="og:description" content="El encuentro más grande de crianza consciente del NOA. 4 y 5 de agosto, Shopping Solar del Cerro, Yerba Buena.">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -74,6 +74,9 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
 /* HERO */
 .hero{text-align:center;padding:28px 20px 16px}
+.hero-location{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;text-align:center;font-size:12px;color:var(--text-secondary);padding:0 20px 14px}
+.hero-location a{color:var(--accent);font-weight:700;text-decoration:none}
+.hero-location a:hover{text-decoration:underline}
 .hero-eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
 .hero-title{font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:44px;font-weight:900;line-height:1.0;color:var(--text-primary);margin-bottom:12px}
 .hero-title em{color:var(--accent);font-style:italic}
@@ -501,6 +504,12 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <img id="hero-logo-img" src="https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light.png" alt="Crianza Summit 360° — Jornada de Impacto 4 Ago, Jornada Institucional 5 Ago" style="display:block;width:100%;max-width:510px;margin:0 auto">
     </div>
 
+    <div class="hero-location">
+      <i class="ti ti-map-pin" style="font-size:14px;color:var(--accent)"></i>
+      <span>Shopping Solar del Cerro, Yerba Buena, Tucumán</span>
+      <a href="https://maps.app.goo.gl/3PkenPoBLhnhAJBZA" target="_blank">Cómo llegar</a>
+    </div>
+
 
     <div class="cta-block">
       <button id="cta-btn" onclick="openTicketModal()" class="cta-btn">
@@ -698,6 +707,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
       <div id="prog-basic-day1"></div>
       <div id="prog-basic-day2" style="display:none"></div>
+
+      <div class="cta-block" style="margin-top:18px">
+        <button onclick="openTicketModal()" class="cta-btn cta-btn-clone">
+          <i class="ti ti-ticket" style="font-size:20px"></i>
+          Reservá tu lugar
+        </button>
+      </div>
     </div>
   </div>
 
@@ -706,6 +722,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     <div class="sec-head"><div class="sec-title-big">Speakers</div><p class="sec-sub">Los referentes del Summit.</p></div>
     <div style="height:12px"></div>
     <div class="sp-promo-grid" id="sp-promo-grid"></div>
+
+    <div class="cta-block" style="margin-top:18px">
+      <button onclick="openTicketModal()" class="cta-btn cta-btn-clone">
+        <i class="ti ti-ticket" style="font-size:20px"></i>
+        Reservá tu lugar
+      </button>
+    </div>
   </div>
 
   <!-- SPONSORS -->
@@ -715,7 +738,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <!-- HERO DE VENTA -->
     <div class="sp-sell-hero sp-block reveal">
-      <div class="sp-sell-kicker">Oportunidad de patrocinio · 4 y 5 de agosto 2026 · Solar del Cerro, Yerba Buena</div>
+      <div class="sp-sell-kicker">Oportunidad de patrocinio · 4 y 5 de agosto 2026 · Shopping Solar del Cerro, Yerba Buena</div>
       <div class="sp-sell-title">Tu marca en el centro de la crianza consciente del NOA</div>
       <div class="sp-sell-sub">Crianza Summit 360° reúne familias, profesionales y referentes de salud y educación en el evento de mayor impacto institucional de la región.</div>
     </div>
@@ -923,9 +946,10 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <h3>¿Tu marca en el Summit?</h3>
       <p>Descargá la propuesta comercial completa con condiciones, alcance y valores por categoría. O escribinos directamente y te asesoramos.</p>
       <div class="sp-cta-btns">
-        <button class="btn-sim" onclick="openGalleryModal()">
+        <!-- Botón de fotos 2025 oculto temporalmente -->
+        <!-- <button class="btn-sim" onclick="openGalleryModal()">
           <i class="ti ti-photo"></i> Cómo te vas a lucir en el summit
-        </button>
+        </button> -->
         <a href="Crianza-Summit-Propuesta-Sponsors-2026.pdf" target="_blank" class="btn-prop" id="btn-propuesta">
           <i class="ti ti-file-download"></i> Descargar propuesta comercial
         </a>
@@ -1006,8 +1030,8 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
           <div class="map-legend-item"><div class="map-legend-dot" style="background:#533AB7"></div><span><b>Sala C</b> — PB · Talleres profesionales</span></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px">
-          <a href="https://maps.google.com/?q=Yerba+Buena+Tucuman+Argentina" target="_blank" class="btn btn-sm btn-primary"><i class="ti ti-map-pin"></i>Cómo llegar</a>
-          <button class="btn btn-sm" onclick="toast('📍 Solar del Cerro, Yerba Buena, Tucumán')"><i class="ti ti-copy"></i>Dirección</button>
+          <a href="https://maps.app.goo.gl/3PkenPoBLhnhAJBZA" target="_blank" class="btn btn-sm btn-primary"><i class="ti ti-map-pin"></i>Cómo llegar</a>
+          <button class="btn btn-sm" onclick="toast('📍 Shopping Solar del Cerro, Yerba Buena, Tucumán')"><i class="ti ti-copy"></i>Dirección</button>
         </div>
       </div>
     </div>
@@ -2457,6 +2481,13 @@ function updateCTA(){
     btn.removeAttribute('onclick');
     btn.innerHTML='<i class="ti ti-calendar-check" style="font-size:20px"></i>¡El evento ya comenzó!';
     if(sub)sub.textContent='Nos vemos en el Summit 🌱';
+  }
+  if(isEventStarted()){
+    document.querySelectorAll('.cta-btn-clone').forEach(b=>{
+      b.className='cta-btn cta-btn-clone disabled';
+      b.removeAttribute('onclick');
+      b.innerHTML='<i class="ti ti-calendar-check" style="font-size:20px"></i>¡El evento ya comenzó!';
+    });
   }
 }
 
