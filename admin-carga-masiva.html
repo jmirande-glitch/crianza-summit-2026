@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>Carga masiva — Crianza Summit 2026</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#F7F3EC;
@@ -152,26 +151,38 @@ Pedro Ruiz, pedro@colegio.edu.ar"></textarea>
 </div>
 
 <script>
-const SB_URL='https://gcgsgypcqysedwtsrsur.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjZ3NneXBjcXlzZWR3dHNyc3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDI4NjEsImV4cCI6MjA5NjA3ODg2MX0.tFqH0Yh31KOUyLXTAMMcXMd5bRQQSYkkdp_d5mPAywY';
-const ADMIN_PASS='tiendida2026';
-const SHEETS_WEBHOOK_URL='https://script.google.com/macros/s/AKfycbxkYduv-RYE86T9oFrOEqtzsfD7sSMaqu2LnIuImEDUD-_LtFZjfzcOfe1hoZMJk1ef/exec';
+const ADMIN_ACTION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/admin-action';
+let adminPass=''; // se manda a admin-action en cada llamada; la validación real es server-side
 
-const sb=supabase.createClient(SB_URL,SB_KEY);
-
-function checkAccess(){
-  const val=document.getElementById('pass-input').value.trim();
-  const err=document.getElementById('pass-error');
-  if(val===ADMIN_PASS){
-    document.getElementById('gate').style.display='none';
-    document.getElementById('app').style.display='block';
-  }else{
-    err.style.display='block';
+// Llama a la edge function admin-action. La clave se revalida siempre del
+// lado del servidor — este archivo nunca vuelve a tener el password real.
+async function callAdminAction(action,extra={}){
+  const res=await fetch(ADMIN_ACTION_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,password:adminPass,...extra})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    if(res.status===401)adminPass='';
+    throw new Error(data.error||'Error de administración');
   }
+  return data;
 }
 
-function generateQrCode(){
-  return 'CS26-'+Math.random().toString(36).substring(2,10).toUpperCase();
+async function checkAccess(){
+  const val=document.getElementById('pass-input').value.trim();
+  const err=document.getElementById('pass-error');
+  err.style.display='none';
+  try{
+    adminPass=val;
+    await callAdminAction('check_password');
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+  }catch(e){
+    adminPass='';
+    err.style.display='block';
+  }
 }
 
 function parseBulkText(raw){
@@ -235,43 +246,21 @@ async function confirmBulkLoad(){
   const origen=document.getElementById('bulk-origen').value.trim();
 
   const validEntries=currentParsed.filter(p=>p.valid);
-  const results=[];
+  const records=validEntries.map(entry=>({nombre:entry.nombre,email:entry.email,ticket_type:ticketType,monto,origen}));
 
-  for(const entry of validEntries){
-    const qrCode=generateQrCode();
-    try{
-      const result=await sb.from('cs26_inscriptos_pagos').upsert({
-        email:entry.email,
-        nombre:entry.nombre,
-        ticket_type:ticketType,
-        monto,
-        mp_payment_id:'bulk-'+(origen?origen.replace(/\s+/g,'_'):'manual')+'-'+Date.now(),
-        qr_code:qrCode
-      },{onConflict:'email'});
-
-      if(result.error){
-        results.push({...entry,success:false,error:result.error.message||'Error desconocido'});
-      }else{
-        results.push({...entry,success:true,qrCode});
-        try{
-          await fetch(SHEETS_WEBHOOK_URL,{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({
-              email:entry.email,nombre:entry.nombre,ticket_type:ticketType,monto,
-              mp_payment_id:'Carga masiva'+(origen?' / '+origen:''),
-              qr_code:qrCode,
-              fecha:new Date().toISOString()
-            })
-          });
-        }catch(sheetErr){console.error('Sheet error:',sheetErr);}
-      }
-    }catch(err){
-      results.push({...entry,success:false,error:err?.message||String(err)});
-    }
+  try{
+    const {results}=await callAdminAction('register',{records});
+    const merged=validEntries.map((entry,i)=>{
+      const r=results[i];
+      return r.success
+        ? {...entry,success:true,qrCode:r.qrCode}
+        : {...entry,success:false,error:r.error};
+    });
+    showResults(merged);
+  }catch(err){
+    console.error(err);
+    showResults(validEntries.map(entry=>({...entry,success:false,error:'Error de conexión con el servidor'})));
   }
-
-  showResults(results);
 }
 
 function showResults(results){
