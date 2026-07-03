@@ -156,7 +156,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .logo-carousel{margin-bottom:12px;overflow:hidden;position:relative}
 .logo-carousel-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:5px}
 .logo-track-wrap{overflow:hidden;width:100%}
-.logo-track{display:flex;align-items:center;gap:32px;width:max-content;animation:scroll-logos 18s linear infinite}
+.logo-track{display:flex;align-items:center;gap:32px;width:max-content;animation:scroll-logos 18s linear infinite;animation-play-state:paused}
 .logo-track:hover{animation-play-state:paused}
 .logo-track img{height:80px;width:auto;object-fit:contain;opacity:.75;filter:grayscale(20%);transition:opacity .2s}
 .logo-track img:hover{opacity:1}
@@ -630,31 +630,53 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div class="card-title"><i class="ti ti-chart-bar"></i>Números clave sobre infancia y adolescencia en Argentina</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
         <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
-          <div style="font-size:26px;font-weight:800;color:var(--accent)">22%</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de la población argentina son niños (0 a 14 años)</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">26%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de la población argentina son NNyA (0 a 17 años · 12,1 millones de personas)</div>
         </div>
         <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
-          <div style="font-size:26px;font-weight:800;color:var(--accent)">46%</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de los niños usa teléfonos móviles habitualmente</div>
-        </div>
-        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
-          <div style="font-size:26px;font-weight:800;color:var(--accent)">71%</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de los niños de 6 a 12 años juegan videojuegos regularmente</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">9,4%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de los menores de edad presenta ansiedad, depresión o tendencias suicidas</div>
         </div>
         <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
           <div style="font-size:26px;font-weight:800;color:var(--accent)">66%</div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de adolescentes argentinos sufrió bullying alguna vez</div>
         </div>
         <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
-          <div style="font-size:26px;font-weight:800;color:var(--accent)">70%</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de adolescentes tucumanos vivió violencia en la escuela</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">95%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de los niños/adolescentes usa teléfonos móviles habitualmente</div>
         </div>
         <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
-          <div style="font-size:26px;font-weight:800;color:var(--accent)">9,4%</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de los menores presenta ansiedad, depresión o tendencias suicidas</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">70%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de adolescentes tucumanos expresan haber vivido violencia en la escuela</div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">71%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de los niños de 6 a 12 años juegan videojuegos regularmente</div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">31%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">vieron formas de lastimarse o herirse físicamente a uno mismo</div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">24%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de adolescentes ya apostó online al menos una vez</div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center;grid-column:1/-1">
+          <div style="font-size:26px;font-weight:800;color:var(--accent)">47%</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.3;margin-top:2px">de adolescentes (12 a 17 años) vieron en internet imágenes de contenido sexual</div>
         </div>
       </div>
-      <div style="font-size:10.5px;color:var(--text-secondary);margin-top:10px;line-height:1.4">Fuentes: Boletín de Salud de la Nación · Academia Española de Pediatría · Censo Nacional 2022 (UNICEF) · Balance de Salud Mental UBA 2023 · Observatorio de Argentinos por la Educación · ONG Bullying Sin Fronteras.</div>
+
+      <div style="background:var(--accent-light);border-radius:var(--radius-md);padding:12px 14px;margin-top:10px;display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:22px;flex-shrink:0">💔</span>
+        <div style="font-size:11.5px;color:var(--text-primary);line-height:1.5">
+          El suicidio es la <strong>2ª causa de muerte</strong> en adolescentes de 10 a 19 años en Argentina. El 80% de los casos corresponde a varones.<br>
+          En Tucumán, los suicidios aumentaron <strong>13,3%</strong> entre 2024 y 2025.
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text-secondary);margin-top:8px;line-height:1.4">Si vos o alguien que conocés necesita ayuda, comunicate a la Línea 135 (CABA) o al 0800-345-1435 (en todo el país), las 24 horas.</div>
+
+      <div style="font-size:10.5px;color:var(--text-secondary);margin-top:10px;line-height:1.4">Fuentes: Estudio descriptivo de las notificaciones del año 2023 en la Ciudad Autónoma de Buenos Aires (Ministerio Público Tutelar) · Boletín de Salud Mental de la Nación · Balance de Salud Mental de la Argentina 2023 (UBA y Observatorio Psicológico) · Observatorio de Argentinos por la Educación, en colaboración con la Universidad Católica de Cuyo y el Ministerio Público Tutelar de la Ciudad Autónoma de Buenos Aires · Internaciones por riesgo suicida de niños, niñas y adolescentes, UNICEF/UNESCO 2025 · ONG Bullying Sin Fronteras.</div>
     </div>
 
     <div style="text-align:center;font-size:10.5px;color:var(--text-secondary);margin-top:18px">Powered by <a href="https://wa.me/+543814786421?text=Hola%20Javier.%20Me%20gust%C3%B3%20el%20sitio%20que%20armaste%20para%20el%20Crianza%20Summit%202026.%20Quiero%20saber%20m%C3%A1s%20de%20eso." target="_blank" style="color:#7BA7D9;text-decoration:none">Javier Mirande</a></div>
@@ -887,11 +909,11 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
           <div class="sp-stat-label">de adolescentes tucumanos vivió violencia escolar</div>
         </div>
         <div class="sp-stat">
-          <div class="sp-stat-num">46%</div>
-          <div class="sp-stat-label">de niños usa celular de forma habitual</div>
+          <div class="sp-stat-num">95%</div>
+          <div class="sp-stat-label">de niños/adolescentes usa celular de forma habitual</div>
         </div>
       </div>
-      <div style="font-size:10px;color:var(--text-secondary);text-align:right;margin-top:6px">Fuentes: UBA 2023 · UNICEF 2024 · Censo Nacional 2022</div>
+      <div style="font-size:10px;color:var(--text-secondary);text-align:right;margin-top:6px">Fuentes: UBA 2023 · UNICEF/UNESCO 2025 · Ministerio Público Tutelar CABA</div>
     </div>
 
     <!-- AUDIENCIA -->
@@ -1355,10 +1377,11 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <button onclick="toggleDia1()" class="ticket-option" id="opt-dia1" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
-        <i class="ti ti-square" id="check-dia1" style="font-size:19px;color:var(--text-secondary);flex-shrink:0"></i>
+        <i class="ti ti-square" id="check-dia1" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;width:19px;display:inline-block;text-align:center"></i>
         <div>
           <div class="ticket-option-name">🗣 Martes 4 de agosto</div>
           <div class="ticket-option-desc">Jornada Abierta de Impacto</div>
+          <div class="ticket-option-desc" style="font-style:italic;margin-top:1px">16:00 a 20:00</div>
         </div>
       </div>
       <div class="ticket-option-price" id="price-dia1" style="text-align:right;line-height:1.15">$45.000</div>
@@ -1366,13 +1389,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <button onclick="toggleDia2Section()" class="ticket-option" id="opt-dia2-toggle" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
-        <i class="ti ti-chevron-down" id="chevron-dia2" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;transition:transform .2s"></i>
+        <i class="ti ti-chevron-down" id="chevron-dia2" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;transition:transform .2s;width:19px;display:inline-block;text-align:center"></i>
         <div>
           <div class="ticket-option-name">🎓 Miércoles 5 de agosto</div>
           <div class="ticket-option-desc">Jornada Formativa</div>
         </div>
       </div>
-      <div id="dia2-selected-badge" style="font-size:12px;font-weight:700;color:var(--teal);text-align:right;line-height:1.25;max-width:100px">Desplegá para ver talleres</div>
+      <div id="dia2-selected-badge" style="font-size:12px;font-weight:700;color:var(--teal);text-align:right;line-height:1.25;max-width:100px">Desplegá para ver actividades</div>
     </button>
 
     <div id="dia2-workshops-list" style="display:none;margin-top:2px;padding-left:20px"></div>
@@ -1386,7 +1409,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </button>
 
     <div id="cart-total-bar" style="display:none;flex-direction:column;gap:6px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-top:14px">
-      <div id="combo-badge" style="display:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);border-radius:20px;padding:3px 10px;align-self:flex-start">🎉 Combo Día 1 + talleres: -15% adicional aplicado</div>
+      <div id="combo-badge" style="display:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);border-radius:20px;padding:3px 10px;align-self:flex-start">🎉 Combo 2+ actividades: -15% adicional aplicado</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">Total (<span id="cart-count">0</span> ítem/s)</span>
         <span id="cart-total-price" style="font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:19px;font-weight:700;color:var(--accent)">$0</span>
@@ -2068,6 +2091,18 @@ function renderLogoCarousel(){
   // Duplicate list for seamless loop
   const all=[...SPONSOR_LOGOS,...SPONSOR_LOGOS];
   track.innerHTML=all.map(l=>`<img src="${l.url}" alt="${l.name}" title="${l.name}" onerror="this.style.display='none'">`).join('');
+  // La animación arranca pausada (ver CSS .logo-track) para que no se vea
+  // trabada mientras las imágenes todavía están cargando y el ancho del
+  // track va cambiando. Recién la dejamos correr cuando todas terminaron
+  // de cargar (o fallaron), momento en el que el ancho ya es estable.
+  const imgs=Array.from(track.querySelectorAll('img'));
+  Promise.all(imgs.map(img=>new Promise(resolve=>{
+    if(img.complete){resolve();return;}
+    img.addEventListener('load',resolve,{once:true});
+    img.addEventListener('error',resolve,{once:true});
+  }))).then(()=>{
+    track.style.animationPlayState='running';
+  });
 }
 
 // ---- ACREDITACIÓN (admin) ----
@@ -2443,10 +2478,10 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 
 // ---- TALLERES DÍA 2 (Miércoles 5 de agosto) — venta individual, carrito ----
 const DIA2_WORKSHOPS=[
-  {id:'comprender',nombre:'Comprender para conectar',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de educación y salud',precioRegular:45000,precioEarly:30000},
-  {id:'entornos',nombre:'Entornos de aprendizaje en la era algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',precioRegular:45000,precioEarly:30000},
-  {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Madres & Padres',precioRegular:50000,precioEarly:32000},
-  {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madres & Padres · Pre adolescencia',precioRegular:50000,precioEarly:32000,nota:'* Adolescentes sin cargo'},
+  {id:'comprender',nombre:'Comprender para conectar',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de educación y salud',speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
+  {id:'entornos',nombre:'Entornos de aprendizaje en la era algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',speaker:'Santiago Stura — Faro Digital',precioRegular:45000,precioEarly:30000},
+  {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Madres & Padres',speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
+  {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madres & Padres · Pre adolescencia',speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Adolescentes sin cargo'},
 ];
 
 // Mismo Early Bird (misma fecha límite) que el taller del Día 1.
@@ -2465,6 +2500,7 @@ function renderDia2Workshops(){
         <div style="text-align:left">
           <div class="ticket-option-name" style="font-size:13px;font-weight:500;text-align:left">${w.nombre}</div>
           <div class="ticket-option-desc" style="text-align:left">${w.horario} · ${w.audiencia}</div>
+          <div class="ticket-option-desc" style="text-align:left;font-style:italic;margin-top:1px">${w.speaker}</div>
           ${w.nota?`<div class="ticket-option-desc" style="font-style:italic;margin-top:1px;text-align:left">${w.nota}</div>`:''}
         </div>
       </div>
@@ -2704,10 +2740,11 @@ function applyDiscountCode(){
 }
 
 // Precio final del Día 1, con Early Bird + mejor descuento aplicado (código vs. La Gaceta).
-// Combo: Día 1 + 2 o más talleres del Día 2 → 15% adicional sobre el total,
+// Combo: 2 o más actividades elegidas en total (el Día 1 cuenta como una
+// actividad más, todas pesan igual) → 15% adicional sobre el total,
 // se aplica encima de cualquier otro descuento que ya tenga el Día 1.
 const COMBO_DISCOUNT_PERCENT=15;
-function isComboActive(){return selectedDia1&&selectedWorkshops.size>=2;}
+function isComboActive(){return(selectedDia1?1:0)+selectedWorkshops.size>=2;}
 
 function getDia1FinalPrice(){
   const basePrice=getDia1BasePrice();
@@ -2759,7 +2796,7 @@ function updateCartUI(){
   const dia2Badge=document.getElementById('dia2-selected-badge');
   const dia2ToggleOpt=document.getElementById('opt-dia2-toggle');
   if(dia2Badge){
-    dia2Badge.textContent=selectedWorkshops.size?`${selectedWorkshops.size} taller${selectedWorkshops.size>1?'es':''} elegido${selectedWorkshops.size>1?'s':''}`:'Desplegá para ver talleres';
+    dia2Badge.textContent=selectedWorkshops.size?`${selectedWorkshops.size} actividad${selectedWorkshops.size>1?'es':''} elegida${selectedWorkshops.size>1?'s':''}`:'Desplegá para ver actividades';
   }
   if(dia2ToggleOpt)dia2ToggleOpt.classList.toggle('selected',selectedWorkshops.size>0);
 
