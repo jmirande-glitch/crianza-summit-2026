@@ -553,7 +553,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     <div class="day-cards">
       <div class="day-card" onclick="goProgramaDay('day1')">
         <div class="day-top">
-          <div class="day-num">4 ago</div>
+          <div class="day-num">Martes 4 ago</div>
           <div class="day-date">Jornada Abierta<br>de Impacto</div>
         </div>
         <div class="day-bottom">
@@ -563,12 +563,12 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       </div>
       <div class="day-card" onclick="goProgramaDay('day2')">
         <div class="day-top">
-          <div class="day-num">5 ago</div>
+          <div class="day-num">Miércoles 5 ago</div>
           <div class="day-date">Jornada<br>Formativa</div>
         </div>
         <div class="day-bottom">
           <div class="day-desc">Talleres independientes destinados a estudiantes, comunidad de familias y equipos de profesionales de educación y salud.</div>
-          <div class="day-pill badge-teal">Profesional</div>
+          <div class="day-pill badge-teal">Público foco</div>
         </div>
       </div>
     </div>
@@ -664,15 +664,14 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <div id="prog-basic-view">
       <div class="tab-bar">
-        <button class="tab-btn active" id="ptab-day1" onclick="setPTab('day1')">📢 4 ago</button>
-        <button class="tab-btn" id="ptab-day2" onclick="setPTab('day2')">🎓 5 ago</button>
+        <button class="tab-btn active" id="ptab-day1" onclick="setPTab('day1')">📢 Martes 4 ago</button>
+        <button class="tab-btn" id="ptab-day2" onclick="setPTab('day2')">🎓 Miércoles 5 ago</button>
       </div>
 
-      <div id="prog-day1-title" style="display:block;font-size:16px;font-weight:700;margin-bottom:30px">Jornada Abierta de Impacto</div>
+      <div id="prog-day1-title" style="display:block;font-size:16px;font-weight:700;margin-bottom:30px">Jornada Abierta de Impacto<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:6px">Horario: de 16:00 a 20:00 hs</div></div>
       <div id="prog-day2-title" style="display:none;font-size:16px;font-weight:700;margin-bottom:12px">Jornada Formativa</div>
 
       <div id="prog-day2-notice" style="display:none;background:linear-gradient(135deg,#185FA5,#2477c9);color:#fff;border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;text-align:center;flex-direction:column;align-items:center">
-        <div style="font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px"><i class="ti ti-building" style="font-size:18px"></i> DÍA 2 — EXCLUSIVO PARA INSTITUCIONES</div>
         <div style="font-size:12.5px;opacity:.95;line-height:1.5;margin-bottom:12px">Si pertenecés a alguna institución educativa, deportiva o de salud y te interesa participar de los talleres específicos, escribinos.</div>
         <a href="https://wa.me/5493814655829?text=Hola!%20Pertenezco%20a%20una%20instituci%C3%B3n%20educativa%2Fdeportiva%2Fde%20salud%20y%20quiero%20info%20sobre%20los%20talleres%20del%20D%C3%ADa%202%20del%20Crianza%20Summit%202026." target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#185FA5;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;text-decoration:none">
           <i class="ti ti-brand-whatsapp" style="font-size:16px;color:#25D366"></i> Escribinos por WhatsApp
@@ -706,7 +705,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
           </div>
         </div>
 
-        <div style="font-size:12px;color:var(--text-secondary);text-align:center;margin-top:14px;font-style:italic">Con especialistas confirmados para cada eje. Contanos qué necesita tu institución y armamos juntos la propuesta.</div>
       </div>
 
       <div id="prog-day1-speakers" style="display:block;margin-bottom:14px">
@@ -1266,21 +1264,23 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <input id="lead-tel-input" type="tel" placeholder="Teléfono (ej: +54 9 381 4655829)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
       <div id="lead-form-msg" style="font-size:11.5px;margin-top:6px;color:var(--red);display:none"></div>
 
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <input id="discount-code-input" type="text" placeholder="Código de descuento (opcional)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onblur="applyDiscountCode()">
-      </div>
-      <div id="discount-code-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
-
-      <div id="gaceta-toggle" onclick="toggleGacetaBlock()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding:10px 12px;border-radius:var(--radius-md);border:1.5px dashed var(--border);background:var(--bg-secondary)">
-        <span style="font-size:12.5px;font-weight:600">¿Sos suscriptor de Club La Gaceta?</span>
-        <i id="gaceta-toggle-icon" class="ti ti-chevron-down" style="font-size:16px;color:var(--text-secondary)"></i>
-      </div>
-      <div id="gaceta-block" style="display:none;margin-top:8px">
-        <div style="display:flex;gap:8px">
-          <input id="gaceta-dni-input" type="text" inputmode="numeric" placeholder="Tu DNI (sin puntos)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
-          <button id="gaceta-verify-btn" type="button" onclick="verifyGacetaSocio()" style="padding:10px 16px;border-radius:var(--radius-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer">Verificar</button>
+      <div id="discounts-wrapper">
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input id="discount-code-input" type="text" placeholder="Código de descuento (opcional)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onblur="applyDiscountCode()">
         </div>
-        <div id="gaceta-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+        <div id="discount-code-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+
+        <div id="gaceta-toggle" onclick="toggleGacetaBlock()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding:10px 12px;border-radius:var(--radius-md);border:1.5px dashed var(--border);background:var(--bg-secondary)">
+          <span style="font-size:12.5px;font-weight:600">¿Sos suscriptor de Club La Gaceta?</span>
+          <i id="gaceta-toggle-icon" class="ti ti-chevron-down" style="font-size:16px;color:var(--text-secondary)"></i>
+        </div>
+        <div id="gaceta-block" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:8px">
+            <input id="gaceta-dni-input" type="text" inputmode="numeric" placeholder="Tu DNI (sin puntos)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+            <button id="gaceta-verify-btn" type="button" onclick="verifyGacetaSocio()" style="padding:10px 16px;border-radius:var(--radius-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer">Verificar</button>
+          </div>
+          <div id="gaceta-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+        </div>
       </div>
     </div>
 
@@ -2342,7 +2342,14 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 // ---- PRECIOS Y EARLY BIRD (solo Día 1, se vende vía MercadoPago) ----
 const DIA1_REGULAR_PRICE=70000;
 const DIA1_EARLY_PRICE=45000;
-const EARLY_BIRD_DEADLINE=new Date('2026-07-05T23:59:59-03:00');
+const EARLY_BIRD_DEADLINE=new Date('2026-07-10T23:59:59-03:00');
+
+// Mientras dura el Early Bird, los descuentos (código sponsor y socio La
+// Gaceta) quedan ocultos. Se habilitan solos el sábado 11/jul a las 00:00,
+// sin necesidad de redeploy. El server (mp-create-preference) también
+// ignora estos descuentos hasta esa fecha, así que esto no es solo estético.
+const DISCOUNTS_ENABLED_DATE=new Date('2026-07-11T00:00:00-03:00');
+function isDiscountsEnabled(){return new Date()>=DISCOUNTS_ENABLED_DATE;}
 
 function isEarlyBirdActive(){return new Date()<=EARLY_BIRD_DEADLINE;}
 function getDia1BasePrice(){return isEarlyBirdActive()?DIA1_EARLY_PRICE:DIA1_REGULAR_PRICE;}
@@ -2426,6 +2433,7 @@ async function verifyGacetaSocio(){
 
 // Devuelve el mejor descuento aplicable (código vs. socio La Gaceta), sin acumular ambos.
 function getBestDiscountPercent(ticketType){
+  if(!isDiscountsEnabled())return 0;
   const codeDiscount=(appliedDiscountCode&&DISCOUNT_CODES[appliedDiscountCode]&&DISCOUNT_CODES[appliedDiscountCode].applies.includes(ticketType))?DISCOUNT_CODES[appliedDiscountCode].percent:0;
   const gacetaDiscount=(gacetaVerifiedDni&&ticketType==='dia1')?GACETA_DISCOUNT_PERCENT:0;
   return Math.max(codeDiscount,gacetaDiscount);
@@ -2469,6 +2477,8 @@ function resetTicketSelection(){
   if(gacetaBlock)gacetaBlock.style.display='none';
   const gacetaIcon=document.getElementById('gaceta-toggle-icon');
   if(gacetaIcon)gacetaIcon.className='ti ti-chevron-down';
+  const discountsWrapper=document.getElementById('discounts-wrapper');
+  if(discountsWrapper)discountsWrapper.style.display=isDiscountsEnabled()?'block':'none';
   document.getElementById('lead-nombre-input').value='';
   document.getElementById('lead-email-input').value='';
   document.getElementById('lead-tel-input').value='';
