@@ -1405,12 +1405,13 @@ const SUMMIT2025_PHOTOS=[
 
 // Logo carousel — URLs de Supabase Storage
 const SPONSOR_LOGOS=[
-  {name:'La Gaceta',url:SB_STORAGE+'/sponsors/lagaceta.png'},
+  {name:'Solar del Cerro',url:SB_STORAGE+'/sponsors/solardelcerro.png'},
+  {name:'Cines del Solar',url:SB_STORAGE+'/sponsors/cinesdelsolar.png'},
+  {name:'Melius',url:SB_STORAGE+'/sponsors/melius.png'},
+  {name:'Villa Poli',url:SB_STORAGE+'/sponsors/villapoli.png'},
+  {name:'Comfye',url:SB_STORAGE+'/sponsors/comfye.png'},
+  {name:'Matias Turismo',url:SB_STORAGE+'/sponsors/matiasturismo.png'},
   {name:'Tiendida',url:SB_STORAGE+'/sponsors/tiendida.png'},
-  {name:'Logos',url:SB_STORAGE+'/sponsors/logos.png'},
-  {name:'Argenti Lemon',url:SB_STORAGE+'/sponsors/argentilemon.png'},
-  {name:'Octaviano',url:SB_STORAGE+'/sponsors/octaviano.png'},
-  {name:"Zanna's",url:SB_STORAGE+'/sponsors/zannas.png'},
 ];
 
 const SPEAKERS=[
@@ -1445,12 +1446,13 @@ const VIDEOS=[
 ];
 
 const SPONSORS=[
-  {tier:'main',name:'Tiendida',logo:SB_STORAGE+'/sponsors/tiendida.png'},
-  {tier:'black',name:'La Gaceta',logo:SB_STORAGE+'/sponsors/lagaceta.png'},
-  {tier:'black',name:'Argenti Lemon',logo:SB_STORAGE+'/sponsors/argentilemon.png'},
-  {tier:'gold',name:'Logos',logo:SB_STORAGE+'/sponsors/logos.png'},
-  {tier:'gold',name:'Octaviano',logo:SB_STORAGE+'/sponsors/octaviano.png'},
-  {tier:'indep',name:"Zanna's",logo:SB_STORAGE+'/sponsors/zannas.png'},
+  {tier:'main',name:'Solar del Cerro',logo:SB_STORAGE+'/sponsors/solardelcerro.png'},
+  {tier:'main',name:'Cines del Solar',logo:SB_STORAGE+'/sponsors/cinesdelsolar.png'},
+  {tier:'gold',name:'Melius',logo:SB_STORAGE+'/sponsors/melius.png'},
+  {tier:'gold',name:'Villa Poli',logo:SB_STORAGE+'/sponsors/villapoli.png'},
+  {tier:'gold',name:'Comfye',logo:SB_STORAGE+'/sponsors/comfye.png'},
+  {tier:'colaborador',name:'Matias Turismo',logo:SB_STORAGE+'/sponsors/matiasturismo.png'},
+  {tier:'black',name:'Tiendida',logo:SB_STORAGE+'/sponsors/tiendida.png'},
 ];
 
 const MATERIALS=[
@@ -1880,11 +1882,10 @@ function renderSpeakers(){
 
 function renderSponsors(){
   const tiers=[
-    {key:'exclusivo',label:'💎 Exclusivo'},
     {key:'main',label:'⭐ Main'},
     {key:'black',label:'⚫ Black'},
     {key:'gold',label:'🥇 Gold'},
-    {key:'indep',label:'👤 Profesionales Independientes'},
+    {key:'colaborador',label:'🤝 Colaborador'},
   ];
   let h='';
   tiers.forEach(t=>{
