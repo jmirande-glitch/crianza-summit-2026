@@ -467,7 +467,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .modal-handle{width:36px;height:4px;background:var(--border-md);border-radius:2px;margin:0 auto 20px}
 .modal-title{font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px}
 .modal-sub{font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5}
-.ticket-option{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid transparent;margin-bottom:10px;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text-primary)}
+.ticket-option{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid transparent;margin-bottom:10px;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text-primary);text-align:left}
 .ticket-option:hover{border-color:var(--accent);background:var(--accent-light)}
 .ticket-option.selected{border-color:var(--accent)!important;background:var(--accent-light)!important}
 .ticket-option-left{}
@@ -492,7 +492,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
 
 /* TOAST */
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text-primary);color:var(--bg-primary);padding:10px 18px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:998;white-space:nowrap;pointer-events:none}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text-primary);color:var(--bg-primary);padding:12px 18px;border-radius:16px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:998;white-space:normal;max-width:min(88vw,360px);width:max-content;text-align:center;line-height:1.4;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .empty{text-align:center;padding:40px 16px;color:var(--text-secondary)}
@@ -1378,7 +1378,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     <button onclick="toggleDia1()" class="ticket-option" id="opt-dia1" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-square" id="check-dia1" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;width:19px;display:inline-block;text-align:center"></i>
-        <div>
+        <div style="text-align:left">
           <div class="ticket-option-name">🗣 Martes 4 de agosto</div>
           <div class="ticket-option-desc">Jornada Abierta de Impacto</div>
           <div class="ticket-option-desc" style="font-style:italic;margin-top:1px">16:00 a 20:00</div>
@@ -1390,7 +1390,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     <button onclick="toggleDia2Section()" class="ticket-option" id="opt-dia2-toggle" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-chevron-down" id="chevron-dia2" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;transition:transform .2s;width:19px;display:inline-block;text-align:center"></i>
-        <div>
+        <div style="text-align:left">
           <div class="ticket-option-name">🎓 Miércoles 5 de agosto</div>
           <div class="ticket-option-desc">Jornada Formativa</div>
         </div>
