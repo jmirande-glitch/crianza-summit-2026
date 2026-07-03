@@ -1261,6 +1261,8 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
           <div class="metric"><div class="metric-val" id="insc-monto">...</div><div class="metric-lbl">recaudado</div></div>
         </div>
 
+        <div id="insc-breakdown" style="margin-bottom:14px"></div>
+
         <a href="admin-carga-masiva.html" target="_blank" class="btn" style="width:100%;justify-content:center;margin-bottom:14px;text-decoration:none">
           <i class="ti ti-upload"></i>Carga masiva institucional
         </a>
@@ -1770,8 +1772,13 @@ async function signOutGoogle(){
 }
 
 async function checkAccess(email){
-  const {data,error}=await sb.from('cs26_inscriptos_pagos').select('*').eq('email',email).maybeSingle();
-  return !error&&data;
+  const [{data:dia1},{data:talleres}]=await Promise.all([
+    sb.from('cs26_inscriptos_pagos').select('*').eq('email',email).maybeSingle(),
+    sb.from('cs26_dia2_inscripciones').select('*').eq('email',email)
+  ]);
+  if(dia1)return dia1;
+  if(talleres&&talleres.length)return talleres[0];
+  return false;
 }
 
 async function initAuth(){
@@ -2041,22 +2048,48 @@ async function renderMyQrCard(){
     return;
   }
   try{
-    const {data:record}=await sb.from('cs26_inscriptos_pagos').select('qr_code,nombre,ticket_type,checked_in').eq('email',currentUser.email).maybeSingle();
-    if(!record){el.innerHTML='';return;}
+    const [{data:dia1},{data:talleres}]=await Promise.all([
+      sb.from('cs26_inscriptos_pagos').select('qr_code,nombre,ticket_type,monto,checked_in').eq('email',currentUser.email).maybeSingle(),
+      sb.from('cs26_dia2_inscripciones').select('qr_code,nombre,taller_nombre,monto,checked_in').eq('email',currentUser.email)
+    ]);
 
-    const ticketLabels={dia1:'Día 1 — Charlas',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
-    const label=ticketLabels[record.ticket_type]||'Entrada general';
-    const statusBadge=record.checked_in
+    if(!dia1&&(!talleres||!talleres.length)){el.innerHTML='';return;}
+
+    const qrCode=dia1?.qr_code||talleres[0]?.qr_code;
+    const nombre=dia1?.nombre||talleres[0]?.nombre;
+    const checkedIn=(dia1?.checked_in)||(talleres||[]).some(t=>t.checked_in);
+
+    const items=[];
+    if(dia1){
+      const ticketLabels={dia1:'Día 1 — Jornada Abierta de Impacto',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
+      items.push({label:ticketLabels[dia1.ticket_type]||'Entrada general',monto:dia1.monto});
+    }
+    (talleres||[]).forEach(t=>items.push({label:t.taller_nombre,monto:t.monto}));
+
+    const total=items.reduce((s,i)=>s+(Number(i.monto)||0),0);
+    const itemsHtml=items.map(i=>`
+      <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+        <span style="text-align:left">${i.label}</span>
+        <span style="font-weight:600;flex-shrink:0;margin-left:8px">${fmtPrice(i.monto)}</span>
+      </div>`).join('');
+
+    const statusBadge=checkedIn
       ?'<span class="badge badge-green" style="margin-top:8px;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-check" style="font-size:12px"></i>Ingreso acreditado</span>'
       :'<span class="badge badge-red" style="margin-top:8px;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-ticket" style="font-size:12px"></i>Entrada confirmada</span>';
 
     el.innerHTML=`<div class="card" style="text-align:center">
       <div class="card-title" style="justify-content:center"><i class="ti ti-qrcode"></i>Tu código de acceso</div>
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(record.qr_code)}" alt="QR de acceso" style="width:200px;height:200px;margin:0 auto;display:block;border-radius:8px" onerror="this.parentElement.innerHTML='<p style=color:var(--red);font-size:12px>No pudimos generar el código QR. Probá recargar la página.</p>'">
-      <div style="font-size:13px;font-weight:600;margin-top:10px">${record.nombre}</div>
-      <div style="font-size:12px;color:var(--text-secondary)">${label}</div>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}" alt="QR de acceso" style="width:200px;height:200px;margin:0 auto;display:block;border-radius:8px" onerror="this.parentElement.innerHTML='<p style=color:var(--red);font-size:12px>No pudimos generar el código QR. Probá recargar la página.</p>'">
+      <div style="font-size:13px;font-weight:600;margin-top:10px">${nombre}</div>
       ${statusBadge}
-      <div style="font-size:11px;color:var(--text-secondary);margin-top:10px">Mostrá este código en la entrada del evento</div>
+      <div style="text-align:left;margin-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Tu compra</div>
+        ${itemsHtml}
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:8px;font-weight:700">
+          <span>Total</span><span>${fmtPrice(total)}</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:10px">Mostrá este código en la entrada del evento — sirve para todo lo que compraste</div>
     </div>`;
   }catch(err){
     console.error(err);
@@ -2289,13 +2322,12 @@ async function onQrScanSuccess(decodedText){
     }
 
     // Mostrar datos y botón de confirmación, sin marcar acreditado todavía
-    const ticketLabels={dia1:'Día 1 — Charlas',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
-    const label=ticketLabels[record.ticket_type]||record.ticket_type;
+    const itemsList=(record.items||[]).map(i=>`<div style="font-size:12px;color:var(--text-secondary)">${i.nombre}</div>`).join('');
     resultEl.style.background='var(--blue-light)';
     resultEl.innerHTML=`
       <i class="ti ti-user-check" style="font-size:32px;color:var(--blue)"></i>
       <div style="font-weight:700;margin-top:8px;font-size:15px">${record.nombre}</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${label}</div>
+      <div style="margin-top:4px">${itemsList}</div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px" onclick="confirmCheckin('${decodedText}')">
         <i class="ti ti-check"></i>Acreditar ingreso
       </button>`;
@@ -2325,10 +2357,9 @@ async function confirmCheckin(qrCode){
       return;
     }
 
-    const ticketLabels={dia1:'Día 1 — Charlas',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
-    const label=ticketLabels[record.ticket_type]||record.ticket_type;
+    const itemsList=(record.items||[]).map(i=>`<div style="font-size:12px;color:var(--text-secondary)">${i.nombre}</div>`).join('');
     resultEl.style.background='var(--green-light)';
-    resultEl.innerHTML=`<i class="ti ti-check" style="font-size:32px;color:var(--green)"></i><div style="font-weight:700;margin-top:8px;color:var(--green)">Ingreso acreditado</div><div style="font-size:15px;margin-top:4px">${record.nombre}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${label}</div>`;
+    resultEl.innerHTML=`<i class="ti ti-check" style="font-size:32px;color:var(--green)"></i><div style="font-weight:700;margin-top:8px;color:var(--green)">Ingreso acreditado</div><div style="font-size:15px;margin-top:4px">${record.nombre}</div><div style="margin-top:2px">${itemsList}</div>`;
     updateAcredStats();
   }catch(err){
     console.error(err);
@@ -2351,25 +2382,80 @@ function setAdminTab(tab){
 
 async function updateAcredStats(){
   try{
-    const {data}=await callAdminAction('stats');
-    if(!data)return;
+    const stats=await callAdminAction('stats');
+    if(!stats||!stats.dia1)return;
 
-    // Inscripción
-    const totalMonto=data.reduce((sum,r)=>sum+(Number(r.monto)||0),0);
+    // Inscripción: totales + desglose
     const inscTotalEl=document.getElementById('insc-total');
     const inscMontoEl=document.getElementById('insc-monto');
-    if(inscTotalEl)inscTotalEl.textContent=data.length;
-    if(inscMontoEl)inscMontoEl.textContent='$'+totalMonto.toLocaleString('es-AR');
+    if(inscTotalEl)inscTotalEl.textContent=stats.totalInscriptos;
+    if(inscMontoEl)inscMontoEl.textContent='$'+stats.totalMonto.toLocaleString('es-AR');
+    renderInscBreakdown(stats);
 
     // Acreditación
-    const checkedIn=data.filter(r=>r.checked_in);
-    acredCheckedInList=checkedIn.sort((a,b)=>new Date(b.checked_in_at)-new Date(a.checked_in_at));
-    const total=checkedIn.length;
-    const pending=data.length-total;
-    document.getElementById('acred-total').textContent=total;
-    document.getElementById('acred-pending').textContent=pending;
+    acredCheckedInList=stats.checkedInList||[];
+    document.getElementById('acred-total').textContent=stats.acreditados;
+    document.getElementById('acred-pending').textContent=stats.pendientes;
     if(acredListOpen)renderAcredList();
   }catch(err){console.error(err);}
+}
+
+function renderInscBreakdown(stats){
+  const el=document.getElementById('insc-breakdown');
+  if(!el)return;
+
+  const fmt=n=>'$'+Math.round(n||0).toLocaleString('es-AR');
+
+  // Acumulado por jornada
+  let html=`
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-calendar-stats"></i>Acumulado por jornada</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+        <span>Martes 4/8 — Jornada Abierta de Impacto</span><span style="font-weight:700">${fmt(stats.dia1.monto)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0">
+        <span>Miércoles 5/8 — Jornada Formativa (talleres)</span><span style="font-weight:700">${fmt(stats.totalMontoDia2)}</span>
+      </div>
+    </div>`;
+
+  // Venta por taller
+  if(stats.talleres&&stats.talleres.length){
+    html+=`
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-list-details"></i>Venta por taller</div>
+      ${stats.talleres.map(t=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+          <div><div>${t.nombre}</div><div style="font-size:10.5px;color:var(--text-secondary)">${t.count} vendido${t.count>1?'s':''}</div></div>
+          <span style="font-weight:700;flex-shrink:0;margin-left:8px">${fmt(t.monto)}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // Gráfico: qué ítem factura más
+  if(stats.itemsFacturacion&&stats.itemsFacturacion.length){
+    const max=Math.max(...stats.itemsFacturacion.map(i=>i.monto),1);
+    html+=`
+    <div class="card">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-chart-bar"></i>Qué factura más</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+        ${stats.itemsFacturacion.map(i=>{
+          const pct=Math.max(4,Math.round((i.monto/max)*100));
+          return `
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px">
+              <span style="text-align:left">${i.nombre}</span>
+              <span style="font-weight:700;flex-shrink:0;margin-left:8px">${fmt(i.monto)}</span>
+            </div>
+            <div style="background:var(--bg-secondary);border-radius:6px;height:10px;overflow:hidden">
+              <div style="background:var(--accent);height:100%;width:${pct}%;border-radius:6px"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML=html;
 }
 
 function toggleManualEntry(){
@@ -2438,12 +2524,10 @@ function renderAcredList(){
     el.innerHTML='<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:8px">Todavía no hay nadie acreditado.</div>';
     return;
   }
-  const ticketLabels={dia1:'Día 1',dia2:'Día 2',ambos:'Ambos días'};
   el.innerHTML=acredCheckedInList.map(r=>{
     const hora=r.checked_in_at?new Date(r.checked_in_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}):'';
-    const label=ticketLabels[r.ticket_type]||r.ticket_type||'';
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border)">
-      <div><div style="font-size:13px;font-weight:600">${r.nombre}</div><div style="font-size:11px;color:var(--text-secondary)">${label}</div></div>
+      <div style="font-size:13px;font-weight:600">${r.nombre}</div>
       <div style="font-size:11px;color:var(--text-secondary)">${hora}</div>
     </div>`;
   }).join('');
