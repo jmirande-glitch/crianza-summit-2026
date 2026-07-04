@@ -2957,11 +2957,17 @@ async function confirmTicketPayment(){
 
   const ticketTypeForLead=items.length===1?items[0].key:'multiple';
 
-  // Guardamos el lead en paralelo (no bloqueante): si falla, igual seguimos
-  // con el pago para no perder la venta por un error de guardado.
-  sb.from('cs26_leads').insert({nombre,email,telefono,ticket_type:ticketTypeForLead})
-    .then(({error})=>{ if(error)console.error('Lead insert error:',error); })
-    .catch(err=>console.error('Lead insert exception:',err));
+  // Guardamos el lead ANTES de seguir (no bloqueamos la venta si falla, pero
+  // esperamos a que termine): si esto quedaba como "fire and forget" sin
+  // esperar, el redirect inmediato a MercadoPago podía cortar la petición
+  // a mitad de camino y el lead nunca llegaba a guardarse, aunque la
+  // persona sí terminara pagando.
+  try{
+    const {error}=await sb.from('cs26_leads').insert({nombre,email,telefono,ticket_type:ticketTypeForLead});
+    if(error)console.error('Lead insert error:',error);
+  }catch(err){
+    console.error('Lead insert exception:',err);
+  }
 
   const total=items.reduce((sum,i)=>sum+i.precio,0);
 
