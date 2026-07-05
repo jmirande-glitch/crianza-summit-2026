@@ -534,6 +534,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </div>
 
 
+    <div id="pending-transfer-banner" style="display:none;align-items:center;justify-content:space-between;gap:10px;background:#FFF4E5;border:1.5px solid #F0A94E;border-radius:var(--radius-md);padding:12px 14px;margin:0 20px 14px">
+      <div style="font-size:12px;line-height:1.4">
+        <b>Tenés una transferencia pendiente</b> de <span id="pending-transfer-amount">$0</span> sin confirmar.
+      </div>
+      <button type="button" onclick="restorePendingTransfer()" style="flex-shrink:0;background:#F0A94E;color:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Retomar</button>
+    </div>
+
     <div class="cta-block">
       <button id="cta-btn" onclick="openTicketModal()" class="cta-btn">
         <i class="ti ti-ticket" style="font-size:20px"></i>
@@ -600,23 +607,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       </div>
     </div>
 
-    <!-- VIDEO CAROUSEL -->
-    <div class="video-carousel">
-      <div class="video-label"><i class="ti ti-player-play-filled"></i>Speakers en acción</div>
-      <div class="video-wrapper">
-        <iframe id="video-frame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-      </div>
-      <div id="video-title-txt" class="video-title-txt"></div>
-      <div id="video-speaker-txt" class="video-speaker-txt"></div>
-      <div class="video-nav">
-        <div class="video-dots" id="video-dots"></div>
-        <div class="video-arrows">
-          <button class="v-arrow" onclick="prevVideo()"><i class="ti ti-chevron-left"></i></button>
-          <button class="v-arrow" onclick="nextVideo()"><i class="ti ti-chevron-right"></i></button>
-        </div>
-      </div>
-    </div>
-
     <div class="card">
       <div class="card-title"><i class="ti ti-info-circle"></i>¿Por qué asistir?</div>
       <div style="display:flex;flex-direction:column;gap:10px">
@@ -677,6 +667,23 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div style="font-size:10px;color:var(--text-secondary);margin-top:8px;line-height:1.4">Si vos o alguien que conocés necesita ayuda, comunicate a la Línea 135 (CABA) o al 0800-345-1435 (en todo el país), las 24 horas.</div>
 
       <div style="font-size:10.5px;color:var(--text-secondary);margin-top:10px;line-height:1.4">Fuentes: Estudio descriptivo de las notificaciones del año 2023 en la Ciudad Autónoma de Buenos Aires (Ministerio Público Tutelar) · Boletín de Salud Mental de la Nación · Balance de Salud Mental de la Argentina 2023 (UBA y Observatorio Psicológico) · Observatorio de Argentinos por la Educación, en colaboración con la Universidad Católica de Cuyo y el Ministerio Público Tutelar de la Ciudad Autónoma de Buenos Aires · Internaciones por riesgo suicida de niños, niñas y adolescentes, UNICEF/UNESCO 2025 · ONG Bullying Sin Fronteras.</div>
+    </div>
+
+    <!-- VIDEO CAROUSEL -->
+    <div class="video-carousel">
+      <div class="video-label"><i class="ti ti-player-play-filled"></i>Speakers en acción</div>
+      <div class="video-wrapper">
+        <iframe id="video-frame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+      <div id="video-title-txt" class="video-title-txt"></div>
+      <div id="video-speaker-txt" class="video-speaker-txt"></div>
+      <div class="video-nav">
+        <div class="video-dots" id="video-dots"></div>
+        <div class="video-arrows">
+          <button class="v-arrow" onclick="prevVideo()"><i class="ti ti-chevron-left"></i></button>
+          <button class="v-arrow" onclick="nextVideo()"><i class="ti ti-chevron-right"></i></button>
+        </div>
+      </div>
     </div>
 
     <div style="text-align:center;font-size:10.5px;color:var(--text-secondary);margin-top:18px">Powered by <a href="https://wa.me/+543814786421?text=Hola%20Javier.%20Me%20gust%C3%B3%20el%20sitio%20que%20armaste%20para%20el%20Crianza%20Summit%202026.%20Quiero%20saber%20m%C3%A1s%20de%20eso." target="_blank" style="color:#7BA7D9;text-decoration:none">Javier Mirande</a></div>
@@ -1377,6 +1384,20 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div style="font-size:11.5px;opacity:.95;margin-top:2px">Válido hasta el <b id="earlybird-date">--</b> · quedan <b id="earlybird-days">--</b> días</div>
     </div>
 
+    <div id="lead-form-section" style="margin:0 0 14px">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Completá tus datos para continuar</div>
+      <input id="lead-nombre-input" type="text" placeholder="Nombre y apellido" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+      <input id="lead-email-input" type="email" placeholder="Email" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+      <input id="lead-tel-input" type="tel" placeholder="Teléfono (ej: +54 9 381 4655829)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+      <select id="lead-tipo-asistente-input" onchange="onTipoAsistenteChange()" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+        <option value="" disabled selected>Tipo de asistente...</option>
+        <option value="familia">Familia (madre/padre)</option>
+        <option value="profesional">Profesional (educación/salud)</option>
+        <option value="adolescente">Adolescente</option>
+      </select>
+      <div id="lead-form-msg" style="font-size:11.5px;margin-top:6px;color:var(--red);display:none"></div>
+    </div>
+
     <button onclick="toggleDia1()" class="ticket-option" id="opt-dia1" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-square" id="check-dia1" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;width:19px;display:inline-block;text-align:center"></i>
@@ -1418,31 +1439,52 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       </div>
     </div>
 
-    <div id="lead-form-section" style="display:none;margin:10px 0 4px">
-      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Completá tus datos para continuar</div>
-      <input id="lead-nombre-input" type="text" placeholder="Nombre y apellido" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
-      <input id="lead-email-input" type="email" placeholder="Email" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
-      <input id="lead-tel-input" type="tel" placeholder="Teléfono (ej: +54 9 381 4655829)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
-      <div id="lead-form-msg" style="font-size:11.5px;margin-top:6px;color:var(--red);display:none"></div>
+    <div id="discounts-wrapper">
+      <div style="font-size:10.5px;color:var(--text-secondary);margin-top:12px">Descuentos válidos solo para el Día 1:</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <input id="discount-code-input" type="text" placeholder="Código de descuento (opcional)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onblur="applyDiscountCode()">
+      </div>
+      <div id="discount-code-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
 
-      <div id="discounts-wrapper">
-        <div style="font-size:10.5px;color:var(--text-secondary);margin-top:12px">Descuentos válidos solo para el Día 1:</div>
-        <div style="display:flex;gap:8px;margin-top:6px">
-          <input id="discount-code-input" type="text" placeholder="Código de descuento (opcional)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onblur="applyDiscountCode()">
+      <div id="gaceta-toggle" onclick="toggleGacetaBlock()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding:10px 12px;border-radius:var(--radius-md);border:1.5px dashed var(--border);background:var(--bg-secondary)">
+        <span style="font-size:12.5px;font-weight:600">¿Sos suscriptor de Club La Gaceta?</span>
+        <i id="gaceta-toggle-icon" class="ti ti-chevron-down" style="font-size:16px;color:var(--text-secondary)"></i>
+      </div>
+      <div id="gaceta-block" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px">
+          <input id="gaceta-dni-input" type="text" inputmode="numeric" placeholder="Tu DNI (sin puntos)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+          <button id="gaceta-verify-btn" type="button" onclick="verifyGacetaSocio()" style="padding:10px 16px;border-radius:var(--radius-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer">Verificar</button>
         </div>
-        <div id="discount-code-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+        <div id="gaceta-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
+      </div>
+    </div>
 
-        <div id="gaceta-toggle" onclick="toggleGacetaBlock()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding:10px 12px;border-radius:var(--radius-md);border:1.5px dashed var(--border);background:var(--bg-secondary)">
-          <span style="font-size:12.5px;font-weight:600">¿Sos suscriptor de Club La Gaceta?</span>
-          <i id="gaceta-toggle-icon" class="ti ti-chevron-down" style="font-size:16px;color:var(--text-secondary)"></i>
+    <div id="payment-method-wrapper" style="margin-top:14px">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Cómo querés pagar?</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="pm-mp-btn" onclick="selectPaymentMethod('mp')" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px;border:1.5px solid var(--accent);border-radius:var(--radius-md);padding:10px;background:var(--bg-secondary);cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">
+          <span style="font-size:13px;font-weight:600;color:var(--text-primary)">💳 MercadoPago</span>
+        </button>
+        <button type="button" id="pm-transfer-btn" onclick="selectPaymentMethod('transfer')" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px;border:1.5px solid transparent;border-radius:var(--radius-md);padding:10px;background:var(--bg-secondary);cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">
+          <span style="font-size:13px;font-weight:600;color:var(--text-primary)">🏦 Transferencia</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="transfer-block" style="display:none;margin-top:14px">
+      <div class="card" style="text-align:center">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">Transferí el total a este alias:</div>
+        <div style="font-size:19px;font-weight:800;font-family:'Gotham Rounded','DM Sans',sans-serif;color:var(--accent);margin-bottom:8px" id="transfer-alias">tiendida.tuc</div>
+        <button type="button" onclick="copyTransferAlias()" style="background:none;border:1.5px solid var(--accent);color:var(--accent);border-radius:20px;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px;display:inline-flex;align-items:center;gap:5px">
+          <i class="ti ti-copy"></i><span id="transfer-copy-text">Copiar alias</span>
+        </button>
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">Monto a transferir: <span id="transfer-amount" style="color:var(--accent)">$0</span></div>
+        <div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:16px;line-height:1.5;text-align:left;background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 12px">
+          Una vez que hagas la transferencia, mandanos el comprobante por WhatsApp para confirmar tu lugar. Te vamos a cargar a mano en cuanto lo recibamos.
         </div>
-        <div id="gaceta-block" style="display:none;margin-top:8px">
-          <div style="display:flex;gap:8px">
-            <input id="gaceta-dni-input" type="text" inputmode="numeric" placeholder="Tu DNI (sin puntos)" style="flex:1;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
-            <button id="gaceta-verify-btn" type="button" onclick="verifyGacetaSocio()" style="padding:10px 16px;border-radius:var(--radius-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer">Verificar</button>
-          </div>
-          <div id="gaceta-msg" style="font-size:11.5px;margin-top:6px;display:none"></div>
-        </div>
+        <button type="button" onclick="sendTransferWhatsapp()" class="cta-btn" style="width:100%;justify-content:center;background:#25D366">
+          <i class="ti ti-brand-whatsapp"></i> Enviar comprobante por WhatsApp
+        </button>
       </div>
     </div>
 
@@ -1492,6 +1534,15 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
   <button class="lightbox-close"><i class="ti ti-x"></i></button>
   <img id="lightbox-img" src="" alt="">
 </div>
+<div id="visit-popup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:center;justify-content:center;padding:20px" onclick="closeVisitPopup()">
+  <div onclick="event.stopPropagation()" style="background:linear-gradient(135deg,var(--accent),#e8893a);color:#fff;border-radius:20px;padding:22px 20px;max-width:300px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative">
+    <div style="font-size:12px;font-weight:800;letter-spacing:.5px;opacity:.95">🔥 ANTICIPADAS CON DESCUENTO</div>
+    <div style="font-size:22px;font-weight:800;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:8px" id="visit-popup-price">$45.000</div>
+    <div style="font-size:11.5px;opacity:.9;margin-top:4px">Quedan <b id="visit-popup-days">--</b> días para que suba el precio</div>
+    <button onclick="goToBuyFromPopup()" style="margin-top:14px;width:100%;background:#fff;color:var(--accent);border:none;border-radius:30px;padding:11px;font-weight:800;font-size:13px;cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">Comprar ahora</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2440,6 +2491,19 @@ function renderInscBreakdown(stats){
     </div>`;
   }
 
+  // Desglose por tipo de asistente
+  if(stats.tipoAsistente&&stats.tipoAsistente.length){
+    html+=`
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-users"></i>Por tipo de asistente</div>
+      ${stats.tipoAsistente.map(t=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+          <span>${t.label}</span>
+          <span style="font-weight:700">${t.count}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
   // Gráfico: qué ítem factura más
   if(stats.itemsFacturacion&&stats.itemsFacturacion.length){
     const max=Math.max(...stats.itemsFacturacion.map(i=>i.monto),1);
@@ -2571,11 +2635,13 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 
 // ---- TALLERES DÍA 2 (Miércoles 5 de agosto) — venta individual, carrito ----
 const DIA2_WORKSHOPS=[
-  {id:'comprender',nombre:'Comprender para conectar',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de educación y salud',speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
-  {id:'entornos',nombre:'Entornos de aprendizaje en la era algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',speaker:'Santiago Stura — Faro Digital',precioRegular:45000,precioEarly:30000},
-  {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Madres & Padres',speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
-  {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madres & Padres · Pre adolescencia',speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Adolescentes sin cargo'},
+  {id:'comprender',nombre:'Comprender para conectar',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
+  {id:'entornos',nombre:'Entornos de aprendizaje en la era algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',audiencias:['profesional'],speaker:'Santiago Stura — Faro Digital',precioRegular:45000,precioEarly:30000},
+  {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Madres & Padres',audiencias:['familia'],speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
+  {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madres & Padres · Pre adolescencia',audiencias:['familia','adolescente'],speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Adolescentes sin cargo'},
 ];
+
+let selectedTipoAsistente='';
 
 // Mismo Early Bird (misma fecha límite) que el taller del Día 1.
 function getWorkshopPrice(w){return isEarlyBirdActive()?w.precioEarly:w.precioRegular;}
@@ -2585,8 +2651,21 @@ let selectedWorkshops=new Set();
 
 function renderDia2Workshops(){
   const el=document.getElementById('dia2-workshops-list');if(!el)return;
+
+  if(!selectedTipoAsistente){
+    el.innerHTML=`<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:14px;background:var(--bg-secondary);border-radius:var(--radius-md)">Elegí tu <b>tipo de asistente</b> arriba para ver los talleres disponibles para vos.</div>`;
+    return;
+  }
+
   const earlyActive=isEarlyBirdActive();
-  el.innerHTML=DIA2_WORKSHOPS.map(w=>`
+  const disponibles=DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(selectedTipoAsistente));
+
+  if(!disponibles.length){
+    el.innerHTML=`<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:14px;background:var(--bg-secondary);border-radius:var(--radius-md)">No hay talleres disponibles para ese perfil todavía.</div>`;
+    return;
+  }
+
+  el.innerHTML=disponibles.map(w=>`
     <button onclick="toggleWorkshop('${w.id}')" class="ticket-option" id="opt-${w.id}" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px;text-align:left">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-square" id="check-${w.id}" style="font-size:19px;color:var(--text-secondary);flex-shrink:0"></i>
@@ -2600,6 +2679,21 @@ function renderDia2Workshops(){
       <div class="ticket-option-price" style="font-size:16px;text-align:right;flex-shrink:0;margin-left:8px;line-height:1.15">${earlyActive?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(w.precioRegular)}</span>`:''}${fmtPrice(getWorkshopPrice(w))}</div>
     </button>
   `).join('');
+}
+
+// Se ejecuta cuando cambia el desplegable de "Tipo de asistente": deselecciona
+// cualquier taller que ya no sea válido para el nuevo perfil, y re-renderiza
+// la lista filtrada.
+function onTipoAsistenteChange(){
+  const select=document.getElementById('lead-tipo-asistente-input');
+  selectedTipoAsistente=select?select.value:'';
+  DIA2_WORKSHOPS.forEach(w=>{
+    if(selectedWorkshops.has(w.id)&&!w.audiencias.includes(selectedTipoAsistente)){
+      selectedWorkshops.delete(w.id);
+    }
+  });
+  renderDia2Workshops();
+  updateCartUI();
 }
 
 function toggleDia1(){
@@ -2760,6 +2854,14 @@ function resetTicketSelection(){
   appliedDiscountCode=null;
   currentLead=null;
   gacetaVerifiedDni=null;
+  selectedTipoAsistente='';
+  const tipoSelect=document.getElementById('lead-tipo-asistente-input');
+  if(tipoSelect)tipoSelect.value='';
+  selectedPaymentMethod='mp';
+  const mpBtn=document.getElementById('pm-mp-btn');
+  const transferBtn=document.getElementById('pm-transfer-btn');
+  if(mpBtn)mpBtn.style.borderColor='var(--accent)';
+  if(transferBtn)transferBtn.style.borderColor='transparent';
   renderDia2Workshops();
   const dia2List=document.getElementById('dia2-workshops-list');
   if(dia2List)dia2List.style.display='none';
@@ -2785,7 +2887,6 @@ function resetTicketSelection(){
   document.getElementById('lead-tel-input').value='';
   const leadMsg=document.getElementById('lead-form-msg');
   if(leadMsg)leadMsg.style.display='none';
-  document.getElementById('lead-form-section').style.display='none';
   document.getElementById('confirm-payment-btn').style.display='none';
   updateEarlyBirdBanner();
   updateCartUI();
@@ -2918,12 +3019,215 @@ function updateCartUI(){
   if(totalEl)totalEl.textContent=fmtPrice(total);
   if(comboBadge)comboBadge.style.display=isComboActive()?'block':'none';
 
-  const leadSection=document.getElementById('lead-form-section');
   const confirmBtn=document.getElementById('confirm-payment-btn');
-  if(leadSection)leadSection.style.display=items.length?'block':'none';
-  if(confirmBtn)confirmBtn.style.display=items.length?'flex':'none';
+  const pmWrapper=document.getElementById('payment-method-wrapper');
+  if(pmWrapper)pmWrapper.style.display=items.length?'block':'none';
+  if(confirmBtn)confirmBtn.style.display=(items.length&&selectedPaymentMethod==='mp')?'flex':'none';
+  const transferBlock=document.getElementById('transfer-block');
+  if(transferBlock)transferBlock.style.display=(items.length&&selectedPaymentMethod==='transfer')?'block':'none';
   const textEl=document.getElementById('confirm-payment-text');
   if(textEl)textEl.textContent=items.length?`Continuar al pago — ${fmtPrice(total)}`:'Continuar al pago';
+  const transferAmountEl=document.getElementById('transfer-amount');
+  if(transferAmountEl)transferAmountEl.textContent=fmtPrice(total);
+}
+
+// ---- MÉTODO DE PAGO: MercadoPago (default) o Transferencia bancaria ----
+let selectedPaymentMethod='mp';
+// ⚠️ Javier: reemplazar por el alias real de la cuenta que va a recibir las transferencias.
+const TRANSFER_ALIAS='tiendida.tuc';
+const ORG_WHATSAPP_NUMBER='5493814655829';
+
+function selectPaymentMethod(method){
+  selectedPaymentMethod=method;
+  const mpBtn=document.getElementById('pm-mp-btn');
+  const transferBtn=document.getElementById('pm-transfer-btn');
+  if(mpBtn)mpBtn.style.borderColor=method==='mp'?'var(--accent)':'transparent';
+  if(transferBtn)transferBtn.style.borderColor=method==='transfer'?'var(--accent)':'transparent';
+  updateCartUI();
+  if(method==='transfer')savePendingTransfer();
+}
+
+// ---- Persistencia de la transferencia pendiente ----
+// La persona sale de la app a transferir desde su banco y puede volver con
+// la pestaña reiniciada (el navegador puede haber matado el proceso en
+// segundo plano) — sin esto, perdería toda la selección y los datos que
+// ya había cargado. Se guarda en localStorage (sobrevive aunque se cierre
+// la pestaña/app del todo, a diferencia de sessionStorage).
+const PENDING_TRANSFER_KEY='cs26_pending_transfer';
+const PENDING_TRANSFER_MAX_AGE_MS=7*24*60*60*1000; // 7 días
+
+function savePendingTransfer(){
+  try{
+    const nombre=(document.getElementById('lead-nombre-input')?.value||'').trim();
+    const email=(document.getElementById('lead-email-input')?.value||'').trim();
+    const telefono=(document.getElementById('lead-tel-input')?.value||'').trim();
+    const items=getCartItems();
+    if(!items.length)return;
+    localStorage.setItem(PENDING_TRANSFER_KEY,JSON.stringify({
+      selectedDia1,
+      selectedWorkshops:[...selectedWorkshops],
+      nombre,email,telefono,
+      tipoAsistente:selectedTipoAsistente,
+      appliedDiscountCode,
+      gacetaVerifiedDni,
+      total:items.reduce((s,i)=>s+i.precio,0),
+      savedAt:Date.now()
+    }));
+  }catch(e){ console.warn('No se pudo guardar la transferencia pendiente:',e); }
+}
+
+function clearPendingTransfer(){
+  try{ localStorage.removeItem(PENDING_TRANSFER_KEY); }catch(e){}
+  const banner=document.getElementById('pending-transfer-banner');
+  if(banner)banner.style.display='none';
+}
+
+function getPendingTransfer(){
+  try{
+    const raw=localStorage.getItem(PENDING_TRANSFER_KEY);
+    if(!raw)return null;
+    const data=JSON.parse(raw);
+    if(!data.savedAt||(Date.now()-data.savedAt)>PENDING_TRANSFER_MAX_AGE_MS){
+      localStorage.removeItem(PENDING_TRANSFER_KEY);
+      return null;
+    }
+    return data;
+  }catch(e){ return null; }
+}
+
+// ---- POP-UP DE ANTICIPADAS (a partir de la 2ª visita) ----
+// Cada visita (carga fresca de la página) suma 1. A partir de la 2ª, y
+// mientras dure el Early Bird ("Anticipadas con descuento"), se muestra un
+// pop-up breve con la info y un CTA directo a comprar. Se cierra solo a
+// los 3 segundos (o antes, si tocan afuera).
+let visitPopupTimer=null;
+function checkVisitPopup(){
+  try{
+    const count=(parseInt(localStorage.getItem('cs26_visit_count')||'0',10)||0)+1;
+    localStorage.setItem('cs26_visit_count',String(count));
+    if(count<2)return;
+    if(!isEarlyBirdActive())return;
+
+    const overlay=document.getElementById('visit-popup-overlay');
+    if(!overlay)return;
+    const priceEl=document.getElementById('visit-popup-price');
+    const daysEl=document.getElementById('visit-popup-days');
+    if(priceEl)priceEl.textContent=fmtPrice(DIA1_EARLY_PRICE);
+    if(daysEl){
+      const diff=EARLY_BIRD_DEADLINE-new Date();
+      daysEl.textContent=Math.max(1,Math.ceil(diff/(1000*60*60*24)));
+    }
+    overlay.style.display='flex';
+    visitPopupTimer=setTimeout(closeVisitPopup,3000);
+  }catch(e){ console.warn('No se pudo mostrar el pop-up de anticipadas:',e); }
+}
+
+function closeVisitPopup(){
+  const overlay=document.getElementById('visit-popup-overlay');
+  if(overlay)overlay.style.display='none';
+  if(visitPopupTimer){clearTimeout(visitPopupTimer);visitPopupTimer=null;}
+}
+
+function goToBuyFromPopup(){
+  closeVisitPopup();
+  openTicketModal();
+}
+
+function checkPendingTransferBanner(){
+  const data=getPendingTransfer();
+  const banner=document.getElementById('pending-transfer-banner');
+  if(!banner)return;
+  if(!data){ banner.style.display='none'; return; }
+  const amountEl=document.getElementById('pending-transfer-amount');
+  if(amountEl)amountEl.textContent=fmtPrice(data.total);
+  banner.style.display='flex';
+}
+
+function restorePendingTransfer(){
+  const data=getPendingTransfer();
+  if(!data){ toast('No encontramos ninguna transferencia pendiente.'); return; }
+  openTicketModal();
+  setTimeout(()=>{
+    selectedDia1=!!data.selectedDia1;
+    selectedTipoAsistente=data.tipoAsistente||'';
+    selectedWorkshops=new Set(data.selectedWorkshops||[]);
+    appliedDiscountCode=data.appliedDiscountCode||null;
+    gacetaVerifiedDni=data.gacetaVerifiedDni||null;
+    const tipoSelect=document.getElementById('lead-tipo-asistente-input');
+    if(tipoSelect)tipoSelect.value=selectedTipoAsistente;
+    renderDia2Workshops();
+    const nombreInput=document.getElementById('lead-nombre-input');
+    const emailInput=document.getElementById('lead-email-input');
+    const telInput=document.getElementById('lead-tel-input');
+    if(nombreInput)nombreInput.value=data.nombre||'';
+    if(emailInput)emailInput.value=data.email||'';
+    if(telInput)telInput.value=data.telefono||'';
+    updateCartUI();
+    selectPaymentMethod('transfer');
+  },150);
+}
+
+function copyTransferAlias(){
+  const showCopied=()=>{
+    const btn=document.getElementById('transfer-copy-text');
+    if(btn){const original=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=original;},2200);}
+  };
+  const fallbackCopy=()=>{
+    try{
+      const input=document.createElement('textarea');
+      input.value=TRANSFER_ALIAS;
+      input.style.position='fixed';
+      input.style.opacity='0';
+      document.body.appendChild(input);
+      input.focus();
+      input.select();
+      const ok=document.execCommand('copy');
+      document.body.removeChild(input);
+      if(ok)showCopied();
+      else toast('No pudimos copiar. Copialo manualmente: '+TRANSFER_ALIAS);
+    }catch(e){
+      toast('No pudimos copiar. Copialo manualmente: '+TRANSFER_ALIAS);
+    }
+  };
+  // navigator.clipboard puede no existir (algunos webviews como el de
+  // Instagram/Facebook, o navegadores viejos) — si le llamamos .writeText
+  // directo sin chequear, explota antes de llegar al catch. Por eso el chequeo.
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(TRANSFER_ALIAS).then(showCopied).catch(fallbackCopy);
+  }else{
+    fallbackCopy();
+  }
+}
+
+async function sendTransferWhatsapp(){
+  const nombreInput=document.getElementById('lead-nombre-input');
+  const emailInput=document.getElementById('lead-email-input');
+  const telInput=document.getElementById('lead-tel-input');
+  const nombre=(nombreInput.value||'').trim();
+  const email=(emailInput.value||'').trim();
+  const telefono=(telInput.value||'').trim();
+
+  if(!nombre){ showLeadError('Falta tu nombre y apellido.'); return; }
+  if(!email||!isValidEmail(email)){ showLeadError('Ingresá un email válido.'); return; }
+  if(!telefono||!isValidPhone(telefono)){ showLeadError('Ingresá un teléfono válido (mínimo 8 dígitos).'); return; }
+  if(!selectedTipoAsistente){ showLeadError('Elegí tu tipo de asistente.'); return; }
+  document.getElementById('lead-form-msg').style.display='none';
+  savePendingTransfer();
+
+  const items=getCartItems();
+  if(!items.length)return;
+  const total=items.reduce((s,i)=>s+i.precio,0);
+  const detalle=items.map(i=>`- ${i.label}: ${fmtPrice(i.precio)}`).join('\n');
+
+  // Guardamos el lead igual que en el flujo de MercadoPago, para tener registro
+  // aunque todavía no haya pago confirmado (no bloqueante).
+  try{
+    await sb.from('cs26_leads').insert({nombre,email,telefono,ticket_type:items.length===1?items[0].key:'multiple',tipo_asistente:selectedTipoAsistente});
+  }catch(err){ console.error('Lead insert (transferencia) error:',err); }
+
+  const msg=`Hola! Soy ${nombre} (${email}). Ya hice la transferencia de ${fmtPrice(total)} para el Crianza Summit 2026:\n${detalle}\n\nTe mando el comprobante:`;
+  window.open(`https://wa.me/${ORG_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank');
+  clearPendingTransfer();
 }
 
 // ---- VALIDACIÓN DE DATOS DE CONTACTO ----
@@ -2943,6 +3247,7 @@ async function confirmTicketPayment(){
   if(!nombre){ showLeadError('Falta tu nombre y apellido.'); return; }
   if(!email||!isValidEmail(email)){ showLeadError('Ingresá un email válido.'); return; }
   if(!telefono||!isValidPhone(telefono)){ showLeadError('Ingresá un teléfono válido (mínimo 8 dígitos).'); return; }
+  if(!selectedTipoAsistente){ showLeadError('Elegí tu tipo de asistente.'); return; }
   document.getElementById('lead-form-msg').style.display='none';
 
   currentLead={nombre,email,telefono};
@@ -2963,7 +3268,7 @@ async function confirmTicketPayment(){
   // a mitad de camino y el lead nunca llegaba a guardarse, aunque la
   // persona sí terminara pagando.
   try{
-    const {error}=await sb.from('cs26_leads').insert({nombre,email,telefono,ticket_type:ticketTypeForLead});
+    const {error}=await sb.from('cs26_leads').insert({nombre,email,telefono,ticket_type:ticketTypeForLead,tipo_asistente:selectedTipoAsistente});
     if(error)console.error('Lead insert error:',error);
   }catch(err){
     console.error('Lead insert exception:',err);
@@ -2994,6 +3299,7 @@ async function confirmTicketPayment(){
         nombre:currentLead.nombre,
         email:currentLead.email,
         telefono:currentLead.telefono,
+        tipo_asistente:selectedTipoAsistente,
         fb_event_id:fbEventId
       })
     });
@@ -3154,7 +3460,7 @@ function setupRevealObserver(){
   document.querySelectorAll('#page-sponsors .reveal').forEach(el=>revealObserver.observe(el));
 }
 
-goVideo(0);countdown();updateCTA();renderLogoCarousel();showWelcomeVideo();setupRevealObserver();
+goVideo(0);countdown();updateCTA();renderLogoCarousel();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
 loadSupabaseData();subscribeRealtime();initAuth();
 
 // Restaurar la sección si el usuario refresca la página
