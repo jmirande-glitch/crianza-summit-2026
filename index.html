@@ -1431,6 +1431,15 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div class="ticket-option-price" style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:4px"><i class="ti ti-brand-whatsapp" style="color:#25D366;font-size:16px"></i>Consultar</div>
     </button>
 
+    <div style="margin-top:16px">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:2px">¿Va alguien más con vos?</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Cada acompañante queda con su propio registro y su propio QR — le va a llegar un mail de confirmación aparte.</div>
+      <div id="companions-list"></div>
+      <button type="button" onclick="addCompanion()" style="width:100%;border:1.5px dashed var(--border);background:transparent;border-radius:var(--radius-lg);padding:12px;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="ti ti-user-plus"></i>Agregar acompañante
+      </button>
+    </div>
+
     <div id="cart-total-bar" style="display:none;flex-direction:column;gap:6px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-top:14px">
       <div id="combo-badge" style="display:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);border-radius:20px;padding:3px 10px;align-self:flex-start">🎉 Combo 2+ actividades: -15% adicional aplicado</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
@@ -2644,6 +2653,128 @@ const DIA2_WORKSHOPS=[
 
 let selectedTipoAsistente='';
 
+// ---- ACOMPAÑANTES: cada uno con su propio nombre/mail/tipo de asistente,
+// su propio Día 1 y sus propios talleres (filtrados por SU tipo de
+// asistente, igual que el comprador principal). El combo de descuento sigue
+// contando el total de actividades de TODO el carrito junto — no se separa
+// por persona, para no complicar el cálculo. ----
+let companions=[];
+let companionIdCounter=0;
+
+function addCompanion(){
+  companions.push({
+    id:++companionIdCounter,
+    nombre:'',
+    email:'',
+    tipoAsistente:'',
+    selectedDia1:false,
+    selectedWorkshops:new Set()
+  });
+  renderCompanions();
+  updateCartUI();
+}
+
+function removeCompanion(id){
+  companions=companions.filter(c=>c.id!==id);
+  renderCompanions();
+  updateCartUI();
+}
+
+function updateCompanionField(id,field,value){
+  const c=companions.find(x=>x.id===id);
+  if(!c)return;
+  c[field]=value;
+  if(field==='tipoAsistente'){
+    // Si cambia el tipo, saca los talleres que ya no le correspondan.
+    c.selectedWorkshops=new Set([...c.selectedWorkshops].filter(wId=>{
+      const w=DIA2_WORKSHOPS.find(x=>x.id===wId);
+      return w&&w.audiencias.includes(value);
+    }));
+    renderCompanions();
+  }
+  updateCartUI();
+}
+
+function toggleCompanionDia1(id){
+  const c=companions.find(x=>x.id===id);
+  if(!c)return;
+  c.selectedDia1=!c.selectedDia1;
+  renderCompanions();
+  updateCartUI();
+}
+
+function toggleCompanionWorkshop(id,workshopId){
+  const c=companions.find(x=>x.id===id);
+  if(!c)return;
+  const w=DIA2_WORKSHOPS.find(x=>x.id===workshopId);
+  if(!w)return;
+  if(c.selectedWorkshops.has(workshopId)){
+    c.selectedWorkshops.delete(workshopId);
+  }else{
+    const conflicto=DIA2_WORKSHOPS.find(other=>
+      c.selectedWorkshops.has(other.id)&&w.desde<other.hasta&&w.hasta>other.desde
+    );
+    if(conflicto){
+      toast(`⚠️ "${w.nombre}" se superpone en horario con "${conflicto.nombre}". Elegí uno de los dos para esta persona.`);
+      return;
+    }
+    c.selectedWorkshops.add(workshopId);
+  }
+  renderCompanions();
+  updateCartUI();
+}
+
+function renderCompanions(){
+  const el=document.getElementById('companions-list');
+  if(!el)return;
+
+  el.innerHTML=companions.map(c=>{
+    const workshopsHtml=!c.tipoAsistente
+      ? `<div style="font-size:11px;color:var(--text-secondary);text-align:center;padding:10px;background:var(--bg-primary);border-radius:var(--radius-md)">Elegí su tipo de asistente para ver talleres disponibles.</div>`
+      : DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(c.tipoAsistente)).map(w=>{
+          const isSel=c.selectedWorkshops.has(w.id);
+          return `
+          <button type="button" onclick="toggleCompanionWorkshop(${c.id},'${w.id}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${isSel?'var(--accent)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:8px 10px;margin-top:5px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
+            <div style="display:flex;align-items:center;gap:8px">
+              <i class="ti ${isSel?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${isSel?'var(--accent)':'var(--text-secondary)'};flex-shrink:0"></i>
+              <div>
+                <div style="font-size:12px;font-weight:500">${w.nombre}</div>
+                <div style="font-size:10px;color:var(--text-secondary)">${w.horario}</div>
+              </div>
+            </div>
+            <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getWorkshopPrice(w))}</div>
+          </button>`;
+        }).join('') || `<div style="font-size:11px;color:var(--text-secondary);text-align:center;padding:10px">No hay talleres para ese perfil.</div>`;
+
+    return `
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em">Acompañante</span>
+        <button type="button" onclick="removeCompanion(${c.id})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:3px"><i class="ti ti-trash" style="font-size:14px"></i>Quitar</button>
+      </div>
+      <input type="text" placeholder="Nombre y apellido" value="${c.nombre}" oninput="updateCompanionField(${c.id},'nombre',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box">
+      <input type="email" placeholder="Email" value="${c.email}" oninput="updateCompanionField(${c.id},'email',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box">
+      <select onchange="updateCompanionField(${c.id},'tipoAsistente',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+        <option value="" ${!c.tipoAsistente?'selected':''} disabled>Tipo de asistente...</option>
+        <option value="familia" ${c.tipoAsistente==='familia'?'selected':''}>Familia (madre/padre)</option>
+        <option value="profesional" ${c.tipoAsistente==='profesional'?'selected':''}>Profesional (educación/salud)</option>
+        <option value="adolescente" ${c.tipoAsistente==='adolescente'?'selected':''}>Adolescente</option>
+      </select>
+
+      <button type="button" onclick="toggleCompanionDia1(${c.id})" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${c.selectedDia1?'var(--accent)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:9px 10px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--accent)':'var(--text-secondary)'};flex-shrink:0"></i>
+          <div style="font-size:12.5px;font-weight:600">🗣 Martes 4/8 — Jornada Abierta de Impacto</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1BasePrice())}</div>
+      </button>
+
+      <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 2px">🎓 Miércoles 5/8 — Talleres</div>
+      ${workshopsHtml}
+    </div>`;
+  }).join('');
+}
+
 // Mismo Early Bird (misma fecha límite) que el taller del Día 1.
 function getWorkshopPrice(w){return isEarlyBirdActive()?w.precioEarly:w.precioRegular;}
 
@@ -2853,6 +2984,8 @@ function updateEarlyBirdBanner(){
 function resetTicketSelection(){
   selectedDia1=false;
   selectedWorkshops=new Set();
+  companions=[];
+  renderCompanions();
   appliedDiscountCode=null;
   currentLead=null;
   gacetaVerifiedDni=null;
@@ -2896,6 +3029,19 @@ function resetTicketSelection(){
 }
 
 // ---- VALIDACIÓN DE DATOS DE CONTACTO ----
+function getValidCompanions(){
+  return companions.filter(c=>c.selectedDia1||c.selectedWorkshops.size>0);
+}
+
+function validateCompanionsForSubmit(){
+  for(const c of getValidCompanions()){
+    if(!c.nombre.trim()) return 'Completá el nombre de tu acompañante.';
+    if(!c.email.trim()||!isValidEmail(c.email.trim())) return `Ingresá un mail válido para "${c.nombre}".`;
+    if(c.selectedWorkshops.size>0&&!c.tipoAsistente) return `Elegí el tipo de asistente de "${c.nombre}".`;
+  }
+  return null;
+}
+
 function isValidEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
 function isValidPhone(v){
   // Acepta dígitos, espacios, +, -, paréntesis; exige al menos 8 dígitos reales.
@@ -2941,7 +3087,12 @@ function applyDiscountCode(){
 // actividad más, todas pesan igual) → 15% adicional sobre el total,
 // se aplica encima de cualquier otro descuento que ya tenga el Día 1.
 const COMBO_DISCOUNT_PERCENT=15;
-function isComboActive(){return(selectedDia1?1:0)+selectedWorkshops.size>=2;}
+function getTotalItemCount(){
+  let count=(selectedDia1?1:0)+selectedWorkshops.size;
+  companions.forEach(c=>{ count+=(c.selectedDia1?1:0)+c.selectedWorkshops.size; });
+  return count;
+}
+function isComboActive(){return getTotalItemCount()>=2;}
 
 function getDia1FinalPrice(){
   const basePrice=getDia1BasePrice();
@@ -2960,6 +3111,19 @@ function getCartItems(){
     if(selectedWorkshops.has(w.id)){
       items.push({key:w.id,label:w.nombre,precio:getWorkshopPrice(w)});
     }
+  });
+  // Acompañantes: cada ítem lleva su propio nombre/mail/tipo — así el
+  // backend sabe a quién registrar en vez de metérselo todo al comprador.
+  companions.forEach(c=>{
+    if(!c.nombre||!c.email)return;
+    if(c.selectedDia1){
+      items.push({key:'dia1',label:`Martes 4 de agosto — Jornada Abierta de Impacto (${c.nombre})`,precio:getDia1BasePrice(),attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
+    }
+    DIA2_WORKSHOPS.forEach(w=>{
+      if(c.selectedWorkshops.has(w.id)){
+        items.push({key:w.id,label:`${w.nombre} (${c.nombre})`,precio:getWorkshopPrice(w),attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
+      }
+    });
   });
   if(isComboActive()){
     items.forEach(i=>{ i.precio=Math.round(i.precio*(1-COMBO_DISCOUNT_PERCENT/100)); });
@@ -3073,7 +3237,7 @@ async function logAbandonedCartAttempt(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         mode:'log_only',
-        items:items.map(i=>({key:i.key})),
+        items:items.map(i=>({key:i.key,attendee_nombre:i.attendeeNombre||undefined,attendee_email:i.attendeeEmail||undefined,attendee_tipo_asistente:i.attendeeTipo||undefined})),
         discount_code:appliedDiscountCode||undefined,
         gaceta_dni:gacetaVerifiedDni||undefined,
         nombre,email,telefono,
@@ -3248,6 +3412,8 @@ async function sendTransferWhatsapp(){
   if(!email||!isValidEmail(email)){ showLeadError('Ingresá un email válido.'); return; }
   if(!telefono||!isValidPhone(telefono)){ showLeadError('Ingresá un teléfono válido (mínimo 8 dígitos).'); return; }
   if(!selectedTipoAsistente){ showLeadError('Elegí tu tipo de asistente.'); return; }
+  const companionErrorTransfer=validateCompanionsForSubmit();
+  if(companionErrorTransfer){ showLeadError(companionErrorTransfer); return; }
   document.getElementById('lead-form-msg').style.display='none';
   savePendingTransfer();
   logAbandonedCartAttempt();
@@ -3286,6 +3452,8 @@ async function confirmTicketPayment(){
   if(!email||!isValidEmail(email)){ showLeadError('Ingresá un email válido.'); return; }
   if(!telefono||!isValidPhone(telefono)){ showLeadError('Ingresá un teléfono válido (mínimo 8 dígitos).'); return; }
   if(!selectedTipoAsistente){ showLeadError('Elegí tu tipo de asistente.'); return; }
+  const companionError=validateCompanionsForSubmit();
+  if(companionError){ showLeadError(companionError); return; }
   document.getElementById('lead-form-msg').style.display='none';
 
   currentLead={nombre,email,telefono};
@@ -3334,7 +3502,7 @@ async function confirmTicketPayment(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        items:items.map(i=>({key:i.key})),
+        items:items.map(i=>({key:i.key,attendee_nombre:i.attendeeNombre||undefined,attendee_email:i.attendeeEmail||undefined,attendee_tipo_asistente:i.attendeeTipo||undefined})),
         discount_code:appliedDiscountCode||undefined,
         gaceta_dni:gacetaVerifiedDni||undefined,
         nombre:currentLead.nombre,
