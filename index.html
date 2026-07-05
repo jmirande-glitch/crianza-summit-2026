@@ -1537,6 +1537,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 <div id="visit-popup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:center;justify-content:center;padding:20px" onclick="closeVisitPopup()">
   <div onclick="event.stopPropagation()" style="background:linear-gradient(135deg,var(--accent),#e8893a);color:#fff;border-radius:20px;padding:22px 20px;max-width:300px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative">
     <div style="font-size:12px;font-weight:800;letter-spacing:.5px;opacity:.95">🔥 ANTICIPADAS CON DESCUENTO</div>
+    <div style="font-size:12px;font-weight:600;margin-top:4px;opacity:.95">Aprovechá y sacá tu entrada con descuento</div>
     <div style="font-size:22px;font-weight:800;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:8px" id="visit-popup-price">$45.000</div>
     <div style="font-size:11.5px;opacity:.9;margin-top:4px">Quedan <b id="visit-popup-days">--</b> días para que suba el precio</div>
     <button onclick="goToBuyFromPopup()" style="margin-top:14px;width:100%;background:#fff;color:var(--accent);border:none;border-radius:30px;padding:11px;font-weight:800;font-size:13px;cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">Comprar ahora</button>
@@ -3118,7 +3119,7 @@ function checkVisitPopup(){
       daysEl.textContent=Math.max(1,Math.ceil(diff/(1000*60*60*24)));
     }
     overlay.style.display='flex';
-    visitPopupTimer=setTimeout(closeVisitPopup,3000);
+    visitPopupTimer=setTimeout(closeVisitPopup,10000);
   }catch(e){ console.warn('No se pudo mostrar el pop-up de anticipadas:',e); }
 }
 
