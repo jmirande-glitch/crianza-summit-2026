@@ -1441,7 +1441,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </div>
 
     <div id="cart-total-bar" style="display:none;flex-direction:column;gap:6px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-top:14px">
-      <div id="combo-badge" style="display:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);border-radius:20px;padding:3px 10px;align-self:flex-start">🎉 Combo 2+ actividades: -15% adicional aplicado</div>
+      <div id="combo-badge" style="display:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);border-radius:20px;padding:3px 10px;align-self:flex-start">🎉 Combo 2+ actividades (por persona): -15% adicional aplicado</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">Total (<span id="cart-count">0</span> ítem/s)</span>
         <span id="cart-total-price" style="font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:19px;font-weight:700;color:var(--accent)">$0</span>
@@ -3083,16 +3083,24 @@ function applyDiscountCode(){
 }
 
 // Precio final del Día 1, con Early Bird + mejor descuento aplicado (código vs. La Gaceta).
-// Combo: 2 o más actividades elegidas en total (el Día 1 cuenta como una
-// actividad más, todas pesan igual) → 15% adicional sobre el total,
-// se aplica encima de cualquier otro descuento que ya tenga el Día 1.
+// Combo: 2 o más actividades elegidas por la MISMA persona (comprador o
+// acompañante) → 15% adicional sobre sus propios ítems. No cuenta sumando
+// entre personas distintas: si 3 personas compran 1 entrada cada una, nadie
+// tiene combo — cada una paga su Día 1 normal.
 const COMBO_DISCOUNT_PERCENT=15;
-function getTotalItemCount(){
-  let count=(selectedDia1?1:0)+selectedWorkshops.size;
-  companions.forEach(c=>{ count+=(c.selectedDia1?1:0)+c.selectedWorkshops.size; });
-  return count;
+
+function getPrimaryItemCount(){ return (selectedDia1?1:0)+selectedWorkshops.size; }
+function isPrimaryComboActive(){ return getPrimaryItemCount()>=2; }
+function getCompanionItemCount(c){ return (c.selectedDia1?1:0)+c.selectedWorkshops.size; }
+function isCompanionComboActive(c){ return getCompanionItemCount(c)>=2; }
+
+// Combo "general" — solo para saber si mostramos el cartelito verde en algún
+// lado (alguien, quien sea, tiene combo). El cálculo real del precio es
+// siempre por persona, ver getCartItems().
+function isComboActive(){
+  if(isPrimaryComboActive())return true;
+  return companions.some(c=>isCompanionComboActive(c));
 }
-function isComboActive(){return getTotalItemCount()>=2;}
 
 function getDia1FinalPrice(){
   const basePrice=getDia1BasePrice();
@@ -3101,33 +3109,43 @@ function getDia1FinalPrice(){
 }
 
 // Arma la lista de ítems seleccionados: [{key,label,precio}], Día 1 primero si está tildado.
-// Si se activa el combo (Día 1 + 2 o más talleres), se le resta un 15% extra a cada ítem.
+// El combo (2+ actividades) se evalúa y aplica por separado para cada
+// persona (comprador y cada acompañante), nunca sumando entre personas.
 function getCartItems(){
   const items=[];
+  const primaryCombo=isPrimaryComboActive();
+
   if(selectedDia1){
-    items.push({key:'dia1',label:'Martes 4 de agosto — Jornada Abierta de Impacto',precio:getDia1FinalPrice()});
+    let precio=getDia1FinalPrice();
+    if(primaryCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+    items.push({key:'dia1',label:'Martes 4 de agosto — Jornada Abierta de Impacto',precio});
   }
   DIA2_WORKSHOPS.forEach(w=>{
     if(selectedWorkshops.has(w.id)){
-      items.push({key:w.id,label:w.nombre,precio:getWorkshopPrice(w)});
+      let precio=getWorkshopPrice(w);
+      if(primaryCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+      items.push({key:w.id,label:w.nombre,precio});
     }
   });
   // Acompañantes: cada ítem lleva su propio nombre/mail/tipo — así el
   // backend sabe a quién registrar en vez de metérselo todo al comprador.
+  // El combo de cada acompañante se calcula SOLO con sus propios ítems.
   companions.forEach(c=>{
     if(!c.nombre||!c.email)return;
+    const companionCombo=isCompanionComboActive(c);
     if(c.selectedDia1){
-      items.push({key:'dia1',label:`Martes 4 de agosto — Jornada Abierta de Impacto (${c.nombre})`,precio:getDia1BasePrice(),attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
+      let precio=getDia1BasePrice();
+      if(companionCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+      items.push({key:'dia1',label:`Martes 4 de agosto — Jornada Abierta de Impacto (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
     }
     DIA2_WORKSHOPS.forEach(w=>{
       if(c.selectedWorkshops.has(w.id)){
-        items.push({key:w.id,label:`${w.nombre} (${c.nombre})`,precio:getWorkshopPrice(w),attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
+        let precio=getWorkshopPrice(w);
+        if(companionCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+        items.push({key:w.id,label:`${w.nombre} (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
       }
     });
   });
-  if(isComboActive()){
-    items.forEach(i=>{ i.precio=Math.round(i.precio*(1-COMBO_DISCOUNT_PERCENT/100)); });
-  }
   return items;
 }
 
