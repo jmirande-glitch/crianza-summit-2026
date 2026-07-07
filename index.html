@@ -1632,14 +1632,15 @@ const SUMMIT2025_PHOTOS=[
 
 // Logo carousel — URLs de Supabase Storage
 const SPONSOR_LOGOS=[
-  {name:'Solar del Cerro',url:SB_STORAGE+'/sponsors/solar-del-cerro.png'},
-  {name:'Cines del Solar',url:SB_STORAGE+'/sponsors/cines-del-solar.png'},
+  {name:'Solar del Cerro',url:SB_STORAGE+'/sponsors/solar-del-cerro.png',urlDark:SB_STORAGE+'/sponsors/solar-del-cerro-dark.png'},
+  {name:'Cines del Solar',url:SB_STORAGE+'/sponsors/cines-del-solar.png',urlDark:SB_STORAGE+'/sponsors/cines-del-solar-dark.png'},
   {name:'Melius',url:SB_STORAGE+'/sponsors/melius.png'},
-  {name:'Villa Poli',url:SB_STORAGE+'/sponsors/villa-poli.png'},
-  {name:'Comfye',url:SB_STORAGE+'/sponsors/comfye.png'},
-  {name:'Matias Turismo',url:SB_STORAGE+'/sponsors/matias-turismo.png'},
+  {name:'Villa Poli',url:SB_STORAGE+'/sponsors/villa-poli.png',urlDark:SB_STORAGE+'/sponsors/villa-poli-dark.png'},
+  {name:'Comfye',url:SB_STORAGE+'/sponsors/comfye.png',urlDark:SB_STORAGE+'/sponsors/comfye-dark.png'},
+  {name:'Matias Turismo',url:SB_STORAGE+'/sponsors/matias-turismo.png',urlDark:SB_STORAGE+'/sponsors/matias-turismo-dark.png'},
   {name:'Fundación Ruta 40',url:SB_STORAGE+'/sponsors/ruta-40.jpg'},
-  {name:'Tiendida',url:SB_STORAGE+'/sponsors/tiendida.png'},
+  {name:'Club La Gaceta',url:SB_STORAGE+'/sponsors/club-la-gaceta.png',urlDark:SB_STORAGE+'/sponsors/club-la-gaceta-dark.png'},
+  {name:'Tiendida',url:SB_STORAGE+'/sponsors/tiendida.png',urlDark:SB_STORAGE+'/sponsors/tiendida-dark.png'},
 ];
 
 const SPEAKERS=[
@@ -1677,14 +1678,15 @@ const VIDEOS=[
 ];
 
 const SPONSORS=[
-  {tier:'main',name:'Solar del Cerro',logo:SB_STORAGE+'/sponsors/solar-del-cerro.png'},
-  {tier:'main',name:'Cines del Solar',logo:SB_STORAGE+'/sponsors/cines-del-solar.png'},
+  {tier:'main',name:'Solar del Cerro',logo:SB_STORAGE+'/sponsors/solar-del-cerro.png',logoDark:SB_STORAGE+'/sponsors/solar-del-cerro-dark.png'},
+  {tier:'main',name:'Cines del Solar',logo:SB_STORAGE+'/sponsors/cines-del-solar.png',logoDark:SB_STORAGE+'/sponsors/cines-del-solar-dark.png'},
   {tier:'gold',name:'Melius',logo:SB_STORAGE+'/sponsors/melius.png'},
-  {tier:'gold',name:'Villa Poli',logo:SB_STORAGE+'/sponsors/villa-poli.png'},
-  {tier:'gold',name:'Comfye',logo:SB_STORAGE+'/sponsors/comfye.png'},
-  {tier:'colaborador',name:'Matias Turismo',logo:SB_STORAGE+'/sponsors/matias-turismo.png'},
+  {tier:'gold',name:'Villa Poli',logo:SB_STORAGE+'/sponsors/villa-poli.png',logoDark:SB_STORAGE+'/sponsors/villa-poli-dark.png'},
+  {tier:'gold',name:'Comfye',logo:SB_STORAGE+'/sponsors/comfye.png',logoDark:SB_STORAGE+'/sponsors/comfye-dark.png'},
+  {tier:'colaborador',name:'Matias Turismo',logo:SB_STORAGE+'/sponsors/matias-turismo.png',logoDark:SB_STORAGE+'/sponsors/matias-turismo-dark.png'},
   {tier:'colaborador',name:'Fundación Ruta 40',logo:SB_STORAGE+'/sponsors/ruta-40.jpg'},
-  {tier:'black',name:'Tiendida',logo:SB_STORAGE+'/sponsors/tiendida.png'},
+  {tier:'colaborador',name:'Club La Gaceta',logo:SB_STORAGE+'/sponsors/club-la-gaceta.png',logoDark:SB_STORAGE+'/sponsors/club-la-gaceta-dark.png'},
+  {tier:'black',name:'Tiendida',logo:SB_STORAGE+'/sponsors/tiendida.png',logoDark:SB_STORAGE+'/sponsors/tiendida-dark.png'},
 ];
 
 const MATERIALS=[
@@ -2092,6 +2094,7 @@ function renderSpeakers(){
 }
 
 function renderSponsors(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   const tiers=[
     {key:'main',label:'⭐ Main'},
     {key:'black',label:'⚫ Black'},
@@ -2104,7 +2107,8 @@ function renderSponsors(){
     h+=`<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:22px 0 12px;letter-spacing:.05em;text-transform:uppercase;text-align:center">${t.label}</div>`;
     h+=`<div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:center;margin-bottom:6px">`;
     list.forEach(s=>{
-      h+=`<img src="${s.logo}" alt="${s.name}" title="${s.name}" style="height:80px;width:auto;max-width:180px;object-fit:contain;opacity:.85;filter:grayscale(20%)" onerror="this.style.display='none'">`;
+      const logoUrl=(isDark&&s.logoDark)?s.logoDark:s.logo;
+      h+=`<img src="${logoUrl}" alt="${s.name}" title="${s.name}" style="height:80px;width:auto;max-width:180px;object-fit:contain;opacity:.85;filter:grayscale(20%)" onerror="this.style.display='none'">`;
     });
     h+=`</div>`;
   });
@@ -2200,9 +2204,13 @@ function renderAll(){
 // ---- LOGO CAROUSEL ----
 function renderLogoCarousel(){
   const track=document.getElementById('logo-track');if(!track)return;
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   // Duplicate list for seamless loop
   const all=[...SPONSOR_LOGOS,...SPONSOR_LOGOS];
-  track.innerHTML=all.map(l=>`<img src="${l.url}" alt="${l.name}" title="${l.name}" onerror="this.style.display='none'">`).join('');
+  track.innerHTML=all.map(l=>{
+    const logoUrl=(isDark&&l.urlDark)?l.urlDark:l.url;
+    return `<img src="${logoUrl}" alt="${l.name}" title="${l.name}" onerror="this.style.display='none'">`;
+  }).join('');
   // La animación arranca pausada (ver CSS .logo-track) para que no se vea
   // trabada mientras las imágenes todavía están cargando y el ancho del
   // track va cambiando. Recién la dejamos correr cuando todas terminaron
@@ -3601,7 +3609,7 @@ function closeLightbox(){document.getElementById('lightbox').classList.remove('o
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function setSyncState(s){const d=document.getElementById('sync-dot');if(d)d.className='sync-dot '+s;}
 function getThemeAuto(){const m=localStorage.getItem('cs26_theme_manual');if(m){const ts=parseInt(localStorage.getItem('cs26_theme_ts')||'0');if(Date.now()-ts<12*60*60*1000)return m;localStorage.removeItem('cs26_theme_manual');localStorage.removeItem('cs26_theme_ts');}const h=new Date().getHours();return(h>=19||h<7)?'dark':'light';}
-function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const ic=document.getElementById('theme-icon');if(ic)ic.className=t==='dark'?'ti ti-sun':'ti ti-moon';const heroLogoUrl=t==='dark'?'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-dark.png':'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light.png';const topbarLogoUrl=t==='dark'?'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-dark-top-bar.png':'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light-top-bar.png';const heroImg=document.getElementById('hero-logo-img');if(heroImg)heroImg.src=heroLogoUrl;const topbarImg=document.getElementById('topbar-logo-img');if(topbarImg)topbarImg.src=topbarLogoUrl;}
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const ic=document.getElementById('theme-icon');if(ic)ic.className=t==='dark'?'ti ti-sun':'ti ti-moon';const heroLogoUrl=t==='dark'?'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-dark.png':'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light.png';const topbarLogoUrl=t==='dark'?'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-dark-top-bar.png':'https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light-top-bar.png';const heroImg=document.getElementById('hero-logo-img');if(heroImg)heroImg.src=heroLogoUrl;const topbarImg=document.getElementById('topbar-logo-img');if(topbarImg)topbarImg.src=topbarLogoUrl;if(typeof renderLogoCarousel==='function')renderLogoCarousel();if(typeof renderSponsors==='function')renderSponsors();}
 function toggleTheme(){const c=document.documentElement.getAttribute('data-theme'),n=c==='dark'?'light':'dark';localStorage.setItem('cs26_theme_manual',n);localStorage.setItem('cs26_theme_ts',Date.now().toString());applyTheme(n);}
 applyTheme(getThemeAuto());
 
