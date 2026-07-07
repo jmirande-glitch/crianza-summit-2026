@@ -754,19 +754,19 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
           <div style="margin-left:18px;display:flex;flex-direction:column;gap:14px">
             <div style="display:flex;gap:12px">
-              <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--teal);line-height:1.3">10:30<br>12:00</div>
-              <div>
-                <div style="font-size:13px;font-weight:700">Crianza respetuosa y límites</div>
-                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Charla para madres y padres de primera infancia e infancias</div>
-                <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Brenda Tróccoli</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--teal);line-height:1.3">17:00<br>18:30</div>
               <div>
                 <div style="font-size:13px;font-weight:700">"Me descubro a diario" <span style="font-weight:400;font-style:italic">(Pre adolescencia)</span></div>
                 <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Taller para madres, padres e hijos (10 a 13 años)</div>
                 <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Maritchu Seitún + Sofi Chas</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--teal);line-height:1.3">18:30<br>20:00</div>
+              <div>
+                <div style="font-size:13px;font-weight:700">Crianza respetuosa y límites</div>
+                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Charla para madres y padres de primera infancia e infancias</div>
+                <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Brenda Tróccoli</div>
               </div>
             </div>
             <!-- Oculto temporalmente (marcado en rojo en Jornada_formativa.docx; horario correcto según docx: 17:00-18:30) -->
@@ -1643,13 +1643,13 @@ const SPONSOR_LOGOS=[
 ];
 
 const SPEAKERS=[
-  {id:'sp1',name:'Maritchu Seitún',ini:'MS',role:'Lic. en Psicología · Especializada en orientación a padres',color:'#1D9E75',tags:['Crianza','Vínculos'],web:null,ig:'maritchuseitun',yt:null,day:1},
+  {id:'sp1',name:'Maritchu Seitún',ini:'MS',role:'Lic. en Psicología · Especializada en orientación a padres',color:'#1D9E75',tags:['Crianza','Vínculos'],web:'https://www.maritchuseitunpsi.com/',ig:'maritchuseitun',yt:null,day:1},
   {id:'sp2',name:'Lucas Raspall',ini:'LR',role:'Médico psiquiatra y psicoterapeuta · Autor de libros, conferencista',color:'#D85A30',tags:['Salud mental','Infancia'],web:null,ig:'lucasraspall',yt:null,day:1},
-  {id:'sp3',name:'Santiago Stura',ini:'SS',role:'Licenciado en Comunicación (UBA) · Faro Digital',color:'#185FA5',tags:['Ciudadanía digital','Tecnología'],web:null,ig:'santiagostura',yt:null,day:1},
+  {id:'sp3',name:'Santiago Stura',ini:'SS',role:'Licenciado en Comunicación (UBA) · Faro Digital',color:'#185FA5',tags:['Ciudadanía digital','Tecnología'],web:'https://farodigital.org/',ig:'farodigitalok',yt:'https://www.youtube.com/channel/UC1ZbQRAYfTZWrhR28qzfzjg',day:1},
   {id:'sp4',name:'Brenda Tróccoli',ini:'BT',role:'Coach ontológica · Especialista en crianza y puericultora',color:'#533AB7',tags:['Crianza','Coaching'],web:null,ig:'brendatroccoli',yt:null,day:1},
-  {id:'sp5',name:'Juan Pablo Ventura',ini:'JV',role:'Psicólogo, terapeuta, conferencista y consultor en educación',color:'#BA7517',tags:['Educación','Liderazgo'],web:null,ig:'juanpabloventura',yt:null,day:1},
-  {id:'sp6',name:'Sofía Chas',ini:'SC',role:'Orientadora familiar y escritora de cuentos infantiles (junto a Maritchu Seitún)',color:'#993556',tags:['Emociones','Autora'],web:null,ig:'sofiachas',yt:null,day:1},
-  {id:'sp7',name:'Carolina Ferreyra',ini:'CF',role:'Fundadora · Tiendida',color:'#D85A30',tags:['Crianza','Emprendimiento'],web:'https://tiendida.com.ar',ig:'tiendida',yt:null,day:1},
+  {id:'sp5',name:'Juan Pablo Ventura',ini:'JV',role:'Psicólogo, terapeuta, conferencista y consultor en educación',color:'#BA7517',tags:['Educación','Liderazgo'],web:null,ig:'juampiventura',yt:null,day:1},
+  {id:'sp6',name:'Sofía Chas',ini:'SC',role:'Orientadora familiar y escritora de cuentos infantiles (junto a Maritchu Seitún)',color:'#993556',tags:['Emociones','Autora'],web:'https://www.maritchuseitunpsi.com/copia-de-maritchu-1',ig:'sofichas',yt:'https://www.youtube.com/@sofiachas',day:1},
+  {id:'sp7',name:'Carolina Ferreyra',ini:'CF',role:'Psicóloga · Fundadora de Tiendida y creadora del Crianza Summit',color:'#D85A30',tags:['Crianza','Emprendimiento'],web:'https://tiendida.com.ar',ig:'tiendida',yt:null,day:1},
 ];
 
 const SESSIONS=[
@@ -1668,9 +1668,12 @@ const SESSIONS=[
 ];
 
 const VIDEOS=[
-  {yt:'rppDJD-ds2w',title:'Crianza y vínculos',speaker:'Maritchu Seitún'},
-  {yt:'YDYqiwd6DME',title:'Educación emocional',speaker:'Sofía Chas'},
-  {yt:'5n5VbWPK70I',title:'Salud mental infanto-juvenil',speaker:'Lucas Raspall'},
+  {yt:'ZnkQByPdl5Y',title:'Mundo adolescente',speaker:'Maritchu Seitún'},
+  {yt:'eE3_q3Hwggo',title:'Los niños y las pantallas',speaker:'Lucas Raspall'},
+  {yt:'ySk5azZ8H_o',title:'Peligros del mundo Roblox',speaker:'Santiago Stura'},
+  {yt:'cRKRI19cNtg',title:'Mundial, emociones y crianza',speaker:'Brenda Tróccoli'},
+  {yt:'IMXI82HzmH0',title:'El viaje interior: cómo el camino del héroe cambia tu vida',speaker:'Juan Pablo Ventura'},
+  {yt:'aoEF14E0aQo',title:'¿Qué es realmente la autoestima?',speaker:'Sofía Chas'},
 ];
 
 const SPONSORS=[
@@ -2653,8 +2656,8 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 const DIA2_WORKSHOPS=[
   {id:'comprender',nombre:'Comprender para conectar',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
   {id:'entornos',nombre:'Entornos de aprendizaje en la era algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',audiencias:['profesional'],speaker:'Santiago Stura — Faro Digital',precioRegular:45000,precioEarly:30000},
-  {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Madres & Padres',audiencias:['familia'],speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
   {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madres & Padres · Pre adolescencia',audiencias:['familia','adolescente'],speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Adolescentes sin cargo'},
+  {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'18:30 a 20:00',desde:1110,hasta:1200,audiencia:'Madres & Padres',audiencias:['familia'],speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
 ];
 
 let selectedTipoAsistente='';
