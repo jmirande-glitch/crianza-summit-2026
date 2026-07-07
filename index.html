@@ -1271,6 +1271,8 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         <div class="metric-grid" style="margin-bottom:14px">
           <div class="metric"><div class="metric-val" id="insc-total">...</div><div class="metric-lbl">inscriptos</div></div>
           <div class="metric"><div class="metric-val" id="insc-monto">...</div><div class="metric-lbl">recaudado</div></div>
+          <div class="metric"><div class="metric-val" id="visitas-hoy">...</div><div class="metric-lbl">visitantes hoy</div></div>
+          <div class="metric"><div class="metric-val" id="visitas-total">...</div><div class="metric-lbl">visitantes totales</div></div>
         </div>
 
         <div id="insc-breakdown" style="margin-bottom:14px"></div>
@@ -1573,6 +1575,23 @@ const sb=supabase.createClient(SB_URL,SB_KEY,{
 });
 let userToken=localStorage.getItem('cs26_token');
 if(!userToken){userToken='u_'+Math.random().toString(36).substr(2,12);localStorage.setItem('cs26_token',userToken);}
+
+// ---- TRACKING DE VISITANTES ÚNICOS ----
+// Reusa el mismo userToken (ya existe para otra cosa) para registrar,
+// una vez por día y por navegador, una visita en cs26_visitas. La
+// clave primaria (user_token, fecha) hace que recargar la página no
+// sume visitas de más — por eso no hace falta chequear nada antes de
+// llamar a esto, simplemente se ignora el conflicto si ya existía.
+async function logVisit(){
+  try{
+    await sb.from('cs26_visitas').upsert(
+      {user_token:userToken},
+      {onConflict:'user_token,fecha',ignoreDuplicates:true}
+    );
+  }catch(err){
+    console.warn('No se pudo registrar la visita:',err);
+  }
+}
 
 const ADMIN_ACTION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/admin-action';
 const SHEETS_WEBHOOK_URL='https://script.google.com/macros/s/AKfycbxkYduv-RYE86T9oFrOEqtzsfD7sSMaqu2LnIuImEDUD-_LtFZjfzcOfe1hoZMJk1ef/exec';
@@ -2486,6 +2505,24 @@ async function updateAcredStats(){
     document.getElementById('acred-pending').textContent=stats.pendientes;
     if(acredListOpen)renderAcredList();
   }catch(err){console.error(err);}
+  updateVisitStats();
+}
+
+// Trae los agregados de visitantes (hoy / totales) vía RPC. Es una
+// función aparte de updateAcredStats para que, si esta parte falla
+// (ej: la migración de cs26_visitas todavía no se corrió), no rompa
+// el resto de las métricas del panel.
+async function updateVisitStats(){
+  try{
+    const {data,error}=await sb.rpc('get_visit_stats');
+    if(error)throw error;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row)return;
+    const hoyEl=document.getElementById('visitas-hoy');
+    const totalEl=document.getElementById('visitas-total');
+    if(hoyEl)hoyEl.textContent=row.visitantes_hoy??0;
+    if(totalEl)totalEl.textContent=row.visitantes_acumulados??0;
+  }catch(err){console.error('Error trayendo estadísticas de visitas:',err);}
 }
 
 function renderInscBreakdown(stats){
@@ -3706,7 +3743,7 @@ function setupRevealObserver(){
 }
 
 goVideo(0);countdown();updateCTA();renderLogoCarousel();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
-loadSupabaseData();subscribeRealtime();initAuth();
+loadSupabaseData();subscribeRealtime();initAuth();logVisit();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
