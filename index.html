@@ -1359,6 +1359,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div class="tab-bar" style="margin-bottom:14px">
         <button class="tab-btn active" id="admtab-inscripcion" onclick="setAdminTab('inscripcion')">📋 Inscripción</button>
         <button class="tab-btn" id="admtab-acreditacion" onclick="setAdminTab('acreditacion')">✅ Acreditación</button>
+        <button class="tab-btn" id="admtab-descuentos" onclick="setAdminTab('descuentos')">🏷️ Descuentos</button>
       </div>
 
       <!-- INSCRIPCIÓN -->
@@ -1456,6 +1457,21 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         </div>
 
         <div id="acred-result" style="display:none;border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:14px"></div>
+      </div>
+
+      <!-- DESCUENTOS -->
+      <div id="tab-descuentos" style="display:none">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-ticket"></i>Nuevo código de descuento</div>
+          <input type="text" id="dc-code" class="datos-input" placeholder="Código (ej: SPONSOR20)" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          <input type="number" id="dc-percent" class="datos-input" placeholder="Porcentaje de descuento (1 a 100)">
+          <div style="font-size:11px;color:var(--text-secondary);margin:2px 0 8px">Por ahora solo aplica al Día 1 — la Jornada Abierta de Impacto.</div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveDiscountCode()"><i class="ti ti-device-floppy"></i>Guardar código</button>
+          <div id="dc-form-msg" style="display:none;margin-top:8px;font-size:12px"></div>
+        </div>
+
+        <div class="sec-title-sm" style="margin-top:16px"><i class="ti ti-list"></i>Códigos existentes</div>
+        <div id="discount-codes-list"></div>
       </div>
 
       <button class="btn" style="width:100%;justify-content:center;margin-top:6px" onclick="lockoutAcred()"><i class="ti ti-logout"></i>Cerrar sesión</button>
@@ -2573,12 +2589,106 @@ let acredListOpen=false;
 let acredCheckedInList=[];
 
 function setAdminTab(tab){
-  const isInsc=tab==='inscripcion';
-  document.getElementById('tab-inscripcion').style.display=isInsc?'block':'none';
-  document.getElementById('tab-acreditacion').style.display=isInsc?'none':'block';
-  document.getElementById('admtab-inscripcion').className='tab-btn'+(isInsc?' active':'');
-  document.getElementById('admtab-acreditacion').className='tab-btn'+(isInsc?'':' active');
-  if(!isInsc)backToAcredModes();
+  document.getElementById('tab-inscripcion').style.display=tab==='inscripcion'?'block':'none';
+  document.getElementById('tab-acreditacion').style.display=tab==='acreditacion'?'block':'none';
+  document.getElementById('tab-descuentos').style.display=tab==='descuentos'?'block':'none';
+  document.getElementById('admtab-inscripcion').className='tab-btn'+(tab==='inscripcion'?' active':'');
+  document.getElementById('admtab-acreditacion').className='tab-btn'+(tab==='acreditacion'?' active':'');
+  document.getElementById('admtab-descuentos').className='tab-btn'+(tab==='descuentos'?' active':'');
+  if(tab==='acreditacion')backToAcredModes();
+  if(tab==='descuentos')loadDiscountCodes();
+}
+
+// ---- GESTIÓN DE CÓDIGOS DE DESCUENTO (panel admin) ----
+async function loadDiscountCodes(){
+  const el=document.getElementById('discount-codes-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:12px"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i></div>';
+  try{
+    const {codes}=await callAdminAction('list_discount_codes');
+    renderDiscountCodesList(codes||[]);
+  }catch(err){
+    console.error(err);
+    el.innerHTML='<div style="font-size:12px;color:var(--red);text-align:center;padding:8px">No pudimos cargar los códigos.</div>';
+  }
+}
+
+function renderDiscountCodesList(codes){
+  const el=document.getElementById('discount-codes-list');
+  if(!el)return;
+  if(!codes.length){
+    el.innerHTML='<div class="empty" style="padding:24px 8px"><i class="ti ti-ticket-off"></i><div class="empty-title">Todavía no hay códigos cargados</div></div>';
+    return;
+  }
+  el.innerHTML=codes.map(c=>`
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px">
+      <div>
+        <div style="font-weight:700;font-size:14px;font-family:'Gotham Rounded','DM Sans',sans-serif">${c.code}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${c.percent}% · ${(c.applies_to||['dia1']).join(', ')}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span class="badge ${c.active?'badge-green':'badge-red'}">${c.active?'Activo':'Inactivo'}</span>
+        <button class="btn btn-sm" onclick="toggleDiscountCodeActive('${c.code}',${!c.active})" title="${c.active?'Desactivar':'Activar'}"><i class="ti ${c.active?'ti-toggle-right':'ti-toggle-left'}"></i></button>
+        <button class="icon-btn" onclick="deleteDiscountCode('${c.code}')" title="Eliminar"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function saveDiscountCode(){
+  const codeInput=document.getElementById('dc-code');
+  const percentInput=document.getElementById('dc-percent');
+  const msgEl=document.getElementById('dc-form-msg');
+  const code=(codeInput.value||'').trim().toUpperCase();
+  const percent=parseFloat(percentInput.value);
+
+  if(!code){toast('Ingresá un código');return;}
+  if(!Number.isFinite(percent)||percent<=0||percent>100){toast('El porcentaje tiene que ser entre 1 y 100');return;}
+
+  msgEl.style.display='block';
+  msgEl.style.color='var(--text-secondary)';
+  msgEl.textContent='Guardando...';
+
+  try{
+    await callAdminAction('save_discount_code',{code,percent,applies_to:['dia1'],active:true});
+    msgEl.style.color='var(--green)';
+    msgEl.textContent=`✅ Código ${code} guardado.`;
+    codeInput.value='';
+    percentInput.value='';
+    loadDiscountCodes();
+  }catch(err){
+    console.error(err);
+    msgEl.style.color='var(--red)';
+    msgEl.textContent='No se pudo guardar: '+(err.message||'error desconocido');
+  }
+}
+
+async function toggleDiscountCodeActive(code,newActive){
+  try{
+    // Necesitamos el percent/applies_to actuales para el upsert (save_discount_code
+    // reemplaza la fila entera) — los tomamos de la lista ya cargada en pantalla.
+    const {codes}=await callAdminAction('list_discount_codes');
+    const current=(codes||[]).find(c=>c.code===code);
+    if(!current)return;
+    await callAdminAction('save_discount_code',{code,percent:current.percent,applies_to:current.applies_to,active:newActive});
+    loadDiscountCodes();
+    toast(newActive?`✅ ${code} activado`:`🚫 ${code} desactivado`);
+  }catch(err){
+    console.error(err);
+    toast('No se pudo actualizar el código');
+  }
+}
+
+async function deleteDiscountCode(code){
+  if(!confirm(`¿Eliminar el código ${code}? Esta acción no se puede deshacer.`))return;
+  try{
+    await callAdminAction('delete_discount_code',{code});
+    loadDiscountCodes();
+    toast(`🗑️ ${code} eliminado`);
+  }catch(err){
+    console.error(err);
+    toast('No se pudo eliminar el código');
+  }
 }
 
 async function updateAcredStats(){
@@ -2891,7 +3001,7 @@ function renderCompanions(){
                 <div style="font-size:10px;color:var(--text-secondary)">${w.horario}</div>
               </div>
             </div>
-            <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getWorkshopPrice(w))}</div>
+            <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getWorkshopPrice(w,isCompanionComboActive(c)))}</div>
           </button>`;
         }).join('') || `<div style="font-size:11px;color:var(--text-secondary);text-align:center;padding:10px">No hay talleres para ese perfil.</div>`;
 
@@ -2915,7 +3025,7 @@ function renderCompanions(){
           <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--accent)':'var(--text-secondary)'};flex-shrink:0"></i>
           <div style="font-size:12.5px;font-weight:600">🗣 Martes 4/8 — Jornada Abierta de Impacto</div>
         </div>
-        <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1BasePrice())}</div>
+        <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1Price(isCompanionComboActive(c)))}</div>
       </button>
 
       <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 2px">🎓 Miércoles 5/8 — Talleres</div>
@@ -2924,8 +3034,10 @@ function renderCompanions(){
   }).join('');
 }
 
-// Mismo Early Bird (misma fecha límite) que el taller del Día 1.
-function getWorkshopPrice(w){return isEarlyBirdActive()?w.precioEarly:w.precioRegular;}
+// Mismo Early Bird (misma fecha límite) que el Día 1, más código/La Gaceta
+// (si aplicaran a talleres) y combo — todo compite por el mejor descuento,
+// sin acumular. comboActive se pasa según quién esté eligiendo (comprador o acompañante).
+function getWorkshopPrice(w,comboActive){return getBestPrice(w.precioRegular,w.precioEarly,w.id,!!comboActive);}
 
 let selectedDia1=false;
 let selectedWorkshops=new Set();
@@ -2939,7 +3051,7 @@ function renderDia2Workshops(){
     return;
   }
 
-  const earlyActive=isEarlyBirdActive();
+  const primaryCombo=isPrimaryComboActive();
   const disponibles=DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(selectedTipoAsistente));
 
   if(!disponibles.length){
@@ -2947,7 +3059,10 @@ function renderDia2Workshops(){
     return;
   }
 
-  el.innerHTML=disponibles.map(w=>`
+  el.innerHTML=disponibles.map(w=>{
+    const precio=getWorkshopPrice(w,primaryCombo);
+    const hasDiscount=precio<w.precioRegular;
+    return`
     <button onclick="toggleWorkshop('${w.id}')" class="ticket-option" id="opt-${w.id}" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px;text-align:left">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-square" id="check-${w.id}" style="font-size:19px;color:var(--text-secondary);flex-shrink:0"></i>
@@ -2958,9 +3073,9 @@ function renderDia2Workshops(){
           ${w.nota?`<div class="ticket-option-desc" style="font-style:italic;margin-top:1px;text-align:left">${w.nota}</div>`:''}
         </div>
       </div>
-      <div class="ticket-option-price" style="font-size:16px;text-align:right;flex-shrink:0;margin-left:8px;line-height:1.15">${earlyActive?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(w.precioRegular)}</span>`:''}${fmtPrice(getWorkshopPrice(w))}</div>
-    </button>
-  `).join('');
+      <div class="ticket-option-price" style="font-size:16px;text-align:right;flex-shrink:0;margin-left:8px;line-height:1.15">${hasDiscount?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(w.precioRegular)}</span>`:''}${fmtPrice(precio)}</div>
+    </button>`;
+  }).join('');
 }
 
 // Se ejecuta cuando cambia el desplegable de "Tipo de asistente": deselecciona
@@ -3025,13 +3140,15 @@ const DISCOUNTS_ENABLED_DATE=new Date('2026-07-11T00:00:00-03:00');
 function isDiscountsEnabled(){return new Date()>=DISCOUNTS_ENABLED_DATE;}
 
 function isEarlyBirdActive(){return new Date()<=EARLY_BIRD_DEADLINE;}
-function getDia1BasePrice(){return isEarlyBirdActive()?DIA1_EARLY_PRICE:DIA1_REGULAR_PRICE;}
 
 // ---- CÓDIGOS DE DESCUENTO ----
-const DISCOUNT_CODES={
-  COMFYE20:{percent:20,applies:['dia1']}
-};
+// Ya no viven hardcodeados acá: se gestionan desde el panel admin (tabla
+// cs26_discount_codes) y se validan contra mp-create-preference (modo
+// check_discount_code). appliedDiscountPercent es solo para mostrar el
+// precio en pantalla — mp-create-preference vuelve a validar todo de cero
+// al confirmar el pago, nunca confía en lo que diga el front.
 let appliedDiscountCode=null;
+let appliedDiscountPercent=0;
 let currentLead=null; // {nombre, email, telefono}
 
 // ---- CLUB LA GACETA (verificación de socio, 20% Día 1, excluyente con el código de descuento) ----
@@ -3082,7 +3199,7 @@ async function verifyGacetaSocio(){
     if(data.habilitado){
       gacetaVerifiedDni=dni;
       msgEl.style.color='var(--green)';
-      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento aplicado.`+(appliedDiscountCode?' (No se combina con el código de descuento; se aplica el mayor.)':'');
+      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento disponible para el Día 1 — se aplica automáticamente el mejor descuento entre este, el código, el Early Bird y el combo (nunca se acumulan).`;
     }else{
       gacetaVerifiedDni=null;
       msgEl.style.color='var(--red)';
@@ -3100,13 +3217,8 @@ async function verifyGacetaSocio(){
   }
 }
 
-// Devuelve el mejor descuento aplicable (código vs. socio La Gaceta), sin acumular ambos.
-function getBestDiscountPercent(ticketType){
-  if(!isDiscountsEnabled())return 0;
-  const codeDiscount=(appliedDiscountCode&&DISCOUNT_CODES[appliedDiscountCode]&&DISCOUNT_CODES[appliedDiscountCode].applies.includes(ticketType))?DISCOUNT_CODES[appliedDiscountCode].percent:0;
-  const gacetaDiscount=(gacetaVerifiedDni&&ticketType==='dia1')?GACETA_DISCOUNT_PERCENT:0;
-  return Math.max(codeDiscount,gacetaDiscount);
-}
+// (El cálculo del mejor descuento ahora vive en getBestPrice(), más abajo,
+// junto con Early Bird y combo — así los tres nunca se acumulan entre sí.)
 
 function fmtPrice(n){return'$'+Math.round(n).toLocaleString('es-AR');}
 
@@ -3136,6 +3248,7 @@ function resetTicketSelection(){
   companions=[];
   renderCompanions();
   appliedDiscountCode=null;
+  appliedDiscountPercent=0;
   currentLead=null;
   gacetaVerifiedDni=null;
   selectedTipoAsistente='';
@@ -3205,38 +3318,63 @@ function showLeadError(msg){
   msgEl.textContent=msg;
 }
 
-function applyDiscountCode(){
+async function applyDiscountCode(){
   const input=document.getElementById('discount-code-input');
   const msgEl=document.getElementById('discount-code-msg');
   const code=(input.value||'').trim().toUpperCase();
   if(!code){
     appliedDiscountCode=null;
+    appliedDiscountPercent=0;
     updateCartUI();
     msgEl.style.display='none';
     return;
   }
-  const discount=DISCOUNT_CODES[code];
-  if(!discount){
-    appliedDiscountCode=null;
-    updateCartUI();
-    msgEl.style.display='block';
-    msgEl.style.color='var(--red)';
-    msgEl.textContent='Código no válido.';
-    return;
-  }
-  appliedDiscountCode=code;
-  updateCartUI();
+
   msgEl.style.display='block';
-  msgEl.style.color='var(--green)';
-  msgEl.textContent=`✅ Código aplicado: ${discount.percent}% de descuento sobre el Día 1.`;
+  msgEl.style.color='var(--text-secondary)';
+  msgEl.textContent='Verificando código...';
+
+  try{
+    const res=await fetch(MP_PREFERENCE_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({mode:'check_discount_code',discount_code:code})
+    });
+    const data=await res.json();
+    if(!res.ok||!data.valid){
+      appliedDiscountCode=null;
+      appliedDiscountPercent=0;
+      updateCartUI();
+      msgEl.style.color='var(--red)';
+      msgEl.textContent=data.reason==='discounts_disabled'?'Los códigos de descuento todavía no están habilitados.':'Código no válido.';
+      return;
+    }
+    appliedDiscountCode=code;
+    appliedDiscountPercent=data.percent;
+    updateCartUI();
+    msgEl.style.color='var(--green)';
+    msgEl.textContent=`✅ Código aplicado: ${data.percent}% de descuento sobre el Día 1.`;
+  }catch(err){
+    console.error('applyDiscountCode error:',err);
+    appliedDiscountCode=null;
+    appliedDiscountPercent=0;
+    updateCartUI();
+    msgEl.style.color='var(--red)';
+    msgEl.textContent='No pudimos verificar el código en este momento.';
+  }
 }
 
-// Precio final del Día 1, con Early Bird + mejor descuento aplicado (código vs. La Gaceta).
+// Precio final: Early Bird, código de descuento, socio La Gaceta y combo
+// (2+ actividades) NUNCA se acumulan entre sí. Para cada ítem se calculan
+// los porcentajes de cada descuento que le aplique y se usa únicamente el
+// más alto — el resto se descarta, siempre automático.
+//
 // Combo: 2 o más actividades elegidas por la MISMA persona (comprador o
-// acompañante) → 15% adicional sobre sus propios ítems. No cuenta sumando
-// entre personas distintas: si 3 personas compran 1 entrada cada una, nadie
-// tiene combo — cada una paga su Día 1 normal.
-const COMBO_DISCOUNT_PERCENT=15;
+// acompañante) → 20% (si es el mejor descuento disponible para ese ítem).
+// No cuenta sumando entre personas distintas: si 3 personas compran 1
+// entrada cada una, nadie tiene combo — cada una compite solo con Early
+// Bird / código / La Gaceta para su propio ítem.
+const COMBO_DISCOUNT_PERCENT=20;
 
 function getPrimaryItemCount(){ return (selectedDia1?1:0)+selectedWorkshops.size; }
 function isPrimaryComboActive(){ return getPrimaryItemCount()>=2; }
@@ -3245,34 +3383,55 @@ function isCompanionComboActive(c){ return getCompanionItemCount(c)>=2; }
 
 // Combo "general" — solo para saber si mostramos el cartelito verde en algún
 // lado (alguien, quien sea, tiene combo). El cálculo real del precio es
-// siempre por persona, ver getCartItems().
+// siempre por persona y por ítem, ver getBestPrice()/getCartItems().
 function isComboActive(){
   if(isPrimaryComboActive())return true;
   return companions.some(c=>isCompanionComboActive(c));
 }
 
-function getDia1FinalPrice(){
-  const basePrice=getDia1BasePrice();
-  const discountPercent=getBestDiscountPercent('dia1');
-  return discountPercent?Math.round(basePrice*(1-discountPercent/100)):basePrice;
+// Único punto de cálculo de precio para cualquier ítem (Día 1 o taller).
+// Junta los candidatos a descuento (Early Bird, código, La Gaceta, combo),
+// se queda con el porcentaje más alto y lo aplica sobre el precio regular
+// — nunca se suman dos descuentos sobre el mismo ítem.
+function getBestPrice(regularPrice,earlyPrice,ticketType,comboActive){
+  const candidates=[0];
+  if(isEarlyBirdActive()&&earlyPrice!=null){
+    candidates.push((1-earlyPrice/regularPrice)*100);
+  }
+  if(isDiscountsEnabled()){
+    if(appliedDiscountCode&&appliedDiscountPercent>0&&ticketType==='dia1'){
+      candidates.push(appliedDiscountPercent);
+    }
+    if(gacetaVerifiedDni&&ticketType==='dia1'){
+      candidates.push(GACETA_DISCOUNT_PERCENT);
+    }
+  }
+  if(comboActive){
+    candidates.push(COMBO_DISCOUNT_PERCENT);
+  }
+  const bestPercent=Math.max(...candidates);
+  return Math.round(regularPrice*(1-bestPercent/100));
+}
+
+function getDia1Price(comboActive){
+  return getBestPrice(DIA1_REGULAR_PRICE,DIA1_EARLY_PRICE,'dia1',!!comboActive);
 }
 
 // Arma la lista de ítems seleccionados: [{key,label,precio}], Día 1 primero si está tildado.
-// El combo (2+ actividades) se evalúa y aplica por separado para cada
-// persona (comprador y cada acompañante), nunca sumando entre personas.
+// El combo (2+ actividades) se evalúa por separado para cada persona
+// (comprador y cada acompañante), nunca sumando entre personas, y compite
+// como un descuento más contra Early Bird/código/La Gaceta (el mejor gana).
 function getCartItems(){
   const items=[];
   const primaryCombo=isPrimaryComboActive();
 
   if(selectedDia1){
-    let precio=getDia1FinalPrice();
-    if(primaryCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+    const precio=getDia1Price(primaryCombo);
     items.push({key:'dia1',label:'Martes 4 de agosto — Jornada Abierta de Impacto',precio});
   }
   DIA2_WORKSHOPS.forEach(w=>{
     if(selectedWorkshops.has(w.id)){
-      let precio=getWorkshopPrice(w);
-      if(primaryCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+      const precio=getBestPrice(w.precioRegular,w.precioEarly,w.id,primaryCombo);
       items.push({key:w.id,label:w.nombre,precio});
     }
   });
@@ -3283,14 +3442,12 @@ function getCartItems(){
     if(!c.nombre||!c.email)return;
     const companionCombo=isCompanionComboActive(c);
     if(c.selectedDia1){
-      let precio=getDia1BasePrice();
-      if(companionCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+      const precio=getDia1Price(companionCombo);
       items.push({key:'dia1',label:`Martes 4 de agosto — Jornada Abierta de Impacto (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
     }
     DIA2_WORKSHOPS.forEach(w=>{
       if(c.selectedWorkshops.has(w.id)){
-        let precio=getWorkshopPrice(w);
-        if(companionCombo)precio=Math.round(precio*(1-COMBO_DISCOUNT_PERCENT/100));
+        const precio=getBestPrice(w.precioRegular,w.precioEarly,w.id,companionCombo);
         items.push({key:w.id,label:`${w.nombre} (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
       }
     });
@@ -3330,15 +3487,11 @@ function updateCartUI(){
 
   const priceDia1El=document.getElementById('price-dia1');
   if(priceDia1El){
-    const regular=DIA1_REGULAR_PRICE;
-    const basePrice=getDia1BasePrice();
-    const earlyActive=isEarlyBirdActive();
-    const discountPercent=getBestDiscountPercent('dia1');
-    const finalPrice=getDia1FinalPrice();
+    const finalPrice=getDia1Price(isPrimaryComboActive());
+    const hasDiscount=finalPrice<DIA1_REGULAR_PRICE;
     let html='';
-    if(earlyActive)html+=`<span style="text-decoration:line-through;font-size:12px;opacity:.5;font-weight:400">${fmtPrice(regular)}</span>`;
-    if(discountPercent)html+=`<br><span style="text-decoration:line-through;font-size:12px;opacity:.5;font-weight:400">${fmtPrice(basePrice)}</span>`;
-    html+=`<br>${fmtPrice(finalPrice)}`;
+    if(hasDiscount)html+=`<span style="text-decoration:line-through;font-size:12px;opacity:.5;font-weight:400">${fmtPrice(DIA1_REGULAR_PRICE)}</span><br>`;
+    html+=fmtPrice(finalPrice);
     priceDia1El.innerHTML=html;
   }
 
@@ -3519,7 +3672,6 @@ function restorePendingTransfer(){
     selectedDia1=!!data.selectedDia1;
     selectedTipoAsistente=data.tipoAsistente||'';
     selectedWorkshops=new Set(data.selectedWorkshops||[]);
-    appliedDiscountCode=data.appliedDiscountCode||null;
     gacetaVerifiedDni=data.gacetaVerifiedDni||null;
     const tipoSelect=document.getElementById('lead-tipo-asistente-input');
     if(tipoSelect)tipoSelect.value=selectedTipoAsistente;
@@ -3532,6 +3684,13 @@ function restorePendingTransfer(){
     if(telInput)telInput.value=data.telefono||'';
     updateCartUI();
     selectPaymentMethod('transfer');
+    // El código de descuento se re-valida contra el servidor en vez de
+    // confiar en lo que había guardado el localStorage — puede haberse
+    // desactivado o cambiado de porcentaje mientras tanto.
+    if(data.appliedDiscountCode){
+      const discountInput=document.getElementById('discount-code-input');
+      if(discountInput){discountInput.value=data.appliedDiscountCode;applyDiscountCode();}
+    }
   },150);
 }
 
