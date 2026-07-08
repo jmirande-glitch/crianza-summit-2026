@@ -1360,6 +1360,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         <button class="tab-btn active" id="admtab-inscripcion" onclick="setAdminTab('inscripcion')">📋 Inscripción</button>
         <button class="tab-btn" id="admtab-acreditacion" onclick="setAdminTab('acreditacion')">✅ Acreditación</button>
         <button class="tab-btn" id="admtab-descuentos" onclick="setAdminTab('descuentos')">🏷️ Descuentos</button>
+        <button class="tab-btn" id="admtab-sponsors" onclick="setAdminTab('sponsors')">🤝 Sponsors</button>
       </div>
 
       <!-- INSCRIPCIÓN -->
@@ -1472,6 +1473,39 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
         <div class="sec-title-sm" style="margin-top:16px"><i class="ti ti-list"></i>Códigos existentes</div>
         <div id="discount-codes-list"></div>
+      </div>
+
+      <!-- SPONSORS -->
+      <div id="tab-sponsors" style="display:none">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-award"></i><span id="sp-form-title">Nuevo sponsor</span></div>
+          <input type="hidden" id="sp-id">
+          <input type="text" id="sp-name" class="datos-input" placeholder="Nombre del sponsor">
+          <select id="sp-category" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
+            <option value="main">⭐ Main</option>
+            <option value="black">⚫ Black</option>
+            <option value="gold">🥇 Gold</option>
+            <option value="colaborador" selected>🤝 Colaborador</option>
+          </select>
+
+          <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 4px">Logo — modo claro *</div>
+          <input type="file" id="sp-logo-light-file" accept="image/*" onchange="handleSponsorLogoUpload('light',this)">
+          <div id="sp-logo-light-preview" style="margin-top:6px"></div>
+
+          <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:12px 0 4px">Logo — modo oscuro (opcional)</div>
+          <input type="file" id="sp-logo-dark-file" accept="image/*" onchange="handleSponsorLogoUpload('dark',this)">
+          <div id="sp-logo-dark-preview" style="margin-top:6px"></div>
+          <div style="font-size:10.5px;color:var(--text-secondary);margin-top:6px">Si no cargás una versión oscura, se usa siempre la clara en ambos modos.</div>
+
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="saveSponsorAdmin()"><i class="ti ti-device-floppy"></i>Guardar</button>
+            <button class="btn" style="justify-content:center" onclick="resetSponsorForm()"><i class="ti ti-x"></i>Cancelar</button>
+          </div>
+          <div id="sp-form-msg" style="display:none;margin-top:8px;font-size:12px"></div>
+        </div>
+
+        <div class="sec-title-sm" style="margin-top:16px"><i class="ti ti-list"></i>Sponsors cargados</div>
+        <div id="sponsors-admin-list"></div>
       </div>
 
       <button class="btn" style="width:100%;justify-content:center;margin-top:6px" onclick="lockoutAcred()"><i class="ti ti-logout"></i>Cerrar sesión</button>
@@ -1760,18 +1794,11 @@ const SUMMIT2025_PHOTOS=[
   SB_STORAGE+'/galeria2025/foto6.jpg',
 ];
 
-// Logo carousel — URLs de Supabase Storage
-const SPONSOR_LOGOS=[
-  {name:'Solar del Cerro',url:SB_STORAGE+'/sponsors/solar-del-cerro.png',urlDark:SB_STORAGE+'/sponsors/solar-del-cerro-dark.png'},
-  {name:'Cines del Solar',url:SB_STORAGE+'/sponsors/cines-del-solar.png',urlDark:SB_STORAGE+'/sponsors/cines-del-solar-dark.png'},
-  {name:'Melius',url:SB_STORAGE+'/sponsors/melius.png'},
-  {name:'Villa Poli',url:SB_STORAGE+'/sponsors/villa-poli.png',urlDark:SB_STORAGE+'/sponsors/villa-poli-dark.png'},
-  {name:'Comfye',url:SB_STORAGE+'/sponsors/comfye.png',urlDark:SB_STORAGE+'/sponsors/comfye-dark.png'},
-  {name:'Matias Turismo',url:SB_STORAGE+'/sponsors/matias-turismo.png',urlDark:SB_STORAGE+'/sponsors/matias-turismo-dark.png'},
-  {name:'Fundación Ruta 40',url:SB_STORAGE+'/sponsors/ruta-40.jpg'},
-  {name:'Club La Gaceta',url:SB_STORAGE+'/sponsors/club-la-gaceta.png',urlDark:SB_STORAGE+'/sponsors/club-la-gaceta-dark.png'},
-  {name:'Tiendida',url:SB_STORAGE+'/sponsors/tiendida.png',urlDark:SB_STORAGE+'/sponsors/tiendida-dark.png'},
-];
+// Sponsors: ya no viven hardcodeados acá — se cargan desde cs26_sponsors
+// (gestionable desde el panel admin, con subida de logo incluida). Un
+// sponsor cargado ahí aparece solo, automáticamente, tanto en este
+// carrusel del Home como en la sección Sponsors, sin tocar código.
+let SPONSORS_DATA=[];
 
 const SPEAKERS=[
   {id:'sp1',name:'Maritchu Seitún',ini:'MS',role:'Lic. en Psicología · Especializada en orientación a padres',color:'#1D9E75',tags:['Crianza','Vínculos'],web:'https://www.maritchuseitunpsi.com/',ig:'maritchuseitun',yt:null,day:1},
@@ -1805,18 +1832,6 @@ const VIDEOS=[
   {yt:'cRKRI19cNtg',title:'Mundial, emociones y crianza',speaker:'Brenda Tróccoli'},
   {yt:'IMXI82HzmH0',title:'El viaje interior: cómo el camino del héroe cambia tu vida',speaker:'Juan Pablo Ventura'},
   {yt:'aoEF14E0aQo',title:'¿Qué es realmente la autoestima?',speaker:'Sofía Chas'},
-];
-
-const SPONSORS=[
-  {tier:'main',name:'Solar del Cerro',logo:SB_STORAGE+'/sponsors/solar-del-cerro.png',logoDark:SB_STORAGE+'/sponsors/solar-del-cerro-dark.png'},
-  {tier:'main',name:'Cines del Solar',logo:SB_STORAGE+'/sponsors/cines-del-solar.png',logoDark:SB_STORAGE+'/sponsors/cines-del-solar-dark.png'},
-  {tier:'gold',name:'Melius',logo:SB_STORAGE+'/sponsors/melius.png'},
-  {tier:'gold',name:'Villa Poli',logo:SB_STORAGE+'/sponsors/villa-poli.png',logoDark:SB_STORAGE+'/sponsors/villa-poli-dark.png'},
-  {tier:'gold',name:'Comfye',logo:SB_STORAGE+'/sponsors/comfye.png',logoDark:SB_STORAGE+'/sponsors/comfye-dark.png'},
-  {tier:'colaborador',name:'Matias Turismo',logo:SB_STORAGE+'/sponsors/matias-turismo.png',logoDark:SB_STORAGE+'/sponsors/matias-turismo-dark.png'},
-  {tier:'colaborador',name:'Fundación Ruta 40',logo:SB_STORAGE+'/sponsors/ruta-40.jpg'},
-  {tier:'colaborador',name:'Club La Gaceta',logo:SB_STORAGE+'/sponsors/club-la-gaceta.png',logoDark:SB_STORAGE+'/sponsors/club-la-gaceta-dark.png'},
-  {tier:'black',name:'Tiendida',logo:SB_STORAGE+'/sponsors/tiendida.png',logoDark:SB_STORAGE+'/sponsors/tiendida-dark.png'},
 ];
 
 const MATERIALS=[
@@ -2233,15 +2248,16 @@ function renderSponsors(){
   ];
   let h='';
   tiers.forEach(t=>{
-    const list=SPONSORS.filter(s=>s.tier===t.key);if(!list.length)return;
+    const list=SPONSORS_DATA.filter(s=>s.category===t.key);if(!list.length)return;
     h+=`<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:22px 0 12px;letter-spacing:.05em;text-transform:uppercase;text-align:center">${t.label}</div>`;
     h+=`<div style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:center;margin-bottom:6px">`;
     list.forEach(s=>{
-      const logoUrl=(isDark&&s.logoDark)?s.logoDark:s.logo;
+      const logoUrl=(isDark&&s.logo_dark_url)?s.logo_dark_url:s.logo_light_url;
       h+=`<img src="${logoUrl}" alt="${s.name}" title="${s.name}" style="height:80px;width:auto;max-width:180px;object-fit:contain;opacity:.85;filter:grayscale(20%)" onerror="this.style.display='none'">`;
     });
     h+=`</div>`;
   });
+  if(!SPONSORS_DATA.length){document.getElementById('sponsors-list').innerHTML='';return;}
   h+=`<div style="font-size:10.5px;color:var(--text-secondary);margin-top:18px;text-align:center;line-height:1.4">Ejemplo ilustrativo de clasificación por categoría.</div>`;
   document.getElementById('sponsors-list').innerHTML=h;
 }
@@ -2332,14 +2348,30 @@ function renderAll(){
 }
 
 // ---- LOGO CAROUSEL ----
+// Trae los sponsors activos desde Supabase (lectura pública, solo
+// active=true por RLS) y dispara el render tanto del carrusel del Home
+// como de la sección Sponsors — un solo dato, dos lugares, automático.
+async function loadSponsorsData(){
+  try{
+    const {data,error}=await sb.from('cs26_sponsors').select('*').eq('active',true).order('sort_order',{ascending:true});
+    if(error)throw error;
+    SPONSORS_DATA=data||[];
+  }catch(err){
+    console.error('Error cargando sponsors:',err);
+    SPONSORS_DATA=[];
+  }
+  renderLogoCarousel();
+  renderSponsors();
+}
+
 function renderLogoCarousel(){
   const track=document.getElementById('logo-track');if(!track)return;
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   // Duplicate list for seamless loop
-  const all=[...SPONSOR_LOGOS,...SPONSOR_LOGOS];
-  track.innerHTML=all.map(l=>{
-    const logoUrl=(isDark&&l.urlDark)?l.urlDark:l.url;
-    return `<img src="${logoUrl}" alt="${l.name}" title="${l.name}" onerror="this.style.display='none'">`;
+  const all=[...SPONSORS_DATA,...SPONSORS_DATA];
+  track.innerHTML=all.map(s=>{
+    const logoUrl=(isDark&&s.logo_dark_url)?s.logo_dark_url:s.logo_light_url;
+    return `<img src="${logoUrl}" alt="${s.name}" title="${s.name}" onerror="this.style.display='none'">`;
   }).join('');
   // La animación arranca pausada (ver CSS .logo-track) para que no se vea
   // trabada mientras las imágenes todavía están cargando y el ancho del
@@ -2592,11 +2624,14 @@ function setAdminTab(tab){
   document.getElementById('tab-inscripcion').style.display=tab==='inscripcion'?'block':'none';
   document.getElementById('tab-acreditacion').style.display=tab==='acreditacion'?'block':'none';
   document.getElementById('tab-descuentos').style.display=tab==='descuentos'?'block':'none';
+  document.getElementById('tab-sponsors').style.display=tab==='sponsors'?'block':'none';
   document.getElementById('admtab-inscripcion').className='tab-btn'+(tab==='inscripcion'?' active':'');
   document.getElementById('admtab-acreditacion').className='tab-btn'+(tab==='acreditacion'?' active':'');
   document.getElementById('admtab-descuentos').className='tab-btn'+(tab==='descuentos'?' active':'');
+  document.getElementById('admtab-sponsors').className='tab-btn'+(tab==='sponsors'?' active':'');
   if(tab==='acreditacion')backToAcredModes();
   if(tab==='descuentos')loadDiscountCodes();
+  if(tab==='sponsors')loadSponsorsAdmin();
 }
 
 // ---- GESTIÓN DE CÓDIGOS DE DESCUENTO (panel admin) ----
@@ -2688,6 +2723,169 @@ async function deleteDiscountCode(code){
   }catch(err){
     console.error(err);
     toast('No se pudo eliminar el código');
+  }
+}
+
+// ---- GESTIÓN DE SPONSORS (panel admin) ----
+let sponsorLogoLightUrl=null;
+let sponsorLogoDarkUrl=null;
+let sponsorsAdminCache=[];
+const SPONSOR_CATEGORY_LABELS={main:'⭐ Main',black:'⚫ Black',gold:'🥇 Gold',colaborador:'🤝 Colaborador'};
+
+function resetSponsorForm(){
+  document.getElementById('sp-id').value='';
+  document.getElementById('sp-name').value='';
+  document.getElementById('sp-category').value='colaborador';
+  document.getElementById('sp-logo-light-file').value='';
+  document.getElementById('sp-logo-dark-file').value='';
+  document.getElementById('sp-logo-light-preview').innerHTML='';
+  document.getElementById('sp-logo-dark-preview').innerHTML='';
+  document.getElementById('sp-form-title').textContent='Nuevo sponsor';
+  sponsorLogoLightUrl=null;
+  sponsorLogoDarkUrl=null;
+  const msgEl=document.getElementById('sp-form-msg');
+  if(msgEl)msgEl.style.display='none';
+}
+
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(',')[1]); // saca el prefijo "data:...;base64,"
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Sube el logo apenas se elige el archivo (no espera al botón Guardar) —
+// así el admin ve la preview y sabe que la subida ya funcionó antes de
+// completar el resto del formulario.
+async function handleSponsorLogoUpload(slot,input){
+  const file=input.files[0];
+  if(!file)return;
+  const previewEl=document.getElementById(`sp-logo-${slot}-preview`);
+  previewEl.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Subiendo...';
+  try{
+    const base64=await fileToBase64(file);
+    const {url}=await callAdminAction('upload_sponsor_logo',{filename:file.name,content_base64:base64,content_type:file.type});
+    if(slot==='light')sponsorLogoLightUrl=url;else sponsorLogoDarkUrl=url;
+    previewEl.innerHTML=`<img src="${url}" alt="preview" style="height:40px;width:auto;border-radius:4px;background:#f5f5f3;padding:4px">`;
+  }catch(err){
+    console.error(err);
+    previewEl.innerHTML='<span style="color:var(--red);font-size:11px">Error al subir la imagen</span>';
+  }
+}
+
+async function loadSponsorsAdmin(){
+  const el=document.getElementById('sponsors-admin-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:12px"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i></div>';
+  try{
+    const {sponsors}=await callAdminAction('list_sponsors');
+    sponsorsAdminCache=sponsors||[];
+    renderSponsorsAdminList(sponsorsAdminCache);
+  }catch(err){
+    console.error(err);
+    el.innerHTML='<div style="font-size:12px;color:var(--red);text-align:center;padding:8px">No pudimos cargar los sponsors.</div>';
+  }
+}
+
+function renderSponsorsAdminList(sponsors){
+  const el=document.getElementById('sponsors-admin-list');
+  if(!el)return;
+  if(!sponsors.length){
+    el.innerHTML='<div class="empty" style="padding:24px 8px"><i class="ti ti-photo-off"></i><div class="empty-title">Todavía no hay sponsors cargados</div></div>';
+    return;
+  }
+  el.innerHTML=sponsors.map(s=>`
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <img src="${s.logo_light_url}" alt="${s.name}" style="height:32px;width:auto;max-width:70px;object-fit:contain;background:#f5f5f3;border-radius:4px;padding:2px;flex-shrink:0">
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:13px;font-family:'Gotham Rounded','DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+          <div style="font-size:11px;color:var(--text-secondary)">${SPONSOR_CATEGORY_LABELS[s.category]||s.category}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span class="badge ${s.active?'badge-green':'badge-red'}">${s.active?'Activo':'Inactivo'}</span>
+        <button class="btn btn-sm" onclick="editSponsorAdmin(${s.id})" title="Editar"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-sm" onclick="toggleSponsorActive(${s.id},${!s.active})" title="${s.active?'Desactivar':'Activar'}"><i class="ti ${s.active?'ti-toggle-right':'ti-toggle-left'}"></i></button>
+        <button class="icon-btn" onclick="deleteSponsorAdmin(${s.id})" title="Eliminar"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function editSponsorAdmin(id){
+  const s=sponsorsAdminCache.find(x=>x.id===id);
+  if(!s)return;
+  document.getElementById('sp-id').value=s.id;
+  document.getElementById('sp-name').value=s.name;
+  document.getElementById('sp-category').value=s.category;
+  document.getElementById('sp-form-title').textContent=`Editando: ${s.name}`;
+  sponsorLogoLightUrl=s.logo_light_url;
+  sponsorLogoDarkUrl=s.logo_dark_url||null;
+  document.getElementById('sp-logo-light-preview').innerHTML=`<img src="${s.logo_light_url}" alt="preview" style="height:40px;width:auto;border-radius:4px;background:#f5f5f3;padding:4px">`;
+  document.getElementById('sp-logo-dark-preview').innerHTML=s.logo_dark_url?`<img src="${s.logo_dark_url}" alt="preview" style="height:40px;width:auto;border-radius:4px;background:#222;padding:4px">`:'';
+  document.getElementById('sp-logo-light-file').value='';
+  document.getElementById('sp-logo-dark-file').value='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveSponsorAdmin(){
+  const id=document.getElementById('sp-id').value||undefined;
+  const name=(document.getElementById('sp-name').value||'').trim();
+  const category=document.getElementById('sp-category').value;
+  const msgEl=document.getElementById('sp-form-msg');
+
+  if(!name){toast('Ingresá el nombre del sponsor');return;}
+  if(!id&&!sponsorLogoLightUrl){toast('Subí al menos el logo en modo claro');return;}
+
+  msgEl.style.display='block';
+  msgEl.style.color='var(--text-secondary)';
+  msgEl.textContent='Guardando...';
+
+  try{
+    await callAdminAction('save_sponsor',{
+      id,
+      name,
+      category,
+      logo_light_url:sponsorLogoLightUrl||undefined,
+      logo_dark_url:sponsorLogoDarkUrl!==undefined?sponsorLogoDarkUrl:undefined
+    });
+    msgEl.style.color='var(--green)';
+    msgEl.textContent=`✅ ${name} guardado.`;
+    resetSponsorForm();
+    loadSponsorsAdmin();
+    loadSponsorsData(); // refresca el carrusel/sección pública al toque
+  }catch(err){
+    console.error(err);
+    msgEl.style.color='var(--red)';
+    msgEl.textContent='No se pudo guardar: '+(err.message||'error desconocido');
+  }
+}
+
+async function toggleSponsorActive(id,newActive){
+  try{
+    await callAdminAction('save_sponsor',{id,active:newActive});
+    loadSponsorsAdmin();
+    loadSponsorsData();
+    toast(newActive?'✅ Sponsor activado':'🚫 Sponsor desactivado');
+  }catch(err){
+    console.error(err);
+    toast('No se pudo actualizar el sponsor');
+  }
+}
+
+async function deleteSponsorAdmin(id){
+  if(!confirm('¿Eliminar este sponsor? Esta acción no se puede deshacer.'))return;
+  try{
+    await callAdminAction('delete_sponsor',{id});
+    loadSponsorsAdmin();
+    loadSponsorsData();
+    toast('🗑️ Sponsor eliminado');
+  }catch(err){
+    console.error(err);
+    toast('No se pudo eliminar el sponsor');
   }
 }
 
@@ -3995,7 +4193,7 @@ function setupRevealObserver(){
   document.querySelectorAll('#page-sponsors .reveal').forEach(el=>revealObserver.observe(el));
 }
 
-goVideo(0);countdown();updateCTA();renderLogoCarousel();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
+goVideo(0);countdown();updateCTA();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
 loadSupabaseData();subscribeRealtime();initAuth();logVisit();
 
 // Restaurar la sección si el usuario refresca la página
