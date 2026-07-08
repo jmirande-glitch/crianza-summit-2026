@@ -1388,16 +1388,22 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
             <input type="text" id="me-nombre" class="datos-input" placeholder="Nombre y apellido *">
             <input type="email" id="me-email" class="datos-input" placeholder="Mail (con el que va a iniciar sesión) *">
             <input type="tel" id="me-celular" class="datos-input" placeholder="Celular">
-            <select id="me-ticket" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
-              <option value="dia1" selected>Día 1 — Charlas</option>
-              <option value="dia2">Día 2 — Talleres</option>
-              <option value="ambos">Ambos días</option>
+            <select id="me-tipo-asistente" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
+              <option value="" disabled selected>Tipo de asistente...</option>
+              <option value="familia">Familia (madre/padre)</option>
+              <option value="profesional">Profesional (educación/salud)</option>
+              <option value="adolescente">Adolescente</option>
             </select>
-            <input type="number" id="me-monto" class="datos-input" placeholder="Monto (solo números, 0 si es cortesía)">
-            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="saveManualEntry()"><i class="ti ti-device-floppy"></i>Guardar y generar QR</button>
+
+            <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em">¿Qué actividades incluye?</div>
+            <div id="me-items-list"></div>
+            <div style="font-size:10.5px;color:var(--text-secondary);margin-top:2px">Tildá todo lo que le corresponde a esta persona. El monto de cada actividad se puede editar (0 = cortesía).</div>
+
+            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="saveManualEntry()"><i class="ti ti-device-floppy"></i>Guardar y generar QR</button>
             <div id="manual-entry-result" style="display:none;margin-top:12px;text-align:center"></div>
           </div>
         </div>
+        <div id="manual-entry-massive-note" style="font-size:10.5px;color:var(--text-secondary);margin-top:6px">Para dar de alta a muchas personas a la vez con estas mismas actividades, usá la carga masiva de arriba.</div>
       </div>
 
       <!-- ACREDITACIÓN -->
@@ -3005,18 +3011,60 @@ function toggleManualEntry(){
   const isOpen=form.style.display!=='none';
   form.style.display=isOpen?'none':'block';
   icon.className=isOpen?'ti ti-cash':'ti ti-chevron-up';
+  if(!isOpen)renderManualEntryItems();
+}
+
+// Arma los checkboxes de "Día 1" + cada taller del Día 2 con su propio
+// monto editable — mismo catálogo (DIA2_WORKSHOPS) que usa el checkout
+// público, así el alta manual nunca queda desactualizada respecto a lo
+// que se vende online.
+function renderManualEntryItems(){
+  const el=document.getElementById('me-items-list');
+  if(!el)return;
+  let html=`
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <input type="checkbox" id="me-item-dia1" style="width:16px;height:16px;flex-shrink:0">
+      <span style="font-size:12.5px;flex:1">🗣 Día 1 — Jornada Abierta de Impacto</span>
+      <input type="number" id="me-item-dia1-monto" value="0" style="width:90px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12px">
+    </label>`;
+  DIA2_WORKSHOPS.forEach(w=>{
+    html+=`
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <input type="checkbox" id="me-item-${w.id}" style="width:16px;height:16px;flex-shrink:0">
+      <span style="font-size:12.5px;flex:1">🎓 ${w.nombre}</span>
+      <input type="number" id="me-item-${w.id}-monto" value="0" style="width:90px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12px">
+    </label>`;
+  });
+  el.innerHTML=html;
+}
+
+function getManualEntryItems(){
+  const items=[];
+  if(document.getElementById('me-item-dia1')?.checked){
+    items.push({key:'dia1',monto:parseFloat(document.getElementById('me-item-dia1-monto')?.value)||0});
+  }
+  DIA2_WORKSHOPS.forEach(w=>{
+    if(document.getElementById(`me-item-${w.id}`)?.checked){
+      items.push({key:w.id,monto:parseFloat(document.getElementById(`me-item-${w.id}-monto`)?.value)||0});
+    }
+  });
+  return items;
 }
 
 async function saveManualEntry(){
   const nombre=document.getElementById('me-nombre')?.value.trim();
   const email=document.getElementById('me-email')?.value.trim();
   const celular=document.getElementById('me-celular')?.value.trim();
-  const ticketType=document.getElementById('me-ticket')?.value;
-  const monto=parseFloat(document.getElementById('me-monto')?.value)||0;
+  const tipoAsistente=document.getElementById('me-tipo-asistente')?.value||null;
+  const items=getManualEntryItems();
   const resultEl=document.getElementById('manual-entry-result');
 
   if(!nombre||!email||!email.includes('@')){
     toast('Completá nombre y un mail válido');
+    return;
+  }
+  if(!items.length){
+    toast('Tildá al menos una actividad (Día 1 o un taller)');
     return;
   }
 
@@ -3024,7 +3072,7 @@ async function saveManualEntry(){
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:20px;animation:spin 1s linear infinite"></i>`;
 
   try{
-    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,ticket_type:ticketType,monto}]});
+    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,tipo_asistente:tipoAsistente,items}]});
     const r=results&&results[0];
 
     if(!r||!r.success){
@@ -3034,6 +3082,7 @@ async function saveManualEntry(){
 
     resultEl.innerHTML=`
       <div style="color:var(--green);font-weight:600;font-size:13px;margin-bottom:8px"><i class="ti ti-check"></i> ${nombre} guardado/a correctamente</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">${(r.items||[]).join(' · ')}</div>
       <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Le mandamos un mail a ${email} con su código de acceso. Ya puede iniciar sesión con ese mail y ver su QR en Mi gestión.</div>
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(r.qrCode)}" alt="QR" style="width:120px;margin:0 auto;display:block">
       <div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Código: ${r.qrCode}</div>`;
@@ -3041,7 +3090,8 @@ async function saveManualEntry(){
     document.getElementById('me-nombre').value='';
     document.getElementById('me-email').value='';
     document.getElementById('me-celular').value='';
-    document.getElementById('me-monto').value='';
+    document.getElementById('me-tipo-asistente').value='';
+    renderManualEntryItems();
     updateAcredStats();
   }catch(err){
     console.error(err);
