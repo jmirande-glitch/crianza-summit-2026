@@ -1722,16 +1722,17 @@ if(!userToken){userToken='u_'+Math.random().toString(36).substr(2,12);localStora
 
 // ---- TRACKING DE VISITANTES ÚNICOS ----
 // Reusa el mismo userToken (ya existe para otra cosa) para registrar,
-// una vez por día y por navegador, una visita en cs26_visitas. La
-// clave primaria (user_token, fecha) hace que recargar la página no
-// sume visitas de más — por eso no hace falta chequear nada antes de
-// llamar a esto, simplemente se ignora el conflicto si ya existía.
+// una vez por día y por navegador, una visita. Llama a la función
+// log_visit() (RPC) en vez de escribir directo en cs26_visitas: un INSERT
+// simple con RLS anda bien, pero el ON CONFLICT DO NOTHING que hace falta
+// para no duplicar la visita del día necesita "espiar" si ya existe una
+// fila en conflicto — y como el rol anon no tiene SELECT sobre la tabla
+// (a propósito, para no exponer los tokens), eso se reportaba como una
+// violación de RLS. La función corre con permisos elevados y hace el
+// upsert por dentro, sin que el navegador necesite tocar la tabla nunca.
 async function logVisit(){
   try{
-    await sb.from('cs26_visitas').upsert(
-      {user_token:userToken},
-      {onConflict:'user_token,fecha',ignoreDuplicates:true}
-    );
+    await sb.rpc('log_visit',{p_user_token:userToken});
   }catch(err){
     console.warn('No se pudo registrar la visita:',err);
   }
