@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Carga masiva — Crianza Summit 2026</title>
+<style>
+  :root{
+    --bg:#F7F3EC;
+    --bg-card:#FFFFFF;
+    --text:#1A1208;
+    --text-secondary:#6B6258;
+    --accent:#D85A30;
+    --accent-dark:#B84823;
+    --border:#E5DDD0;
+    --green:#3D7A4F;
+    --green-light:#E8F3EA;
+    --red:#C44536;
+    --red-light:#FBEAE7;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:22px;font-weight:700;margin:0 0 4px}
+  .subtitle{color:var(--text-secondary);font-size:14px;margin:0 0 28px}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:16px}
+  label:first-child{margin-top:0}
+  input,select,textarea{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    background:var(--bg);
+    color:var(--text);
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{min-height:180px;resize:vertical;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6}
+  .hint{font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.5}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:white;border:none;border-radius:8px;
+    padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:inherit;width:100%;margin-top:18px;transition:background .15s;
+  }
+  .btn:hover{background:var(--accent-dark)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg);color:var(--text)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #gate{text-align:center;padding-top:60px}
+  #gate input{text-align:center;letter-spacing:.1em;max-width:280px;margin:0 auto}
+  #gate .btn{max-width:280px;margin:16px auto 0}
+  .error-text{color:var(--red);font-size:13px;margin-top:8px;display:none}
+  #app{display:none}
+  .preview-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+  .preview-table th{text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase}
+  .preview-table td{padding:8px;border-bottom:1px solid var(--border)}
+  .preview-table tr.row-error td{color:var(--red)}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px}
+  .badge-ok{background:var(--green-light);color:var(--green)}
+  .badge-error{background:var(--red-light);color:var(--red)}
+  .summary{display:flex;gap:16px;margin-top:16px;font-size:14px}
+  .summary b{font-size:20px;display:block}
+  #result-panel{display:none}
+  .qr-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .qr-item{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:8px}
+  .qr-item img{width:56px;height:56px;border-radius:6px}
+  .qr-item .info{flex:1;min-width:0}
+  .qr-item .name{font-weight:600;font-size:13px}
+  .qr-item .meta{font-size:12px;color:var(--text-secondary)}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .item-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .item-row:last-child{border-bottom:none}
+  .item-row input[type="checkbox"]{width:16px;height:16px;flex-shrink:0}
+  .item-row span{font-size:13px;flex:1}
+  .item-row input[type="number"]{width:100px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div id="gate">
+    <h1>Carga masiva de inscriptos</h1>
+    <p class="subtitle">Acceso restringido — Crianza Summit 2026</p>
+    <input type="password" id="pass-input" placeholder="Clave de administrador" onkeydown="if(event.key==='Enter')checkAccess()">
+    <div class="error-text" id="pass-error">Clave incorrecta.</div>
+    <button class="btn" onclick="checkAccess()">Ingresar</button>
+  </div>
+
+  <div id="app">
+    <h1>Carga masiva de inscriptos</h1>
+    <p class="subtitle">Para instituciones, cortesías o pagos por fuera de MercadoPago.</p>
+
+    <div class="card">
+      <label for="bulk-text">Lista de personas</label>
+      <textarea id="bulk-text" placeholder="Juan Pérez, juan@colegio.edu.ar
+María Gómez, maria@colegio.edu.ar
+Pedro Ruiz, pedro@colegio.edu.ar"></textarea>
+      <div class="hint">Una persona por línea: <b>Nombre completo, mail</b> (opcional: <b>, celular</b> como tercer dato). También podés pegar directo desde Excel/Sheets (separado por tabulación).</div>
+
+      <label for="bulk-tipo-asistente">Tipo de asistente (aplica a todos los de la lista)</label>
+      <select id="bulk-tipo-asistente">
+        <option value="">Sin especificar</option>
+        <option value="familia">Familia (madre/padre)</option>
+        <option value="profesional">Profesional (educación/salud)</option>
+        <option value="adolescente">Adolescente</option>
+      </select>
+
+      <label>¿Qué actividades les corresponde a todos los de esta lista?</label>
+      <div id="bulk-items-list"></div>
+      <div class="hint">Tildá todo lo que corresponda. El monto es por persona (0 = cortesía) y se aplica igual a todos los de la lista.</div>
+
+      <label for="bulk-origen">Origen / referencia (opcional)</label>
+      <input type="text" id="bulk-origen" placeholder="Ej: Colegio San Martín">
+
+      <button class="btn btn-secondary" onclick="previewBulk()">Vista previa</button>
+    </div>
+
+    <div class="card" id="preview-card" style="display:none">
+      <div style="font-weight:700;font-size:15px">Vista previa</div>
+      <div class="summary">
+        <div><b id="preview-valid-count">0</b><span style="color:var(--text-secondary)">válidos</span></div>
+        <div><b id="preview-error-count" style="color:var(--red)">0</b><span style="color:var(--text-secondary)">con error</span></div>
+      </div>
+      <table class="preview-table" id="preview-table"></table>
+      <button class="btn" id="confirm-btn" onclick="confirmBulkLoad()">Cargar todos</button>
+    </div>
+
+    <div class="card" id="result-panel">
+      <div style="font-weight:700;font-size:15px;margin-bottom:4px">✅ Carga completada</div>
+      <div class="summary">
+        <div><b id="result-success-count">0</b><span style="color:var(--text-secondary)">cargados</span></div>
+        <div><b id="result-fail-count" style="color:var(--red)">0</b><span style="color:var(--text-secondary)">con error</span></div>
+      </div>
+      <div class="qr-list" id="result-qr-list"></div>
+      <button class="btn btn-secondary" onclick="resetForm()">Cargar otra lista</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ADMIN_ACTION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/admin-action';
+
+// dia1 + catálogo de talleres — mismo set de ids que usa mp-create-preference
+// y admin-action, para que la carga masiva nunca quede desactualizada
+// respecto a lo que se vende online.
+const DIA2_WORKSHOP_TITLES={
+  comprender:'Comprender para conectar',
+  entornos:'Entornos de aprendizaje en la era algorítmica',
+  'convivencia-digital':'Convivencia digital y prevención de violencias',
+  'crianza-respetuosa':'Crianza respetuosa y límites',
+  'me-descubro':'Me Descubro a diario',
+};
+
+let adminPass='';
+
+// Toda escritura pasa por admin-action (nunca directo a Supabase con la
+// anon key) — la clave se revalida siempre server-side, nunca se confía
+// en lo que diga este archivo.
+async function callAdminAction(action,extra={}){
+  const res=await fetch(ADMIN_ACTION_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,password:adminPass,...extra})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.error||'Error de administración');
+  return data;
+}
+
+async function checkAccess(){
+  const val=document.getElementById('pass-input').value.trim();
+  const err=document.getElementById('pass-error');
+  err.style.display='none';
+  try{
+    adminPass=val;
+    await callAdminAction('check_password');
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+    renderBulkItems();
+  }catch(e){
+    adminPass='';
+    err.style.display='block';
+  }
+}
+
+// Arma los checkboxes de "Día 1" + cada taller, cada uno con su propio
+// monto editable (aplicado por igual a todas las personas de la lista).
+function renderBulkItems(){
+  const el=document.getElementById('bulk-items-list');
+  if(!el)return;
+  let html=`
+    <label class="item-row">
+      <input type="checkbox" id="bulk-item-dia1" checked>
+      <span>🗣 Día 1 — Jornada Abierta de Impacto</span>
+      <input type="number" id="bulk-item-dia1-monto" value="0">
+    </label>`;
+  Object.entries(DIA2_WORKSHOP_TITLES).forEach(([id,title])=>{
+    html+=`
+    <label class="item-row">
+      <input type="checkbox" id="bulk-item-${id}">
+      <span>🎓 ${title}</span>
+      <input type="number" id="bulk-item-${id}-monto" value="0">
+    </label>`;
+  });
+  el.innerHTML=html;
+}
+
+function getBulkItems(){
+  const items=[];
+  if(document.getElementById('bulk-item-dia1')?.checked){
+    items.push({key:'dia1',monto:parseFloat(document.getElementById('bulk-item-dia1-monto')?.value)||0});
+  }
+  Object.keys(DIA2_WORKSHOP_TITLES).forEach(id=>{
+    if(document.getElementById(`bulk-item-${id}`)?.checked){
+      items.push({key:id,monto:parseFloat(document.getElementById(`bulk-item-${id}-monto`)?.value)||0});
+    }
+  });
+  return items;
+}
+
+function parseBulkText(raw){
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  return lines.map(line=>{
+    // soporta separador por coma o por tab (pegado desde sheets);
+    // tercer campo opcional: celular
+    let parts;
+    if(line.includes('\t')) parts=line.split('\t');
+    else parts=line.split(',');
+
+    const nombre=(parts[0]||'').trim();
+    const email=(parts[1]||'').trim().toLowerCase();
+    const celular=(parts[2]||'').trim();
+    const isValidEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    return {
+      raw:line,
+      nombre,
+      email,
+      celular,
+      valid: nombre.length>0 && isValidEmail,
+      errorMsg: !nombre.length ? 'Falta el nombre' : (!isValidEmail ? 'Mail inválido' : '')
+    };
+  });
+}
+
+let currentParsed=[];
+
+function previewBulk(){
+  const raw=document.getElementById('bulk-text').value;
+  currentParsed=parseBulkText(raw);
+
+  const items=getBulkItems();
+  if(!items.length){
+    alert('Tildá al menos una actividad (Día 1 o un taller) antes de previsualizar.');
+    return;
+  }
+
+  const validCount=currentParsed.filter(p=>p.valid).length;
+  const errorCount=currentParsed.length-validCount;
+
+  document.getElementById('preview-valid-count').textContent=validCount;
+  document.getElementById('preview-error-count').textContent=errorCount;
+
+  const table=document.getElementById('preview-table');
+  table.innerHTML=`
+    <tr><th>Nombre</th><th>Mail</th><th>Estado</th></tr>
+    ${currentParsed.map(p=>`
+      <tr class="${p.valid?'':'row-error'}">
+        <td>${p.nombre||'—'}</td>
+        <td>${p.email||'—'}</td>
+        <td>${p.valid?'<span class="badge badge-ok">OK</span>':`<span class="badge badge-error">${p.errorMsg}</span>`}</td>
+      </tr>
+    `).join('')}
+  `;
+
+  document.getElementById('preview-card').style.display='block';
+  document.getElementById('confirm-btn').disabled = validCount===0;
+  document.getElementById('preview-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function confirmBulkLoad(){
+  const btn=document.getElementById('confirm-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Cargando...';
+
+  const items=getBulkItems();
+  const tipoAsistente=document.getElementById('bulk-tipo-asistente').value||null;
+  const origen=document.getElementById('bulk-origen').value.trim();
+  const validEntries=currentParsed.filter(p=>p.valid);
+
+  // Una sola llamada a admin-action con TODOS los registros — register ya
+  // está pensado para aceptar N records de una (alta manual = 1, carga
+  // masiva = N), así que no hace falta pegarle a la función una vez por persona.
+  const records=validEntries.map(entry=>({
+    nombre:entry.nombre,
+    email:entry.email,
+    celular:entry.celular||'',
+    tipo_asistente:tipoAsistente,
+    origen,
+    items
+  }));
+
+  try{
+    const {results}=await callAdminAction('register',{records});
+    showResults(results||[]);
+  }catch(err){
+    console.error(err);
+    alert('Error al cargar: '+(err.message||'error desconocido'));
+    btn.disabled=false;
+    btn.innerHTML='Cargar todos';
+  }
+}
+
+function showResults(results){
+  const successCount=results.filter(r=>r.success).length;
+  const failCount=results.length-successCount;
+
+  document.getElementById('result-success-count').textContent=successCount;
+  document.getElementById('result-fail-count').textContent=failCount;
+
+  const list=document.getElementById('result-qr-list');
+  list.innerHTML=results.map(r=>{
+    if(r.success){
+      return `<div class="qr-item">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(r.qrCode)}" alt="QR">
+        <div class="info">
+          <div class="name">${r.nombre}</div>
+          <div class="meta">${r.email} · ${(r.items||[]).join(' · ')}</div>
+        </div>
+        <span class="badge badge-ok">Cargado</span>
+      </div>`;
+    }else{
+      return `<div class="qr-item">
+        <div class="info">
+          <div class="name">${r.nombre}</div>
+          <div class="meta">${r.email} · ${r.error}</div>
+        </div>
+        <span class="badge badge-error">Error</span>
+      </div>`;
+    }
+  }).join('');
+
+  document.getElementById('preview-card').style.display='none';
+  document.getElementById('result-panel').style.display='block';
+  document.getElementById('result-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetForm(){
+  document.getElementById('bulk-text').value='';
+  document.getElementById('bulk-origen').value='';
+  document.getElementById('bulk-tipo-asistente').value='';
+  document.getElementById('preview-card').style.display='none';
+  document.getElementById('result-panel').style.display='none';
+  renderBulkItems();
+  currentParsed=[];
+  const confirmBtn=document.getElementById('confirm-btn');
+  confirmBtn.disabled=false;
+  confirmBtn.innerHTML='Cargar todos';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
