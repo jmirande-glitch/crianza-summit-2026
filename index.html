@@ -2360,14 +2360,18 @@ function buildIcsForItems(items){
   return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Crianza Summit 2026//ES\r\nCALSCALE:GREGORIAN\r\n${vevents}END:VCALENDAR\r\n`;
 }
 
+// Usamos un data URI en vez de Blob + object URL: en la compu igual se
+// descarga el archivo (respeta el atributo "download"), pero en iPhone
+// esto hace que Safari reconozca el tipo "text/calendar" y abra
+// directamente el cartel nativo de "Agregar al Calendario" — con Blob,
+// en cambio, el archivo quedaba guardado en la app Files y había que ir
+// a buscarlo y abrirlo a mano.
 function downloadIcsFile(icsContent,filename){
-  const blob=new Blob([icsContent],{type:'text/calendar;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
+  const dataUri='data:text/calendar;charset=utf-8,'+encodeURIComponent(icsContent);
   const a=document.createElement('a');
-  a.href=url;a.download=filename;
+  a.href=dataUri;a.download=filename;a.target='_blank';
   document.body.appendChild(a);a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 
 async function addAllToCalendar(){
