@@ -1400,6 +1400,16 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
       <!-- ACREDITACIÓN -->
       <div id="tab-acreditacion" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="tab-btn" id="acred-dia1-btn" onclick="setAcredDia(1)" style="flex:1">🗣 Día 1</button>
+          <button class="tab-btn" id="acred-dia2-btn" onclick="setAcredDia(2)" style="flex:1">🎓 Día 2</button>
+        </div>
+        <div id="acred-taller-select-wrap" style="display:none;margin-bottom:12px">
+          <select id="acred-taller-select" class="datos-input" onchange="onAcredTallerChange()">
+            <option value="" disabled selected>¿Qué taller es esta sala?</option>
+          </select>
+        </div>
+
         <div class="metric-grid" style="margin-bottom:14px">
           <div class="metric" onclick="toggleAcredList()" style="cursor:pointer">
             <div class="metric-val" id="acred-total">...</div>
@@ -2498,6 +2508,7 @@ async function showAcredScanner(){
   document.getElementById('acred-gate').style.display='none';
   document.getElementById('acred-scanner-view').style.display='';
   await updateAcredStats();
+  initAcredDefaults();
   setAdminTab('inscripcion');
   backToAcredModes();
 }
@@ -2583,7 +2594,7 @@ async function searchAcredException(){
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px;cursor:pointer" onclick="onQrScanSuccess('${r.qr_code}')">
         <div>
           <div style="font-size:13px;font-weight:600">${r.nombre}</div>
-          <div style="font-size:11px;color:var(--text-secondary)">${r.email}${r.checked_in?' · ya acreditado':''}</div>
+          <div style="font-size:11px;color:var(--text-secondary)">${r.email}</div>
         </div>
         <i class="ti ti-chevron-right" style="font-size:16px;opacity:.5"></i>
       </div>
@@ -2611,13 +2622,18 @@ async function onQrScanSuccess(decodedText){
   if(now-lastScanTime<2500)return; // evitar doble-lectura del mismo frame
   lastScanTime=now;
 
+  if(acredDia===2&&!acredTallerId){
+    toast('⚠️ Elegí primero qué taller es esta sala');
+    return;
+  }
+
   const resultEl=document.getElementById('acred-result');
   resultEl.style.display='block';
   resultEl.style.background='var(--bg-secondary)';
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:24px;animation:spin 1s linear infinite"></i><div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">Verificando...</div>`;
 
   try{
-    const {record}=await callAdminAction('lookup_qr',{qr_code:decodedText});
+    const {record}=await callAdminAction('lookup_qr',{qr_code:decodedText,...getAcredScopeParams()});
 
     if(!record){
       resultEl.style.background='var(--red-light)';
@@ -2625,15 +2641,24 @@ async function onQrScanSuccess(decodedText){
       return;
     }
 
+    const itemsList=(record.items||[]).map(i=>`<div style="font-size:12px;color:var(--text-secondary)">${i.nombre}</div>`).join('');
+
+    if(!record.relevant){
+      // Tiene un QR válido (compró algo), pero nada para ESTE control puntual.
+      const queLeFalta=acredDia===1?'el Día 1':'este taller';
+      resultEl.style.background='var(--red-light)';
+      resultEl.innerHTML=`<i class="ti ti-ban" style="font-size:32px;color:var(--red)"></i><div style="font-weight:700;margin-top:8px;color:var(--red)">No tiene entrada para ${queLeFalta}</div><div style="font-size:13px;margin-top:6px">${record.nombre}</div><div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Lo que sí compró:</div><div style="margin-top:2px">${itemsList||'<i>nada más registrado</i>'}</div>`;
+      return;
+    }
+
     if(record.checked_in){
       resultEl.style.background='var(--amber-light)';
       const hora=record.checked_in_at?new Date(record.checked_in_at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}):'';
-      resultEl.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:32px;color:var(--amber)"></i><div style="font-weight:700;margin-top:8px;color:var(--amber)">Ya fue acreditado</div><div style="font-size:13px;margin-top:4px">${record.nombre}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Escaneado a las ${hora}</div>`;
+      resultEl.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:32px;color:var(--amber)"></i><div style="font-weight:700;margin-top:8px;color:var(--amber)">Ya fue acreditado acá</div><div style="font-size:13px;margin-top:4px">${record.nombre}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Escaneado a las ${hora}</div>`;
       return;
     }
 
     // Mostrar datos y botón de confirmación, sin marcar acreditado todavía
-    const itemsList=(record.items||[]).map(i=>`<div style="font-size:12px;color:var(--text-secondary)">${i.nombre}</div>`).join('');
     resultEl.style.background='var(--blue-light)';
     resultEl.innerHTML=`
       <i class="ti ti-user-check" style="font-size:32px;color:var(--blue)"></i>
@@ -2655,20 +2680,29 @@ async function confirmCheckin(qrCode){
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:24px;animation:spin 1s linear infinite"></i><div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">Acreditando...</div>`;
 
   try{
-    const {record,already}=await callAdminAction('checkin',{qr_code:qrCode});
+    const {record,already}=await callAdminAction('checkin',{qr_code:qrCode,...getAcredScopeParams()});
     if(!record){
       resultEl.style.background='var(--red-light)';
       resultEl.innerHTML=`<i class="ti ti-x" style="font-size:32px;color:var(--red)"></i><div style="font-weight:700;margin-top:8px;color:var(--red)">Código inválido</div>`;
       return;
     }
+
+    const itemsList=(record.items||[]).map(i=>`<div style="font-size:12px;color:var(--text-secondary)">${i.nombre}</div>`).join('');
+
+    if(!record.relevant){
+      const queLeFalta=acredDia===1?'el Día 1':'este taller';
+      resultEl.style.background='var(--red-light)';
+      resultEl.innerHTML=`<i class="ti ti-ban" style="font-size:32px;color:var(--red)"></i><div style="font-weight:700;margin-top:8px;color:var(--red)">No tiene entrada para ${queLeFalta}</div><div style="font-size:13px;margin-top:6px">${record.nombre}</div>`;
+      return;
+    }
+
     if(already){
       resultEl.style.background='var(--amber-light)';
-      resultEl.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:32px;color:var(--amber)"></i><div style="font-weight:700;margin-top:8px;color:var(--amber)">Ya fue acreditado</div>`;
+      resultEl.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:32px;color:var(--amber)"></i><div style="font-weight:700;margin-top:8px;color:var(--amber)">Ya fue acreditado acá</div>`;
       updateAcredStats();
       return;
     }
 
-    const itemsList=(record.items||[]).map(i=>`<div style="font-size:12px;color:var(--text-secondary)">${i.nombre}</div>`).join('');
     resultEl.style.background='var(--green-light)';
     resultEl.innerHTML=`<i class="ti ti-check" style="font-size:32px;color:var(--green)"></i><div style="font-weight:700;margin-top:8px;color:var(--green)">Ingreso acreditado</div><div style="font-size:15px;margin-top:4px">${record.nombre}</div><div style="margin-top:2px">${itemsList}</div>`;
     updateAcredStats();
@@ -2681,6 +2715,90 @@ async function confirmCheckin(qrCode){
 
 let acredListOpen=false;
 let acredCheckedInList=[];
+let acredDia=1;
+let acredTallerId=null;
+let lastAcredStats=null;
+
+// Arranca en el día que corresponda según la fecha real (Tucumán, GMT-3):
+// 4/8 → Día 1, 5/8 en adelante → Día 2. Fuera de esas fechas (pruebas antes
+// del evento) queda en Día 1 por defecto, pero el staff lo puede cambiar
+// libremente en cualquier momento.
+function initAcredDefaults(){
+  const now=new Date();
+  const gmt3=new Date(now.getTime()-3*60*60*1000); // aproximación simple a hora de Tucumán
+  const y=gmt3.getUTCFullYear(),m=gmt3.getUTCMonth()+1,d=gmt3.getUTCDate();
+  const isDia2OrLater=(y===2026&&m===8&&d>=5);
+  setAcredDia(isDia2OrLater?2:1);
+}
+
+function setAcredDia(dia){
+  acredDia=dia;
+  document.getElementById('acred-dia1-btn').className='tab-btn'+(dia===1?' active':'');
+  document.getElementById('acred-dia2-btn').className='tab-btn'+(dia===2?' active':'');
+  const wrap=document.getElementById('acred-taller-select-wrap');
+  if(dia===2){
+    wrap.style.display='block';
+    renderAcredTallerOptions();
+  }else{
+    wrap.style.display='none';
+    acredTallerId=null;
+  }
+  acredListOpen=false;
+  document.getElementById('acred-list-panel').style.display='none';
+  const chevron=document.getElementById('acred-list-chevron');
+  if(chevron)chevron.className='ti ti-chevron-down';
+  backToAcredModes();
+  renderAcredMetrics();
+}
+
+function renderAcredTallerOptions(){
+  const sel=document.getElementById('acred-taller-select');
+  if(!sel)return;
+  const current=sel.value;
+  sel.innerHTML='<option value="" disabled>¿Qué taller es esta sala?</option>'+
+    DIA2_WORKSHOPS.map(w=>`<option value="${w.id}">${w.nombre} (${w.horario})</option>`).join('');
+  if(current)sel.value=current;
+}
+
+function onAcredTallerChange(){
+  acredTallerId=document.getElementById('acred-taller-select').value||null;
+  acredListOpen=false;
+  document.getElementById('acred-list-panel').style.display='none';
+  backToAcredModes();
+  renderAcredMetrics();
+}
+
+// Devuelve los parámetros de scope (día + taller si corresponde) para
+// mandarle a lookup_qr/checkin — así cada control de acceso (Día 1
+// general, o cada sala del Día 2) solo afecta lo que le corresponde.
+function getAcredScopeParams(){
+  return {dia:acredDia,taller_id:acredDia===2?(acredTallerId||undefined):undefined};
+}
+
+// Toma los números ya cargados (lastAcredStats) y muestra los que
+// corresponden al día/taller elegido — sin pedir nada nuevo al servidor.
+function renderAcredMetrics(){
+  if(!lastAcredStats)return;
+  const totalEl=document.getElementById('acred-total');
+  const pendingEl=document.getElementById('acred-pending');
+  if(acredDia===1){
+    totalEl.textContent=lastAcredStats.dia1.acreditados;
+    pendingEl.textContent=lastAcredStats.dia1.pendientes;
+    acredCheckedInList=lastAcredStats.dia1.checkedInList||[];
+  }else{
+    const taller=(lastAcredStats.talleres||[]).find(t=>t.id===acredTallerId);
+    if(!taller){
+      totalEl.textContent='—';
+      pendingEl.textContent='—';
+      acredCheckedInList=[];
+    }else{
+      totalEl.textContent=taller.acreditados;
+      pendingEl.textContent=taller.pendientes;
+      acredCheckedInList=taller.checkedInList||[];
+    }
+  }
+  if(acredListOpen)renderAcredList();
+}
 
 function setAdminTab(tab){
   document.getElementById('tab-inscripcion').style.display=tab==='inscripcion'?'block':'none';
@@ -2963,11 +3081,10 @@ async function updateAcredStats(){
     if(inscMontoEl)inscMontoEl.textContent='$'+stats.totalMonto.toLocaleString('es-AR');
     renderInscBreakdown(stats);
 
-    // Acreditación
-    acredCheckedInList=stats.checkedInList||[];
-    document.getElementById('acred-total').textContent=stats.acreditados;
-    document.getElementById('acred-pending').textContent=stats.pendientes;
-    if(acredListOpen)renderAcredList();
+    // Acreditación: guardamos todo (Día 1 + cada taller) y mostramos solo
+    // lo que corresponde al día/taller elegido en el selector.
+    lastAcredStats=stats;
+    renderAcredMetrics();
   }catch(err){console.error(err);}
   updateVisitStats();
 }
