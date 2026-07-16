@@ -474,7 +474,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .modal-sub{font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5}
 .ticket-option{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid transparent;margin-bottom:10px;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text-primary);text-align:left}
 .ticket-option:hover{border-color:var(--accent);background:var(--accent-light)}
-.ticket-option.selected{border-color:var(--accent)!important;background:var(--accent-light)!important}
+.ticket-option.selected{border-color:var(--green)!important;background:var(--green-light)!important}
 .ticket-option-left{}
 .ticket-option-name{font-size:14px;font-weight:600;margin-bottom:2px}
 .ticket-option-desc{font-size:11px;color:var(--text-secondary)}
@@ -710,19 +710,19 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
           <div style="margin-left:18px;display:flex;flex-direction:column;gap:14px">
             <div style="display:flex;gap:12px">
-              <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--amber);line-height:1.3">15:00<br>16:30</div>
-              <div>
-                <div style="font-size:13px;font-weight:700">"Comprender para conectar"</div>
-                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Las adolescencias y sus desafíos · Para profesionales y familias</div>
-                <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Juan Pablo Ventura</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--amber);line-height:1.3">10:30<br>12:00</div>
               <div>
                 <div style="font-size:13px;font-weight:700">"Entornos de aprendizaje en la época algorítmica"</div>
                 <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">¿Cómo acompañar a niños/as y adolescentes en los desafíos digitales?</div>
                 <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Santiago Stura</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--amber);line-height:1.3">15:00<br>16:30</div>
+              <div>
+                <div style="font-size:13px;font-weight:700">"Comprender para conectar"</div>
+                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Las adolescencias y sus desafíos · Para profesionales y familias</div>
+                <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Juan Pablo Ventura</div>
               </div>
             </div>
             <!-- Oculto temporalmente
@@ -1566,6 +1566,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <input id="lead-nombre-input" type="text" placeholder="Nombre y apellido" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
       <input id="lead-email-input" type="email" placeholder="Email" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
       <input id="lead-tel-input" type="tel" placeholder="Teléfono (ej: +54 9 381 4655829)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Respondé esto para ver opciones de talleres del día 5 de agosto:</div>
       <select id="lead-tipo-asistente-input" onchange="onTipoAsistenteChange()" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
         <option value="" disabled selected>Tipo de asistente...</option>
         <option value="familia">Familia (madre/padre)</option>
@@ -1595,7 +1596,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
           <div class="ticket-option-desc">Jornada Formativa</div>
         </div>
       </div>
-      <div id="dia2-selected-badge" style="font-size:12px;font-weight:700;color:var(--teal);text-align:right;line-height:1.25;max-width:100px">Desplegá para ver actividades</div>
+      <div id="dia2-selected-badge" style="font-size:12px;font-weight:700;color:var(--red);text-align:right;line-height:1.25;max-width:100px">Desplegá para ver actividades</div>
     </button>
 
     <div id="dia2-workshops-list" style="display:none;margin-top:2px;padding-left:20px"></div>
@@ -3345,8 +3346,8 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 
 // ---- TALLERES DÍA 2 (Miércoles 5 de agosto) — venta individual, carrito ----
 const DIA2_WORKSHOPS=[
-  {id:'comprender',nombre:'Comprender para conectar',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
   {id:'entornos',nombre:'Entornos de aprendizaje en la época algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',audiencias:['profesional'],speaker:'Santiago Stura',precioRegular:45000,precioEarly:30000},
+  {id:'comprender',nombre:'Comprender para conectar',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
   // Oculto temporalmente
   // {id:'convivencia-digital',nombre:'Convivencia digital y prevención de violencias',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Maritchu Seitún + Brenda Tróccoli',precioRegular:45000,precioEarly:30000},
   {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madres & Padres · Pre adolescencia (10 a 14 años)',audiencias:['familia','adolescente'],speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Es un taller para hacer en familia — incluye a los hijos/as de 10 a 14 años, que asisten sin cargo'},
@@ -3436,9 +3437,9 @@ function renderCompanions(){
       : DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(c.tipoAsistente)).map(w=>{
           const isSel=c.selectedWorkshops.has(w.id);
           return `
-          <button type="button" onclick="toggleCompanionWorkshop(${c.id},'${w.id}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${isSel?'var(--accent)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:8px 10px;margin-top:5px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
+          <button type="button" onclick="toggleCompanionWorkshop(${c.id},'${w.id}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${isSel?'var(--green)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:8px 10px;margin-top:5px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
             <div style="display:flex;align-items:center;gap:8px">
-              <i class="ti ${isSel?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${isSel?'var(--accent)':'var(--text-secondary)'};flex-shrink:0"></i>
+              <i class="ti ${isSel?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${isSel?'var(--green)':'var(--text-secondary)'};flex-shrink:0"></i>
               <div>
                 <div style="font-size:12px;font-weight:500">${w.nombre}</div>
                 <div style="font-size:10px;color:var(--text-secondary)">${w.horario}</div>
@@ -3463,9 +3464,9 @@ function renderCompanions(){
         <option value="adolescente" ${c.tipoAsistente==='adolescente'?'selected':''}>Adolescente</option>
       </select>
 
-      <button type="button" onclick="toggleCompanionDia1(${c.id})" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${c.selectedDia1?'var(--accent)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:9px 10px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
+      <button type="button" onclick="toggleCompanionDia1(${c.id})" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${c.selectedDia1?'var(--green)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:9px 10px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
         <div style="display:flex;align-items:center;gap:8px">
-          <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--accent)':'var(--text-secondary)'};flex-shrink:0"></i>
+          <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--green)':'var(--text-secondary)'};flex-shrink:0"></i>
           <div style="font-size:12.5px;font-weight:600">🗣 Martes 4/8 — Jornada Abierta de Impacto</div>
         </div>
         <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1Price(isCompanionComboActive(c)))}</div>
@@ -3490,7 +3491,7 @@ function renderDia2Workshops(){
   const el=document.getElementById('dia2-workshops-list');if(!el)return;
 
   if(!selectedTipoAsistente){
-    el.innerHTML=`<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:14px;background:var(--bg-secondary);border-radius:var(--radius-md)">Elegí tu <b>tipo de asistente</b> arriba para ver los talleres disponibles para vos.</div>`;
+    el.innerHTML=`<div style="font-size:12px;color:var(--red);text-align:center;padding:14px;background:var(--red-light);border-radius:var(--radius-md)">Elegí tu <b>tipo de asistente</b> arriba para ver los talleres disponibles para vos.</div>`;
     return;
   }
 
@@ -3910,7 +3911,7 @@ function updateCartUI(){
   const optDia1=document.getElementById('opt-dia1');
   if(checkDia1){
     checkDia1.className=selectedDia1?'ti ti-square-rounded-check-filled':'ti ti-square';
-    checkDia1.style.color=selectedDia1?'var(--accent)':'var(--text-secondary)';
+    checkDia1.style.color=selectedDia1?'var(--green)':'var(--text-secondary)';
   }
   if(optDia1)optDia1.classList.toggle('selected',selectedDia1);
 
@@ -3921,7 +3922,7 @@ function updateCartUI(){
     const isSel=selectedWorkshops.has(w.id);
     if(check){
       check.className=isSel?'ti ti-square-rounded-check-filled':'ti ti-square';
-      check.style.color=isSel?'var(--accent)':'var(--text-secondary)';
+      check.style.color=isSel?'var(--green)':'var(--text-secondary)';
     }
     if(opt)opt.classList.toggle('selected',isSel);
 
