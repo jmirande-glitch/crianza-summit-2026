@@ -123,6 +123,15 @@ Pedro Ruiz, pedro@colegio.edu.ar"></textarea>
       <div id="bulk-items-list"></div>
       <div class="hint">Tildá todo lo que corresponda. El monto es por persona (0 = cortesía) y se aplica igual a todos los de la lista.</div>
 
+      <label for="bulk-forma-pago">Forma de pago (aplica a todos los de la lista)</label>
+      <select id="bulk-forma-pago">
+        <option value="" disabled selected>Elegí una</option>
+        <option value="transferencia">Transferencia bancaria</option>
+        <option value="efectivo">Efectivo</option>
+        <option value="cortesia">Cortesía</option>
+        <option value="otro">Otro</option>
+      </select>
+
       <label for="bulk-origen">Origen / referencia (opcional)</label>
       <input type="text" id="bulk-origen" placeholder="Ej: Colegio San Martín">
 
@@ -295,6 +304,12 @@ function previewBulk(){
 }
 
 async function confirmBulkLoad(){
+  const formaPago=document.getElementById('bulk-forma-pago').value;
+  if(!formaPago){
+    alert('Elegí la forma de pago antes de confirmar la carga.');
+    return;
+  }
+
   const btn=document.getElementById('confirm-btn');
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span> Cargando...';
@@ -312,6 +327,7 @@ async function confirmBulkLoad(){
     email:entry.email,
     celular:entry.celular||'',
     tipo_asistente:tipoAsistente,
+    forma_pago:formaPago,
     origen,
     items
   }));
@@ -365,6 +381,7 @@ function resetForm(){
   document.getElementById('bulk-text').value='';
   document.getElementById('bulk-origen').value='';
   document.getElementById('bulk-tipo-asistente').value='';
+  document.getElementById('bulk-forma-pago').value='';
   document.getElementById('preview-card').style.display='none';
   document.getElementById('result-panel').style.display='none';
   renderBulkItems();
