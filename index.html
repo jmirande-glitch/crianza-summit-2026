@@ -1412,6 +1412,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
               <option value="profesional">Profesional (educación/salud)</option>
               <option value="adolescente">Adolescente</option>
             </select>
+            <select id="me-forma-pago" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:8px">
+              <option value="" disabled selected>Forma de pago...</option>
+              <option value="transferencia">Transferencia bancaria</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="cortesia">Cortesía</option>
+              <option value="otro">Otro</option>
+            </select>
 
             <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em">¿Qué actividades incluye?</div>
             <div id="me-items-list"></div>
@@ -3181,6 +3188,22 @@ function renderInscBreakdown(stats){
     </div>`;
   }
 
+  // Desglose por forma de pago (personas distintas, no filas — si alguien
+  // compró Día 1 + un taller, cuenta 1 sola vez acá con el monto sumado).
+  // Las cargadas antes de que existiera este campo quedan agrupadas en
+  // "Manual (sin especificar)" — no hay forma de reconstruir eso.
+  if(stats.formaPago&&stats.formaPago.length){
+    html+=`
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-credit-card"></i>Por forma de pago</div>
+      ${stats.formaPago.map(f=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+          <div><div>${f.label}</div><div style="font-size:10.5px;color:var(--text-secondary)">${f.count} persona${f.count===1?'':'s'}</div></div>
+          <span style="font-weight:700;flex-shrink:0;margin-left:8px">${fmt(f.monto)}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
   // Ventas por código de descuento (solo cuenta compras online hechas
   // después de que se agregó este tracking — las de antes no tienen este dato)
   if(stats.codigosDescuento&&stats.codigosDescuento.length){
@@ -3286,6 +3309,7 @@ async function saveManualEntry(){
   const email=document.getElementById('me-email')?.value.trim();
   const celular=document.getElementById('me-celular')?.value.trim();
   const tipoAsistente=document.getElementById('me-tipo-asistente')?.value||null;
+  const formaPago=document.getElementById('me-forma-pago')?.value||null;
   const items=getManualEntryItems();
   const resultEl=document.getElementById('manual-entry-result');
 
@@ -3297,12 +3321,16 @@ async function saveManualEntry(){
     toast('Tildá al menos una actividad (Día 1 o un taller)');
     return;
   }
+  if(!formaPago){
+    toast('Elegí la forma de pago');
+    return;
+  }
 
   resultEl.style.display='block';
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:20px;animation:spin 1s linear infinite"></i>`;
 
   try{
-    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,tipo_asistente:tipoAsistente,items}]});
+    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,tipo_asistente:tipoAsistente,forma_pago:formaPago,items}]});
     const r=results&&results[0];
 
     if(!r||!r.success){
@@ -3321,6 +3349,7 @@ async function saveManualEntry(){
     document.getElementById('me-email').value='';
     document.getElementById('me-celular').value='';
     document.getElementById('me-tipo-asistente').value='';
+    document.getElementById('me-forma-pago').value='';
     renderManualEntryItems();
     updateAcredStats();
   }catch(err){
