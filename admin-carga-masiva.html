@@ -3652,7 +3652,7 @@ async function verifyGacetaSocio(){
     if(data.habilitado){
       gacetaVerifiedDni=dni;
       msgEl.style.color='var(--green)';
-      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento disponible para el Día 1 — se aplica automáticamente el mejor descuento entre este, el código, el Early Bird y el combo (nunca se acumulan).`;
+      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento sobre el Día 1 (se aplica solo ahí, nunca se acumula con el código ni con el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
     }else{
       gacetaVerifiedDni=null;
       msgEl.style.color='var(--red)';
@@ -3808,7 +3808,7 @@ async function applyDiscountCode(){
     appliedDiscountPercent=data.percent;
     updateCartUI();
     msgEl.style.color='var(--green)';
-    msgEl.textContent=`✅ Código válido: ${data.percent}% de descuento sobre el Día 1 (se aplica solo si es el mejor descuento disponible).`;
+    msgEl.textContent=`✅ Código válido: ${data.percent}% de descuento sobre el Día 1 (se aplica solo ahí, y solo si es mejor que el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
   }catch(err){
     console.error('applyDiscountCode error:',err);
     appliedDiscountCode=null;
