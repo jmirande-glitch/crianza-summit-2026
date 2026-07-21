@@ -3148,9 +3148,11 @@ function renderInscBreakdown(stats){
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--border)">
         <span>Martes 4/8 — Jornada Abierta de Impacto</span><span style="font-weight:700">${fmt(stats.dia1.monto)}</span>
       </div>
+      <div style="font-size:10.5px;color:var(--text-secondary);padding:0 0 8px">${stats.dia1.count} inscripto${stats.dia1.count===1?'':'s'}</div>
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0">
         <span>Miércoles 5/8 — Jornada Formativa (talleres)</span><span style="font-weight:700">${fmt(stats.totalMontoDia2)}</span>
       </div>
+      <div style="font-size:10.5px;color:var(--text-secondary);padding:0">${stats.dia2PersonasDistintas??0} persona${stats.dia2PersonasDistintas===1?'':'s'} distinta${stats.dia2PersonasDistintas===1?'':'s'} · ${stats.dia2CuposVendidos??0} cupo${stats.dia2CuposVendidos===1?'':'s'} de taller vendido${stats.dia2CuposVendidos===1?'':'s'} en total</div>
     </div>`;
 
   // Venta por taller
@@ -3160,7 +3162,7 @@ function renderInscBreakdown(stats){
       <div class="card-title" style="font-size:12px"><i class="ti ti-list-details"></i>Venta por taller</div>
       ${stats.talleres.map(t=>`
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
-          <div><div>${t.nombre}</div><div style="font-size:10.5px;color:var(--text-secondary)">${t.count} vendido${t.count>1?'s':''}</div></div>
+          <div><div>${t.nombre}</div><div style="font-size:10.5px;color:var(--text-secondary)">${t.count} cupo${t.count>1?'s':''} vendido${t.count>1?'s':''}</div></div>
           <span style="font-weight:700;flex-shrink:0;margin-left:8px">${fmt(t.monto)}</span>
         </div>`).join('')}
     </div>`;
@@ -3172,6 +3174,33 @@ function renderInscBreakdown(stats){
     <div class="card" style="margin-bottom:10px">
       <div class="card-title" style="font-size:12px"><i class="ti ti-users"></i>Por tipo de asistente</div>
       ${stats.tipoAsistente.map(t=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+          <span>${t.label}</span>
+          <span style="font-weight:700">${t.count}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // Ventas por código de descuento (solo cuenta compras online hechas
+  // después de que se agregó este tracking — las de antes no tienen este dato)
+  if(stats.codigosDescuento&&stats.codigosDescuento.length){
+    html+=`
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-ticket"></i>Ventas por código de descuento</div>
+      ${stats.codigosDescuento.map(c=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+          <div><div style="font-weight:700">${c.code}</div><div style="font-size:10.5px;color:var(--text-secondary)">${c.count} venta${c.count>1?'s':''}</div></div>
+          <span style="font-weight:700;flex-shrink:0;margin-left:8px">${fmt(c.monto)}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // Por qué descuento entró cada uno (Día 1) — de un vistazo
+  if(stats.tiposDescuento&&stats.tiposDescuento.length){
+    html+=`
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="font-size:12px"><i class="ti ti-discount-2"></i>Día 1 — por tipo de descuento</div>
+      ${stats.tiposDescuento.map(t=>`
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--border)">
           <span>${t.label}</span>
           <span style="font-weight:700">${t.count}</span>
