@@ -733,7 +733,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
                 <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Juan Pablo Ventura</div>
               </div>
             </div>
-            <!-- Oculto temporalmente
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--amber);line-height:1.3">15:00<br>16:30</div>
               <div>
@@ -742,7 +741,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
                 <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Maritchu Seitún + Brenda Tróccoli</div>
               </div>
             </div>
-            -->
           </div>
         </div>
 
@@ -770,22 +768,17 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
                 <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Brenda Tróccoli</div>
               </div>
             </div>
-            <!-- Oculto temporalmente (marcado en rojo en Jornada_formativa.docx; horario correcto según docx: 17:00-18:30) -->
-            <!--
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:58px;font-size:11px;font-weight:700;color:var(--teal);line-height:1.3">17:00<br>18:30</div>
               <div>
                 <div style="font-size:13px;font-weight:700">Plata fácil y juego: apuestas, monetización e influencers</div>
-                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Taller para madres, padres e hijos (13 a 18 años)</div>
+                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;line-height:1.4">Taller para madre/padre e hijo/a (13 a 18 años)</div>
                 <div style="font-size:10.5px;color:var(--text-secondary);font-style:italic;margin-top:3px">Santiago Stura</div>
               </div>
             </div>
-            -->
           </div>
         </div>
 
-        <!-- Bloque "Adolescentes protagonistas" oculto temporalmente completo (marcado en rojo en Jornada_formativa.docx) -->
-        <!--
         <div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
             <span style="width:10px;height:10px;border-radius:50%;background:#E8736B;flex-shrink:0"></span>
@@ -812,7 +805,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
             </div>
           </div>
         </div>
-        -->
 
       </div>
 
@@ -3413,11 +3405,13 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 // ---- TALLERES DÍA 2 (Miércoles 5 de agosto) — venta individual, carrito ----
 const DIA2_WORKSHOPS=[
   {id:'poder-del-vinculo',nombre:'El Poder del Vínculo',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de primera infancia e infancia',audiencias:['profesional'],speaker:'Brenda Tróccoli',precioRegular:45000,precioEarly:30000},
+  {id:'tu-huella-digital',nombre:'Tu huella digital',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Adolescentes (12 a 18 años)',audiencias:['adolescente'],speaker:'Santiago Stura',precioRegular:45000,precioEarly:30000,nota:'* Edad sugerida no excluyente'},
   {id:'entornos',nombre:'Entornos de aprendizaje en época algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',audiencias:['profesional'],speaker:'Santiago Stura',precioRegular:45000,precioEarly:30000},
+  {id:'viaje-adolescente',nombre:'El viaje adolescente',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Adolescentes (15 a 18 años)',audiencias:['adolescente'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000,nota:'* Edad sugerida no excluyente'},
   {id:'comprender',nombre:'Comprender para conectar',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
-  // Oculto temporalmente
-  // {id:'convivencia-digital',nombre:'Convivencia digital y prevención de violencias',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Maritchu Seitún + Brenda Tróccoli',precioRegular:45000,precioEarly:30000},
+  {id:'convivencia-digital',nombre:'Convivencia digital y prevención de violencias',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Maritchu Seitún + Brenda Tróccoli',precioRegular:45000,precioEarly:30000},
   {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madre/Padre e hijo/a (10 a 14 años)',audiencias:['familia','adolescente'],speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Destinado a madre/padre e hijo/a de 10 a 14 años — 1 adulto + 1 joven sin cargo'},
+  {id:'plata-facil-juego',nombre:'Plata fácil y juego: apuestas, monetización e influencers',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madre/Padre e hijo/a (13 a 18 años)',audiencias:['familia','adolescente'],speaker:'Santiago Stura',precioRegular:50000,precioEarly:32000,nota:'* Destinado a madre/padre e hijo/a de 13 a 18 años'},
   {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'18:30 a 20:00',desde:1110,hasta:1200,audiencia:'Madres & Padres',audiencias:['familia'],speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
 ];
 
