@@ -2316,7 +2316,7 @@ async function renderMyQrCard(){
 
     const items=[];
     if(dia1){
-      const ticketLabels={dia1:'Día 1 — Jornada Abierta de Impacto',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
+      const ticketLabels={dia1:'Jornada de Impacto (4/8)',dia2:'Día 2 — Talleres',ambos:'Ambos días'};
       items.push({label:ticketLabels[dia1.ticket_type]||'Entrada general',monto:dia1.monto});
     }
     (talleres||[]).forEach(t=>items.push({label:t.taller_nombre,monto:t.monto}));
@@ -3405,9 +3405,9 @@ const MP_PREFERENCE_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/mp-c
 // ---- TALLERES DÍA 2 (Miércoles 5 de agosto) — venta individual, carrito ----
 const DIA2_WORKSHOPS=[
   {id:'poder-del-vinculo',nombre:'El Poder del Vínculo',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Profesionales de primera infancia e infancia',audiencias:['profesional'],speaker:'Brenda Tróccoli',precioRegular:45000,precioEarly:30000},
-  {id:'tu-huella-digital',nombre:'Tu huella digital',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Adolescentes (12 a 18 años)',audiencias:['adolescente'],speaker:'Santiago Stura',precioRegular:45000,precioEarly:30000,nota:'* Edad sugerida no excluyente'},
+  {id:'tu-huella-digital',nombre:'Tu huella digital',horario:'8:30 a 10:00',desde:510,hasta:600,audiencia:'Adolescentes (12 a 18 años)',audiencias:['adolescente'],speaker:'Santiago Stura',precioRegular:34000,precioEarly:34000,nota:'* Edad sugerida no excluyente'},
   {id:'entornos',nombre:'Entornos de aprendizaje en época algorítmica',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Profesionales de educación y salud',audiencias:['profesional'],speaker:'Santiago Stura',precioRegular:45000,precioEarly:30000},
-  {id:'viaje-adolescente',nombre:'El viaje adolescente',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Adolescentes (15 a 18 años)',audiencias:['adolescente'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000,nota:'* Edad sugerida no excluyente'},
+  {id:'viaje-adolescente',nombre:'El viaje adolescente',horario:'10:30 a 12:00',desde:630,hasta:720,audiencia:'Adolescentes (15 a 18 años)',audiencias:['adolescente'],speaker:'Juan Pablo Ventura',precioRegular:34000,precioEarly:34000,nota:'* Edad sugerida no excluyente'},
   {id:'comprender',nombre:'Comprender para conectar',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Juan Pablo Ventura',precioRegular:45000,precioEarly:30000},
   {id:'convivencia-digital',nombre:'Convivencia digital y prevención de violencias',horario:'15:00 a 16:30',desde:900,hasta:990,audiencia:'Profesionales de educación y salud · Madres & Padres',audiencias:['profesional','familia'],speaker:'Santiago Stura + Maritchu Seitún + Brenda Tróccoli',precioRegular:45000,precioEarly:30000},
   {id:'me-descubro',nombre:'Me Descubro a diario',horario:'17:00 a 18:30',desde:1020,hasta:1110,audiencia:'Madre/Padre e hijo/a (10 a 14 años)',audiencias:['familia','adolescente'],speaker:'Maritchu Seitún + Sofi Chas',precioRegular:50000,precioEarly:32000,nota:'* Destinado a madre/padre e hijo/a de 10 a 14 años — 1 adulto + 1 joven sin cargo'},
@@ -3704,7 +3704,7 @@ async function verifyGacetaSocio(){
     if(data.habilitado){
       gacetaVerifiedDni=dni;
       msgEl.style.color='var(--green)';
-      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento sobre el Día 1 (se aplica solo ahí, nunca se acumula con el código ni con el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
+      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento sobre la Jornada de Impacto (4/8) (se aplica solo ahí, nunca se acumula con el código ni con el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
     }else{
       gacetaVerifiedDni=null;
       msgEl.style.color='var(--red)';
@@ -3860,7 +3860,7 @@ async function applyDiscountCode(){
     appliedDiscountPercent=data.percent;
     updateCartUI();
     msgEl.style.color='var(--green)';
-    msgEl.textContent=`✅ Código válido: ${data.percent}% de descuento sobre el Día 1 (se aplica solo ahí, y solo si es mejor que el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
+    msgEl.textContent=`✅ Código válido: ${data.percent}% de descuento sobre la Jornada de Impacto (4/8) (se aplica solo ahí, y solo si es mejor que el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
   }catch(err){
     console.error('applyDiscountCode error:',err);
     appliedDiscountCode=null;
