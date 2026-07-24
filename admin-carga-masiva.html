@@ -112,7 +112,7 @@ Pedro Ruiz, pedro@colegio.edu.ar"></textarea>
       <div class="hint">Una persona por línea: <b>Nombre completo, mail</b> (opcional: <b>, celular</b> como tercer dato). También podés pegar directo desde Excel/Sheets (separado por tabulación).</div>
 
       <label for="bulk-tipo-asistente">Tipo de asistente (aplica a todos los de la lista)</label>
-      <select id="bulk-tipo-asistente">
+      <select id="bulk-tipo-asistente" onchange="renderBulkItems()">
         <option value="">Sin especificar</option>
         <option value="familia">Familia (madre/padre)</option>
         <option value="profesional">Profesional (educación/salud)</option>
@@ -216,12 +216,19 @@ async function checkAccess(){
 function renderBulkItems(){
   const el=document.getElementById('bulk-items-list');
   if(!el)return;
-  let html=`
+  const tipoAsistente=document.getElementById('bulk-tipo-asistente')?.value||'';
+  const isAdolescente=tipoAsistente==='adolescente';
+  let html='';
+  if(!isAdolescente){
+    html+=`
     <label class="item-row">
       <input type="checkbox" id="bulk-item-dia1" checked>
       <span>🗣 Día 1 — Jornada Abierta de Impacto</span>
       <input type="number" id="bulk-item-dia1-monto" value="0">
     </label>`;
+  }else{
+    html+=`<div style="font-size:11px;color:var(--text-secondary);padding:6px 0">Los adolescentes no pueden anotarse a Día 1 (Jornada de Impacto) — solo se ofrecen talleres del 5/8.</div>`;
+  }
   Object.entries(DIA2_WORKSHOP_TITLES).forEach(([id,title])=>{
     html+=`
     <label class="item-row">
