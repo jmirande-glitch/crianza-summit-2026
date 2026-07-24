@@ -1398,12 +1398,15 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
             <input type="text" id="me-nombre" class="datos-input" placeholder="Nombre y apellido *">
             <input type="email" id="me-email" class="datos-input" placeholder="Mail (con el que va a iniciar sesión) *">
             <input type="tel" id="me-celular" class="datos-input" placeholder="Celular">
-            <select id="me-tipo-asistente" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif">
+            <select id="me-tipo-asistente" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif" onchange="onMeTipoAsistenteChange()">
               <option value="" disabled selected>Tipo de asistente...</option>
               <option value="familia">Familia (madre/padre)</option>
               <option value="profesional">Profesional (educación/salud)</option>
               <option value="adolescente">Adolescente</option>
             </select>
+            <div id="me-edad-wrap" style="display:none;margin-top:8px">
+              <input type="number" id="me-edad" class="datos-input" min="1" max="99" placeholder="Edad">
+            </div>
             <select id="me-forma-pago" class="datos-input" style="font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:8px">
               <option value="" disabled selected>Forma de pago...</option>
               <option value="transferencia">Transferencia bancaria</option>
@@ -1583,6 +1586,11 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div id="lead-form-msg" style="font-size:11.5px;margin-top:6px;color:var(--red);display:none"></div>
     </div>
 
+    <div id="lead-edad-wrap" style="display:none;margin-bottom:14px">
+      <input id="lead-edad-input" type="number" min="1" max="99" placeholder="Tu edad" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+    </div>
+
+    <div id="dia1-block">
     <button onclick="toggleDia1()" class="ticket-option" id="opt-dia1" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-square" id="check-dia1" style="font-size:19px;color:var(--text-secondary);flex-shrink:0;width:19px;display:inline-block;text-align:center"></i>
@@ -1594,6 +1602,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       </div>
       <div class="ticket-option-price" id="price-dia1" style="text-align:right;line-height:1.15">$45.000</div>
     </button>
+    </div>
 
     <button onclick="toggleDia2Section()" class="ticket-option" id="opt-dia2-toggle" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
@@ -3263,34 +3272,77 @@ function toggleManualEntry(){
 // monto editable — mismo catálogo (DIA2_WORKSHOPS) que usa el checkout
 // público, así el alta manual nunca queda desactualizada respecto a lo
 // que se vende online.
+function onMeTipoAsistenteChange(){
+  const tipoAsistente=document.getElementById('me-tipo-asistente')?.value||'';
+  const edadWrap=document.getElementById('me-edad-wrap');
+  if(edadWrap)edadWrap.style.display=tipoAsistente==='adolescente'?'block':'none';
+  renderManualEntryItems();
+}
+
 function renderManualEntryItems(){
   const el=document.getElementById('me-items-list');
   if(!el)return;
-  let html=`
+  const tipoAsistente=document.getElementById('me-tipo-asistente')?.value||'';
+  const isAdolescente=tipoAsistente==='adolescente';
+
+  // Preservamos lo ya tildado/escrito antes de reconstruir la lista (esta
+  // función se vuelve a llamar cada vez que cambia un checkbox).
+  const prevChecked={};
+  const prevMonto={};
+  ['dia1',...DIA2_WORKSHOPS.map(w=>w.id)].forEach(id=>{
+    const chk=document.getElementById(`me-item-${id}`);
+    const monto=document.getElementById(`me-item-${id}-monto`);
+    if(chk)prevChecked[id]=chk.checked;
+    if(monto)prevMonto[id]=monto.value;
+  });
+  const prevMenorNombre=document.getElementById('me-menor-nombre')?.value||'';
+  const prevMenorEdad=document.getElementById('me-menor-edad')?.value||'';
+
+  let html='';
+  if(!isAdolescente){
+    html+=`
     <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">
-      <input type="checkbox" id="me-item-dia1" style="width:16px;height:16px;flex-shrink:0">
+      <input type="checkbox" id="me-item-dia1" onchange="renderManualEntryItems()" ${prevChecked.dia1?'checked':''} style="width:16px;height:16px;flex-shrink:0">
       <span style="font-size:12.5px;flex:1">🗣 Día 1 — Jornada Abierta de Impacto</span>
-      <input type="number" id="me-item-dia1-monto" value="0" style="width:90px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12px">
+      <input type="number" id="me-item-dia1-monto" value="${prevMonto.dia1??0}" style="width:90px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12px">
     </label>`;
+  }
   DIA2_WORKSHOPS.forEach(w=>{
     html+=`
     <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">
-      <input type="checkbox" id="me-item-${w.id}" style="width:16px;height:16px;flex-shrink:0">
-      <span style="font-size:12.5px;flex:1">🎓 ${w.nombre}</span>
-      <input type="number" id="me-item-${w.id}-monto" value="0" style="width:90px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12px">
+      <input type="checkbox" id="me-item-${w.id}" onchange="renderManualEntryItems()" ${prevChecked[w.id]?'checked':''} style="width:16px;height:16px;flex-shrink:0">
+      <span style="font-size:12.5px;flex:1">🎓 ${w.nombre} <span style="color:var(--text-secondary)">(${w.horario})</span></span>
+      <input type="number" id="me-item-${w.id}-monto" value="${prevMonto[w.id]??0}" style="width:90px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12px">
     </label>`;
   });
+
+  const needsMenor=prevChecked['me-descubro']||prevChecked['plata-facil-juego'];
+  if(needsMenor){
+    html+=`
+    <div style="margin-top:10px;padding:10px;background:var(--bg-secondary);border-radius:var(--radius-md)">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Nombre y edad de quien acompaña (niño/a o adolescente):</div>
+      <input type="text" id="me-menor-nombre" placeholder="Nombre y apellido del menor" value="${prevMenorNombre}" class="datos-input" style="margin-bottom:6px">
+      <input type="number" id="me-menor-edad" min="1" max="99" placeholder="Edad del menor" value="${prevMenorEdad}" class="datos-input">
+    </div>`;
+  }
+
   el.innerHTML=html;
 }
 
 function getManualEntryItems(){
   const items=[];
+  const menorNombre=document.getElementById('me-menor-nombre')?.value||null;
+  const menorEdad=document.getElementById('me-menor-edad')?.value||null;
+  const MENOR_WORKSHOPS=new Set(['me-descubro','plata-facil-juego']);
+
   if(document.getElementById('me-item-dia1')?.checked){
     items.push({key:'dia1',monto:parseFloat(document.getElementById('me-item-dia1-monto')?.value)||0});
   }
   DIA2_WORKSHOPS.forEach(w=>{
     if(document.getElementById(`me-item-${w.id}`)?.checked){
-      items.push({key:w.id,monto:parseFloat(document.getElementById(`me-item-${w.id}-monto`)?.value)||0});
+      const item={key:w.id,monto:parseFloat(document.getElementById(`me-item-${w.id}-monto`)?.value)||0};
+      if(MENOR_WORKSHOPS.has(w.id)){item.menor_nombre=menorNombre;item.menor_edad=menorEdad;}
+      items.push(item);
     }
   });
   return items;
@@ -3302,6 +3354,7 @@ async function saveManualEntry(){
   const celular=document.getElementById('me-celular')?.value.trim();
   const tipoAsistente=document.getElementById('me-tipo-asistente')?.value||null;
   const formaPago=document.getElementById('me-forma-pago')?.value||null;
+  const edad=tipoAsistente==='adolescente'?(document.getElementById('me-edad')?.value||null):null;
   const items=getManualEntryItems();
   const resultEl=document.getElementById('manual-entry-result');
 
@@ -3322,7 +3375,7 @@ async function saveManualEntry(){
   resultEl.innerHTML=`<i class="ti ti-loader-2" style="font-size:20px;animation:spin 1s linear infinite"></i>`;
 
   try{
-    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,tipo_asistente:tipoAsistente,forma_pago:formaPago,items}]});
+    const {results}=await callAdminAction('register',{records:[{nombre,email,celular,tipo_asistente:tipoAsistente,forma_pago:formaPago,edad,items}]});
     const r=results&&results[0];
 
     if(!r||!r.success){
@@ -3342,6 +3395,10 @@ async function saveManualEntry(){
     document.getElementById('me-celular').value='';
     document.getElementById('me-tipo-asistente').value='';
     document.getElementById('me-forma-pago').value='';
+    const meEdadInput=document.getElementById('me-edad');
+    if(meEdadInput)meEdadInput.value='';
+    const meEdadWrap=document.getElementById('me-edad-wrap');
+    if(meEdadWrap)meEdadWrap.style.display='none';
     renderManualEntryItems();
     updateAcredStats();
   }catch(err){
@@ -3416,6 +3473,8 @@ const DIA2_WORKSHOPS=[
 ];
 
 let selectedTipoAsistente='';
+let menorNombre='';
+let menorEdad='';
 
 // ---- ACOMPAÑANTES: cada uno con su propio nombre/mail/tipo de asistente,
 // su propio Día 1 y sus propios talleres (filtrados por SU tipo de
@@ -3431,8 +3490,11 @@ function addCompanion(){
     nombre:'',
     email:'',
     tipoAsistente:'',
+    edad:'',
     selectedDia1:false,
-    selectedWorkshops:new Set()
+    selectedWorkshops:new Set(),
+    menorNombre:'',
+    menorEdad:''
   });
   renderCompanions();
   updateCartUI();
@@ -3454,6 +3516,9 @@ function updateCompanionField(id,field,value){
       const w=DIA2_WORKSHOPS.find(x=>x.id===wId);
       return w&&w.audiencias.includes(value);
     }));
+    if(value==='adolescente'&&c.selectedDia1){
+      c.selectedDia1=false; // un adolescente no puede comprar Día 1 (Jornada de Impacto)
+    }
     renderCompanions();
   }
   updateCartUI();
@@ -3510,6 +3575,13 @@ function renderCompanions(){
           </button>`;
         }).join('') || `<div style="font-size:11px;color:var(--text-secondary);text-align:center;padding:10px">No hay talleres para ese perfil.</div>`;
 
+    const needsMenorData=c.selectedWorkshops.has('me-descubro')||c.selectedWorkshops.has('plata-facil-juego');
+    const menorHtml=needsMenorData?`
+      <div style="font-size:11px;color:var(--text-secondary);margin:10px 0 4px">Nombre y edad de quien lo acompaña (niño/a o adolescente):</div>
+      <input type="text" placeholder="Nombre y apellido del menor" value="${c.menorNombre||''}" oninput="updateCompanionField(${c.id},'menorNombre',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box">
+      <input type="number" min="1" max="99" placeholder="Edad del menor" value="${c.menorEdad||''}" oninput="updateCompanionField(${c.id},'menorEdad',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+    `:'';
+
     return `
     <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:12px;margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -3524,7 +3596,11 @@ function renderCompanions(){
         <option value="profesional" ${c.tipoAsistente==='profesional'?'selected':''}>Profesional (educación/salud)</option>
         <option value="adolescente" ${c.tipoAsistente==='adolescente'?'selected':''}>Adolescente</option>
       </select>
+      ${c.tipoAsistente==='adolescente'?`
+      <input type="number" min="1" max="99" placeholder="Edad" value="${c.edad||''}" oninput="updateCompanionField(${c.id},'edad',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+      `:''}
 
+      ${c.tipoAsistente==='adolescente'?'':`
       <button type="button" onclick="toggleCompanionDia1(${c.id})" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${c.selectedDia1?'var(--green)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:9px 10px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
         <div style="display:flex;align-items:center;gap:8px">
           <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--green)':'var(--text-secondary)'};flex-shrink:0"></i>
@@ -3532,9 +3608,11 @@ function renderCompanions(){
         </div>
         <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1Price(isCompanionComboActive(c)))}</div>
       </button>
+      `}
 
       <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 2px">🎓 Miércoles 5/8 — Talleres</div>
       ${workshopsHtml}
+      ${menorHtml}
     </div>`;
   }).join('');
 }
@@ -3581,6 +3659,16 @@ function renderDia2Workshops(){
       <div class="ticket-option-price" id="price-${w.id}" style="font-size:16px;text-align:right;flex-shrink:0;margin-left:8px;line-height:1.15">${hasDiscount?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(w.precioRegular)}</span>`:''}${fmtPrice(precio)}</div>
     </button>`;
   }).join('');
+
+  const needsMenorData=selectedWorkshops.has('me-descubro')||selectedWorkshops.has('plata-facil-juego');
+  if(needsMenorData){
+    el.innerHTML+=`
+      <div style="margin-top:10px;padding:10px;background:var(--bg-secondary);border-radius:var(--radius-md)">
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Nombre y edad de quien te acompaña (niño/a o adolescente):</div>
+        <input id="menor-nombre-input" type="text" placeholder="Nombre y apellido del menor" value="${menorNombre}" oninput="menorNombre=this.value" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box">
+        <input id="menor-edad-input" type="number" min="1" max="99" placeholder="Edad del menor" value="${menorEdad}" oninput="menorEdad=this.value" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+      </div>`;
+  }
 }
 
 // Se ejecuta cuando cambia el desplegable de "Tipo de asistente": deselecciona
@@ -3594,6 +3682,16 @@ function onTipoAsistenteChange(){
       selectedWorkshops.delete(w.id);
     }
   });
+
+  const dia1Block=document.getElementById('dia1-block');
+  const edadWrap=document.getElementById('lead-edad-wrap');
+  const isAdolescente=selectedTipoAsistente==='adolescente';
+  if(dia1Block)dia1Block.style.display=isAdolescente?'none':'block';
+  if(edadWrap)edadWrap.style.display=isAdolescente?'block':'none';
+  if(isAdolescente&&selectedDia1){
+    selectedDia1=false; // un adolescente no puede comprar Día 1 (Jornada de Impacto)
+  }
+
   renderDia2Workshops();
   updateCartUI();
 }
@@ -3757,9 +3855,17 @@ function resetTicketSelection(){
   currentLead=null;
   gacetaVerifiedDni=null;
   selectedTipoAsistente='';
+  menorNombre='';
+  menorEdad='';
   currentCartRef='cs26-'+(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));
   const tipoSelect=document.getElementById('lead-tipo-asistente-input');
   if(tipoSelect)tipoSelect.value='';
+  const edadInput=document.getElementById('lead-edad-input');
+  if(edadInput)edadInput.value='';
+  const edadWrap=document.getElementById('lead-edad-wrap');
+  if(edadWrap)edadWrap.style.display='none';
+  const dia1Block=document.getElementById('dia1-block');
+  if(dia1Block)dia1Block.style.display='block';
   selectedPaymentMethod='mp';
   const mpBtn=document.getElementById('pm-mp-btn');
   const transferBtn=document.getElementById('pm-transfer-btn');
@@ -3860,7 +3966,7 @@ async function applyDiscountCode(){
     appliedDiscountPercent=data.percent;
     updateCartUI();
     msgEl.style.color='var(--green)';
-    msgEl.textContent=`✅ Código válido: ${data.percent}% de descuento sobre la Jornada de Impacto (4/8) (se aplica solo ahí, y solo si es mejor que el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
+    msgEl.textContent=`✅ Código válido: ${data.percent}% de descuento aplicado sobre Jornada de Impacto (4/8)`;
   }catch(err){
     console.error('applyDiscountCode error:',err);
     appliedDiscountCode=null;
@@ -3933,6 +4039,8 @@ function getDia1Price(comboActive){
 function getCartItems(){
   const items=[];
   const primaryCombo=isPrimaryComboActive();
+  const MENOR_WORKSHOPS=new Set(['me-descubro','plata-facil-juego']);
+  const propiaEdad=selectedTipoAsistente==='adolescente'?(document.getElementById('lead-edad-input')?.value||null):null;
 
   if(selectedDia1){
     const precio=getDia1Price(primaryCombo);
@@ -3941,7 +4049,10 @@ function getCartItems(){
   DIA2_WORKSHOPS.forEach(w=>{
     if(selectedWorkshops.has(w.id)){
       const precio=getBestPrice(w.precioRegular,w.precioEarly,w.id,primaryCombo);
-      items.push({key:w.id,label:w.nombre,precio});
+      const item={key:w.id,label:w.nombre,precio};
+      if(propiaEdad)item.edad=propiaEdad;
+      if(MENOR_WORKSHOPS.has(w.id)){item.menorNombre=menorNombre||null;item.menorEdad=menorEdad||null;}
+      items.push(item);
     }
   });
   // Acompañantes: cada ítem lleva su propio nombre/mail/tipo — así el
@@ -3957,7 +4068,10 @@ function getCartItems(){
     DIA2_WORKSHOPS.forEach(w=>{
       if(c.selectedWorkshops.has(w.id)){
         const precio=getBestPrice(w.precioRegular,w.precioEarly,w.id,companionCombo);
-        items.push({key:w.id,label:`${w.nombre} (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
+        const item={key:w.id,label:`${w.nombre} (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente};
+        if(c.tipoAsistente==='adolescente'&&c.edad)item.edad=c.edad;
+        if(MENOR_WORKSHOPS.has(w.id)){item.menorNombre=c.menorNombre||null;item.menorEdad=c.menorEdad||null;}
+        items.push(item);
       }
     });
   });
@@ -4077,7 +4191,7 @@ async function logAbandonedCartAttempt(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         mode:'log_only',
-        items:items.map(i=>({key:i.key,attendee_nombre:i.attendeeNombre||undefined,attendee_email:i.attendeeEmail||undefined,attendee_tipo_asistente:i.attendeeTipo||undefined})),
+        items:items.map(i=>({key:i.key,attendee_nombre:i.attendeeNombre||undefined,attendee_email:i.attendeeEmail||undefined,attendee_tipo_asistente:i.attendeeTipo||undefined,edad:i.edad||undefined,menor_nombre:i.menorNombre||undefined,menor_edad:i.menorEdad||undefined})),
         discount_code:appliedDiscountCode||undefined,
         gaceta_dni:gacetaVerifiedDni||undefined,
         nombre,email,telefono,
@@ -4348,7 +4462,7 @@ async function confirmTicketPayment(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        items:items.map(i=>({key:i.key,attendee_nombre:i.attendeeNombre||undefined,attendee_email:i.attendeeEmail||undefined,attendee_tipo_asistente:i.attendeeTipo||undefined})),
+        items:items.map(i=>({key:i.key,attendee_nombre:i.attendeeNombre||undefined,attendee_email:i.attendeeEmail||undefined,attendee_tipo_asistente:i.attendeeTipo||undefined,edad:i.edad||undefined,menor_nombre:i.menorNombre||undefined,menor_edad:i.menorEdad||undefined})),
         discount_code:appliedDiscountCode||undefined,
         gaceta_dni:gacetaVerifiedDni||undefined,
         nombre:currentLead.nombre,
