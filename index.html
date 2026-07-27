@@ -1399,7 +1399,12 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <i class="gate-icon ti ti-shield-lock"></i>
       <h3>Acceso de organizador</h3>
       <p>Ingresá la clave de administrador para gestionar inscripciones y acreditación.</p>
-      <input type="password" class="lock-input" id="acred-pass-input" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')checkAcredAccess()">
+      <div style="position:relative;width:100%">
+        <input type="password" class="lock-input" id="acred-pass-input" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')checkAcredAccess()" style="width:100%;box-sizing:border-box;padding-right:44px">
+        <button type="button" onclick="toggleAcredPassVisibility()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px;display:flex;align-items:center">
+          <i class="ti ti-eye" id="acred-pass-eye" style="font-size:19px"></i>
+        </button>
+      </div>
       <div class="lock-error" id="acred-pass-error">Clave incorrecta.</div>
       <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="checkAcredAccess()"><i class="ti ti-arrow-right"></i>Ingresar</button>
     </div>
@@ -1827,8 +1832,37 @@ const ADMIN_ACTION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/admin
 const SHEETS_WEBHOOK_URL='https://script.google.com/macros/s/AKfycbxkYduv-RYE86T9oFrOEqtzsfD7sSMaqu2LnIuImEDUD-_LtFZjfzcOfe1hoZMJk1ef/exec';
 let currentUser=null;        // {email, name, avatar}
 let userHasAccess=false;     // true si está en cs26_inscriptos_pagos
-let adminUnlocked=sessionStorage.getItem('cs26_admin')==='1';
-let adminPass=sessionStorage.getItem('cs26_admin_pass')||''; // se manda a admin-action en cada llamada; nunca es la fuente de verdad (eso vive server-side)
+
+// Recordamos la clave de admin por 1 mes (localStorage no vence solo, así
+// que guardamos una fecha de expiración aparte y la chequeamos al cargar).
+const ADMIN_AUTH_TTL_MS=30*24*60*60*1000;
+
+function loadStoredAdminAuth(){
+  const expiry=Number(localStorage.getItem('cs26_admin_expiry')||0);
+  if(expiry&&Date.now()<expiry){
+    return localStorage.getItem('cs26_admin_pass')||'';
+  }
+  // Vencido (o nunca se guardó): limpiamos cualquier resto viejo.
+  localStorage.removeItem('cs26_admin');
+  localStorage.removeItem('cs26_admin_pass');
+  localStorage.removeItem('cs26_admin_expiry');
+  return '';
+}
+
+function saveAdminAuth(pass){
+  localStorage.setItem('cs26_admin','1');
+  localStorage.setItem('cs26_admin_pass',pass);
+  localStorage.setItem('cs26_admin_expiry',String(Date.now()+ADMIN_AUTH_TTL_MS));
+}
+
+function clearAdminAuth(){
+  localStorage.removeItem('cs26_admin');
+  localStorage.removeItem('cs26_admin_pass');
+  localStorage.removeItem('cs26_admin_expiry');
+}
+
+let adminPass=loadStoredAdminAuth();
+let adminUnlocked=!!adminPass;
 
 // Llama a la edge function admin-action. Todas las escrituras administrativas
 // (alta manual, check-in, etc.) pasan por acá — la clave se revalida siempre
@@ -1845,8 +1879,7 @@ async function callAdminAction(action,extra={}){
       // La clave guardada ya no es válida (o nunca lo fue): forzamos a re-loguear.
       adminUnlocked=false;
       adminPass='';
-      sessionStorage.removeItem('cs26_admin');
-      sessionStorage.removeItem('cs26_admin_pass');
+      clearAdminAuth();
     }
     throw new Error(data.error||'Error de administración');
   }
@@ -2563,6 +2596,15 @@ function cancelLogoPress(){
   logoPressTimer=null;
 }
 
+function toggleAcredPassVisibility(){
+  const input=document.getElementById('acred-pass-input');
+  const eye=document.getElementById('acred-pass-eye');
+  if(!input||!eye)return;
+  const isHidden=input.type==='password';
+  input.type=isHidden?'text':'password';
+  eye.className=isHidden?'ti ti-eye-off':'ti ti-eye';
+}
+
 async function checkAcredAccess(){
   const val=document.getElementById('acred-pass-input')?.value.trim();
   const err=document.getElementById('acred-pass-error');
@@ -2571,8 +2613,7 @@ async function checkAcredAccess(){
     adminPass=val;
     await callAdminAction('check_password');
     adminUnlocked=true;
-    sessionStorage.setItem('cs26_admin','1');
-    sessionStorage.setItem('cs26_admin_pass',val);
+    saveAdminAuth(val);
     showAcredScanner();
   }catch(e){
     adminPass='';
@@ -2686,8 +2727,7 @@ function lockoutAcred(){
   stopAcredCamera();
   adminUnlocked=false;
   adminPass='';
-  sessionStorage.removeItem('cs26_admin');
-  sessionStorage.removeItem('cs26_admin_pass');
+  clearAdminAuth();
   document.getElementById('acred-gate').style.display='';
   document.getElementById('acred-scanner-view').style.display='none';
   document.getElementById('acred-pass-input').value='';
