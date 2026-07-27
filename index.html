@@ -1704,6 +1704,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </div>
 
     <div id="payment-method-wrapper" style="margin-top:14px">
+      <div style="font-size:10.5px;color:var(--text-secondary);margin-bottom:10px">Descuentos no acumulables. Aplica siempre el mayor.</div>
       <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Cómo querés pagar?</div>
       <div style="display:flex;gap:8px">
         <button type="button" id="pm-mp-btn" onclick="selectPaymentMethod('mp')" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px;border:1.5px solid var(--accent);border-radius:var(--radius-md);padding:10px;background:var(--bg-secondary);cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">
@@ -3843,7 +3844,7 @@ async function verifyGacetaSocio(){
     if(data.habilitado){
       gacetaVerifiedDni=dni;
       msgEl.style.color='var(--green)';
-      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento sobre la Jornada de Impacto (4/8) (se aplica solo ahí, nunca se acumula con el código ni con el combo). Si además elegís algún taller del Día 2, ese ítem tiene su propio descuento por combo, que puede ser distinto.`;
+      msgEl.textContent=`✅ ¡Sos socio de Club La Gaceta! ${GACETA_DISCOUNT_PERCENT}% de descuento sobre la Jornada de Impacto (4/8)`;
     }else{
       gacetaVerifiedDni=null;
       msgEl.style.color='var(--red)';
