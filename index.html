@@ -1349,33 +1349,17 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     <div class="sec-head"><div class="sec-title-big">Mi gestión</div></div>
     <div style="height:8px"></div>
 
-    <div class="card" style="text-align:center" id="gestion-banner-default">
+    <div class="card" style="text-align:center">
       <div style="font-size:16px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:8px">¿Ya te inscribiste? 🌱</div>
-      <p style="font-size:13px;color:var(--text-secondary)">Iniciá sesión con la cuenta que usaste para inscribirte. Ahí vas a poder ver tu QR de ingreso al evento.</p>
+      <p style="font-size:13px;color:var(--text-secondary)">Ingresá el mail con el que te inscribiste y te reenviamos el mail de confirmación con tu código QR de ingreso.</p>
     </div>
 
-    <div class="card" style="text-align:center;display:none" id="gestion-banner-confirmed">
-      <div style="font-size:16px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:8px">¡Te damos la bienvenida al Crianza Summit 2026! 🌱</div>
-      <p style="font-size:13px;color:var(--text-secondary)">Tu compra está confirmada. Acá abajo tenés tu QR para ingresar al evento.</p>
-    </div>
-
-    <div class="login-cta" id="gestion-login-area">
+    <div class="login-cta">
       <div style="text-align:left">
-        <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">Ingresá el mail con el que te inscribiste</div>
-        <input type="email" id="magic-email-input" class="lock-input" placeholder="tu-mail@ejemplo.com" style="text-align:left;letter-spacing:normal" onkeydown="if(event.key==='Enter')sendMagicLinkFromForm()">
-        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="sendMagicLinkFromForm()"><i class="ti ti-send"></i>Enviarme el link de acceso</button>
-        <div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Sin contraseña — te mandamos un link a ese mail y con eso entrás directo.</div>
+        <input type="email" id="resend-email-input" class="lock-input" placeholder="tu-mail@ejemplo.com" style="text-align:left;letter-spacing:normal" onkeydown="if(event.key==='Enter')resendConfirmationEmail()">
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" id="resend-email-btn" onclick="resendConfirmationEmail()"><i class="ti ti-mail-forward"></i>Reenviarme mi QR por mail</button>
+        <div id="resend-email-msg" style="font-size:11.5px;margin-top:8px;display:none"></div>
       </div>
-    </div>
-
-    <div id="my-qr-card"></div>
-
-    <div class="card" style="text-align:center;display:none;margin-top:14px" id="gestion-share-block">
-      <div style="font-size:15px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:8px">¡Ahora compartilo con más personas!</div>
-      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">Si te parece que el Crianza Summit 2026 le puede ser útil a algún amigo, conocido o colega, compartile este mensaje.</p>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="copyShareMessage()">
-        <i class="ti ti-copy"></i><span id="share-copy-text">Copiar y compartir</span>
-      </button>
     </div>
 
     <div class="card" style="text-align:center;margin-top:14px">
@@ -1384,10 +1368,6 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         <i class="ti ti-brand-whatsapp"></i>Escribir por WhatsApp
       </a>
     </div>
-
-    <button id="gestion-logout-btn" onclick="signOutGoogle()" style="display:none;width:100%;justify-content:center;align-items:center;gap:7px;margin-top:10px;padding:11px;background:none;border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-secondary);font-size:13px;font-family:'Gotham Rounded','DM Sans',sans-serif;cursor:pointer">
-      <i class="ti ti-logout"></i>Cerrar sesión
-    </button>
   </div>
 
   <!-- ACREDITACIÓN (admin) -->
@@ -2074,6 +2054,44 @@ async function signInWithGoogle(){
   if(error)toast('Error al iniciar sesión');
 }
 
+const RESEND_CONFIRMATION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/resend-confirmation';
+
+async function resendConfirmationEmail(){
+  const input=document.getElementById('resend-email-input');
+  const btn=document.getElementById('resend-email-btn');
+  const msgEl=document.getElementById('resend-email-msg');
+  const email=(input?.value||'').trim();
+
+  if(!email||!email.includes('@')){toast('Ingresá un mail válido');return;}
+
+  msgEl.style.display='block';
+  msgEl.style.color='var(--text-secondary)';
+  msgEl.textContent='Enviando...';
+  if(btn)btn.disabled=true;
+
+  try{
+    const res=await fetch(RESEND_CONFIRMATION_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.found){
+      msgEl.style.color='var(--red)';
+      msgEl.textContent='No te encontramos registrado con ese mail. Si necesitás ayuda, escribinos por WhatsApp más abajo.';
+      return;
+    }
+    msgEl.style.color='var(--green)';
+    msgEl.textContent='📩 ¡Listo! Te reenviamos el mail con tu QR — revisá tu bandeja (y spam, por las dudas).';
+  }catch(err){
+    console.error('resendConfirmationEmail error:',err);
+    msgEl.style.color='var(--red)';
+    msgEl.textContent='No pudimos procesar el pedido, intentá de nuevo en un rato.';
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
 async function signInWithMagicLink(email){
   if(!email||!email.includes('@')){toast('Ingresá un mail válido');return;}
   const {error}=await sb.auth.signInWithOtp({
@@ -2108,6 +2126,13 @@ async function checkAccess(email){
 }
 
 async function initAuth(){
+  // Si la URL trae "access_token"/"type=magiclink" en el hash, es que la
+  // persona acaba de volver de tocar el link del mail — ahí sí la
+  // mandamos a Mi gestión. Si no, dejamos que navegue donde estaba (evita
+  // saltarla a Mi gestión solo porque volvió a la pestaña con la sesión
+  // ya iniciada de antes).
+  const isMagicLinkRedirect=/access_token=|type=magiclink|type=recovery/.test(window.location.hash);
+
   const {data:{session}}=await sb.auth.getSession();
   if(session?.user){
     currentUser={
@@ -2120,6 +2145,7 @@ async function initAuth(){
     renderUserArea();
     tagOneSignalUser();
     if(userHasAccess)showGestionLoggedIn();else showNoAccess();
+    if(isMagicLinkRedirect)goPage('page-agenda');
   }else{
     renderUserArea();
     showGestionLoggedOut();
@@ -2137,6 +2163,12 @@ async function initAuth(){
       tagOneSignalUser();
       if(userHasAccess){showGestionLoggedIn();toast(`✅ ¡Bienvenido/a ${currentUser.name.split(' ')[0]}!`);}
       else showNoAccess();
+      // El link mágico vuelve con los tokens de sesión en el hash de la URL
+      // (#access_token=...), que pisa cualquier "#agenda" que le hayamos
+      // puesto como destino — por eso hay que llevarlo a Mi gestión acá a
+      // propósito, en vez de depender del hash para decidir la página. Solo
+      // en este caso puntual (login recién hecho), no en cualquier SIGNED_IN.
+      if(isMagicLinkRedirect)goPage('page-agenda');
     }else if(event==='SIGNED_OUT'){
       currentUser=null;userHasAccess=false;
       renderUserArea();
@@ -4712,7 +4744,7 @@ function setupRevealObserver(){
 }
 
 goVideo(0);countdown();updateCTA();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
-loadSupabaseData();subscribeRealtime();initAuth();logVisit();
+loadSupabaseData();subscribeRealtime();logVisit();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
