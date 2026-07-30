@@ -3722,7 +3722,7 @@ function renderCompanions(){
           <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--green)':'var(--text-secondary)'};flex-shrink:0"></i>
           <div style="font-size:12.5px;font-weight:600">🗣 Martes 4/8 — Jornada Abierta de Impacto</div>
         </div>
-        <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1Price(isCompanionComboActive(c)))}</div>
+        <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1Price(isCompanionComboActive(c),false))}</div>
       </button>
       `}
 
@@ -4126,15 +4126,19 @@ function isComboActive(){
 // Junta los candidatos a descuento (Early Bird, código, La Gaceta, combo),
 // se queda con el porcentaje más alto y lo aplica sobre el precio regular
 // — nunca se suman dos descuentos sobre el mismo ítem.
-function getBestPrice(regularPrice,earlyPrice,ticketType,comboActive){
+function getBestPrice(regularPrice,earlyPrice,ticketType,comboActive,isPrimary){
+  if(isPrimary===undefined)isPrimary=true;
   const candidates=[0];
   if(isEarlyBirdActive()&&earlyPrice!=null){
     candidates.push((1-earlyPrice/regularPrice)*100);
   }
   if(isDiscountsEnabled()){
-    if(appliedDiscountCode&&appliedDiscountPercent>0&&ticketType==='dia1'){
+    // El código de descuento sigue siendo solo para el comprador principal.
+    if(isPrimary&&appliedDiscountCode&&appliedDiscountPercent>0&&ticketType==='dia1'){
       candidates.push(appliedDiscountPercent);
     }
+    // La Gaceta aplica a TODOS los Día 1 de la compra (comprador + acompañantes) —
+    // una sola cuenta socia cubre a todos los que se carguen en la misma compra.
     if(gacetaVerifiedDni&&ticketType==='dia1'){
       candidates.push(GACETA_DISCOUNT_PERCENT);
     }
@@ -4146,8 +4150,9 @@ function getBestPrice(regularPrice,earlyPrice,ticketType,comboActive){
   return Math.round(regularPrice*(1-bestPercent/100));
 }
 
-function getDia1Price(comboActive){
-  return getBestPrice(DIA1_REGULAR_PRICE,DIA1_EARLY_PRICE,'dia1',!!comboActive);
+function getDia1Price(comboActive,isPrimary){
+  if(isPrimary===undefined)isPrimary=true;
+  return getBestPrice(DIA1_REGULAR_PRICE,DIA1_EARLY_PRICE,'dia1',!!comboActive,isPrimary);
 }
 
 // Arma la lista de ítems seleccionados: [{key,label,precio}], Día 1 primero si está tildado.
@@ -4180,7 +4185,7 @@ function getCartItems(){
     if(!c.nombre||!c.email)return;
     const companionCombo=isCompanionComboActive(c);
     if(c.selectedDia1){
-      const precio=getDia1Price(companionCombo);
+      const precio=getDia1Price(companionCombo,false);
       items.push({key:'dia1',label:`Martes 4 de agosto — Jornada Abierta de Impacto (${c.nombre})`,precio,attendeeNombre:c.nombre,attendeeEmail:c.email,attendeeTipo:c.tipoAsistente});
     }
     DIA2_WORKSHOPS.forEach(w=>{
