@@ -183,6 +183,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 /* TABS */
 .tab-bar{display:flex;gap:4px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:3px;margin:12px 0}
 .tab-btn{flex:1;padding:6px;border:none;background:none;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text-secondary);font-family:'Gotham Rounded','DM Sans',sans-serif;transition:all .2s}
+.promo-path-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif;transition:all .15s}
+.promo-path-btn:hover{border-color:var(--accent)}
+.promo-path-btn.selected{border-color:var(--accent);background:var(--accent-light)}
+.promo-sub-btn{padding:10px 8px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:var(--text-primary);flex:1;transition:all .15s}
+.promo-sub-btn.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent-dark)}
+.promo-fade{opacity:0;transform:translateY(6px);transition:opacity .25s ease,transform .25s ease}
+.promo-fade.show{opacity:1;transform:translateY(0)}
 .tab-btn.active{background:var(--bg-primary);color:var(--text-primary);font-weight:600}
 
 /* VIDEO CAROUSEL */
@@ -1389,12 +1396,12 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <div class="card">
       <div style="font-size:14px;font-weight:700;margin-bottom:6px">¿Qué te interesa para mañana? 🌱</div>
-      <p style="font-size:12.5px;color:var(--text-secondary);margin:0">Contanos un poco y te armamos una selección de talleres — después la podés ajustar como quieras antes de pagar.</p>
+      <p style="font-size:12.5px;color:var(--text-secondary);margin:0">Dos preguntas rápidas y te sugerimos qué elegir.</p>
     </div>
 
     <div class="card">
-      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Cómo participás?</div>
-      <select id="promo-tipo-asistente" onchange="renderPromoResults()" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">1. ¿Cómo participás?</div>
+      <select id="promo-tipo-asistente" onchange="onPromoTipoChange()" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
         <option value="" disabled selected>Elegí una opción...</option>
         <option value="familia">Familia (madre/padre)</option>
         <option value="profesional">Profesional (educación/salud)</option>
@@ -1402,24 +1409,25 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       </select>
     </div>
 
-    <div class="card">
-      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Preferís mañana o tarde?</div>
-      <div style="display:flex;gap:8px;margin-bottom:16px" id="promo-momento-buttons">
-        <button class="tab-btn" onclick="setPromoFilter('momento','manana')" style="flex:1">☀️ Mañana</button>
-        <button class="tab-btn" onclick="setPromoFilter('momento','tarde')" style="flex:1">🌇 Tarde</button>
-        <button class="tab-btn active" onclick="setPromoFilter('momento','')" style="flex:1">Cualquiera</button>
+    <div class="card" id="promo-path-card" style="display:none">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:10px">2. ¿Qué priorizás hoy?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="promo-path-btn" id="promo-path-agenda" onclick="setPromoPath('agenda')">
+          <span style="font-size:20px">📅</span>
+          <span><span style="display:block;font-weight:700;font-size:13px">Mi agenda</span><span style="display:block;font-size:11.5px;color:var(--text-secondary)">Que me quede cómodo el horario</span></span>
+        </button>
+        <button class="promo-path-btn" id="promo-path-tematica" onclick="setPromoPath('tematica')">
+          <span style="font-size:20px">🎯</span>
+          <span><span style="display:block;font-weight:700;font-size:13px">Un tema puntual</span><span style="display:block;font-size:11.5px;color:var(--text-secondary)">Ir directo a lo que me interesa</span></span>
+        </button>
+        <button class="promo-path-btn" id="promo-path-inversion" onclick="setPromoPath('inversion')">
+          <span style="font-size:20px">💰</span>
+          <span><span style="display:block;font-weight:700;font-size:13px">Mi inversión</span><span style="display:block;font-size:11.5px;color:var(--text-secondary)">Gastar lo menos posible</span></span>
+        </button>
       </div>
-
-      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Te interesa algún speaker en particular?</div>
-      <select id="promo-speaker" onchange="setPromoFilter('speaker',this.value)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:16px">
-        <option value="">Cualquiera</option>
-      </select>
-
-      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Qué temática te interesa más?</div>
-      <select id="promo-tematica" onchange="setPromoFilter('tematica',this.value)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
-        <option value="">Cualquiera</option>
-      </select>
     </div>
+
+    <div class="card" id="promo-subchoice-card" style="display:none"></div>
 
     <div id="promo-results"></div>
   </div>
@@ -3651,113 +3659,171 @@ const DIA2_WORKSHOPS=[
 // cargado en otro lado, así que si se agrega/saca un taller hay que
 // actualizar esto también.
 const TEMATICAS={
-  vinculos:{label:'🧠 Vínculos y primera infancia',talleres:['poder-del-vinculo','me-descubro','crianza-respetuosa']},
-  digital:{label:'📱 Tecnología y mundo digital',talleres:['entornos','tu-huella-digital','plata-facil-juego','convivencia-digital']},
-  adolescencia:{label:'🌱 Adolescencia y desarrollo personal',talleres:['viaje-adolescente','comprender']},
+  vinculos:{label:'Vínculos y primera infancia',emoji:'🧠',talleres:['poder-del-vinculo','me-descubro','crianza-respetuosa']},
+  digital:{label:'Tecnología y mundo digital',emoji:'📱',talleres:['entornos','tu-huella-digital','plata-facil-juego','convivencia-digital']},
+  adolescencia:{label:'Adolescencia y desarrollo personal',emoji:'🌱',talleres:['viaje-adolescente','comprender']},
 };
 
-let promoFilters={momento:'',speaker:'',tematica:''};
+let promoPath=null;   // 'agenda' | 'tematica' | 'inversion'
+let promoSub=null;    // depende del camino elegido
 let lastPromoCombos=[];
+const noOverlapPromo=(a,b)=>!(a.desde<b.hasta&&a.hasta>b.desde);
 
-function setPromoFilter(key,value){
-  promoFilters[key]=value;
-  if(key==='momento'){
-    document.querySelectorAll('#promo-momento-buttons .tab-btn').forEach(b=>b.classList.remove('active'));
-    const map={manana:0,tarde:1,'':2};
-    const btns=document.querySelectorAll('#promo-momento-buttons .tab-btn');
-    if(btns[map[value]])btns[map[value]].classList.add('active');
-  }
-  renderPromoResults();
+function onPromoTipoChange(){
+  promoPath=null;
+  promoSub=null;
+  const tipo=document.getElementById('promo-tipo-asistente')?.value;
+  document.getElementById('promo-path-card').style.display=tipo?'block':'none';
+  document.getElementById('promo-subchoice-card').style.display='none';
+  document.querySelectorAll('.promo-path-btn').forEach(b=>b.classList.remove('selected'));
+  renderPromoCombos();
 }
 
-function populatePromoDropdowns(){
-  const speakerSel=document.getElementById('promo-speaker');
-  if(speakerSel&&speakerSel.options.length<=1){
-    const speakers=[...new Set(DIA2_WORKSHOPS.flatMap(w=>w.speaker.split(' + ')))].sort();
-    speakerSel.innerHTML='<option value="">Cualquiera</option>'+speakers.map(s=>`<option value="${s}">${s}</option>`).join('');
-  }
-  const tematicaSel=document.getElementById('promo-tematica');
-  if(tematicaSel&&tematicaSel.options.length<=1){
-    tematicaSel.innerHTML='<option value="">Cualquiera</option>'+Object.entries(TEMATICAS).map(([key,t])=>`<option value="${key}">${t.label}</option>`).join('');
+function setPromoPath(path){
+  promoPath=path;
+  promoSub=null;
+  document.querySelectorAll('.promo-path-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('promo-path-'+path).classList.add('selected');
+
+  const subCard=document.getElementById('promo-subchoice-card');
+  if(path==='agenda'){
+    subCard.innerHTML=`
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:10px">3. ¿Mañana, tarde, o el día completo?</div>
+      <div style="display:flex;gap:8px">
+        <button class="promo-sub-btn" data-sub="manana" onclick="setPromoSub('manana')">🌅 Mañana</button>
+        <button class="promo-sub-btn" data-sub="tarde" onclick="setPromoSub('tarde')">🌇 Tarde</button>
+        <button class="promo-sub-btn" data-sub="todo" onclick="setPromoSub('todo')">🌞 Todo el día</button>
+      </div>`;
+    subCard.style.display='block';
+    renderPromoCombos();
+  }else if(path==='tematica'){
+    subCard.innerHTML=`
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:10px">3. ¿Qué tema te interesa?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${Object.entries(TEMATICAS).map(([key,t])=>`<button class="promo-sub-btn" data-sub="${key}" style="text-align:left" onclick="setPromoSub('${key}')">${t.emoji} ${t.label}</button>`).join('')}
+      </div>`;
+    subCard.style.display='block';
+    renderPromoCombos();
+  }else if(path==='inversion'){
+    subCard.style.display='none';
+    setPromoSub('minimo');
   }
 }
 
-function scorePromoTaller(w){
-  let score=0;
-  if(promoFilters.speaker&&w.speaker.includes(promoFilters.speaker))score+=3;
-  if(promoFilters.tematica&&(TEMATICAS[promoFilters.tematica]?.talleres||[]).includes(w.id))score+=2;
-  if(promoFilters.momento){
-    const esManana=w.desde<780; // antes de las 13:00
-    if((promoFilters.momento==='manana'&&esManana)||(promoFilters.momento==='tarde'&&!esManana))score+=1;
-  }
-  return score;
+function setPromoSub(sub){
+  promoSub=sub;
+  document.querySelectorAll('.promo-sub-btn').forEach(b=>b.classList.toggle('selected',b.dataset.sub===sub));
+  renderPromoCombos();
 }
 
-// Arma hasta 3 combos de 2 talleres (que no se superpongan en horario),
-// priorizando los talleres que mejor puntúan según los filtros elegidos.
-// Si para esa audiencia solo hay 1 taller posible, lo ofrece solo.
-function generatePromoCombos(tipoAsistente){
-  const disponibles=DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(tipoAsistente));
-  const scored=disponibles.map(w=>({w,score:scorePromoTaller(w)})).sort((a,b)=>b.score-a.score);
-  const noOverlap=(a,b)=>!(a.desde<b.hasta&&a.hasta>b.desde);
+function getPromoDisponibles(tipo){
+  return DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(tipo));
+}
 
-  const combos=[];
-  const usedPairKeys=new Set();
-  for(let i=0;i<scored.length&&combos.length<3;i++){
-    for(let j=0;j<scored.length;j++){
-      if(i===j)continue;
-      const a=scored[i].w,b=scored[j].w;
-      if(!noOverlap(a,b))continue;
-      const pairKey=[a.id,b.id].sort().join('+');
-      if(usedPairKeys.has(pairKey))continue;
-      usedPairKeys.add(pairKey);
-      combos.push({talleres:[a,b].sort((x,y)=>x.desde-y.desde),score:scored[i].score+scored[j].score});
-      break;
+// Prueba TODAS las combinaciones posibles de a 2 dentro de la lista (no se
+// queda con la primera que encuentra) para elegir un par real, sin
+// superposición horaria.
+function buildBestPromoPair(list){
+  for(let i=0;i<list.length;i++){
+    for(let j=i+1;j<list.length;j++){
+      if(noOverlapPromo(list[i],list[j])){
+        return [list[i],list[j]].sort((a,b)=>a.desde-b.desde);
+      }
     }
   }
-  combos.sort((a,b)=>b.score-a.score);
-
-  if(!combos.length&&scored.length){
-    return [{talleres:[scored[0].w],score:scored[0].score}];
-  }
-  return combos.slice(0,3);
+  return null;
 }
 
-function renderPromoResults(){
-  populatePromoDropdowns();
-  const tipo=document.getElementById('promo-tipo-asistente')?.value;
+// Arma UNA sola sugerencia principal (con su explicación) según el camino
+// elegido — nada de listas largas de opciones, para que se sienta simple.
+function generatePromoResult(tipo,path,sub){
+  const disponibles=getPromoDisponibles(tipo);
+  if(!disponibles.length)return [];
+
+  if(path==='agenda'){
+    if(sub==='todo'){
+      const manana=disponibles.filter(w=>w.desde<780);
+      const tarde=disponibles.filter(w=>w.desde>=780);
+      if(manana.length&&tarde.length){
+        return [{talleres:[manana[0],tarde[0]],reason:'Armamos tu día completo: uno a la mañana y otro a la tarde, sin que se pisen.'}];
+      }
+      return []; // no hay de las dos franjas para esa audiencia
+    }
+    const candidatos=disponibles.filter(w=>sub==='manana'?w.desde<780:w.desde>=780);
+    if(!candidatos.length)return [];
+    const pair=buildBestPromoPair(candidatos);
+    if(pair)return [{talleres:pair,reason:`Estos dos entran cómodos en tu ${sub==='manana'?'mañana':'tarde'}, sin pisarse en horario.`}];
+    return [{talleres:[candidatos[0]],reason:`Es el único taller disponible para vos en ese horario.`}];
+  }
+
+  if(path==='tematica'){
+    const t=TEMATICAS[sub];
+    const enTema=disponibles.filter(w=>t.talleres.includes(w.id));
+    if(!enTema.length)return [];
+    const pair=buildBestPromoPair(enTema);
+    if(pair)return [{talleres:pair,reason:`Los dos talleres de "${t.label}" que mejor encajan en tu horario.`}];
+    return [{talleres:[enTema[0]],reason:`Es el único taller de "${t.label}" disponible para vos.`}];
+  }
+
+  if(path==='inversion'){
+    const cheapest=[...disponibles].sort((a,b)=>a.precioRegular-b.precioRegular)[0];
+    const results=[{talleres:[cheapest],reason:'La opción más accesible disponible para vos.'}];
+    const partner=disponibles.filter(w=>w.id!==cheapest.id&&noOverlapPromo(cheapest,w)).sort((a,b)=>a.precioRegular-b.precioRegular)[0];
+    if(partner){
+      results.push({talleres:[cheapest,partner].sort((a,b)=>a.desde-b.desde),reason:'Si sumás uno más, cada taller te queda un 15% más barato por el combo.'});
+    }
+    return results;
+  }
+  return [];
+}
+
+function renderPromoCombos(){
   const resultsEl=document.getElementById('promo-results');
   if(!resultsEl)return;
-  if(!tipo){
-    resultsEl.innerHTML='<div class="card" style="text-align:center;color:var(--text-secondary);font-size:13px">Elegí primero cómo participás, arriba 👆</div>';
-    return;
-  }
-  const combos=generatePromoCombos(tipo);
-  lastPromoCombos=combos;
-  if(!combos.length){
-    resultsEl.innerHTML='<div class="card" style="text-align:center;color:var(--text-secondary);font-size:13px">No encontramos talleres disponibles para esa combinación.</div>';
-    return;
-  }
-  resultsEl.innerHTML=combos.map((combo,i)=>{
-    const comboActive=combo.talleres.length>=2;
-    const total=combo.talleres.reduce((s,w)=>s+getWorkshopPrice(w,comboActive),0);
-    const regularTotal=combo.talleres.reduce((s,w)=>s+w.precioRegular,0);
-    const itemsHtml=combo.talleres.map(w=>`
-      <div style="margin-bottom:10px">
-        <div style="font-weight:700;font-size:13.5px">${w.nombre}</div>
-        <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px">${w.horario} · ${w.speaker}</div>
-      </div>`).join('');
-    return `
-    <div class="card" style="margin-bottom:12px;border:1.5px solid ${i===0?'var(--accent)':'var(--border)'}">
-      ${i===0?'<div style="font-size:10.5px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.03em">✨ RECOMENDADO PARA VOS</div>':''}
-      ${itemsHtml}
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="font-size:11.5px;color:var(--green);font-weight:700">${comboActive?'🎉 Combo -15% aplicado':''}</div>
-        <div style="font-size:17px;font-weight:700;text-align:right">${comboActive?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(regularTotal)}</span>`:''}${fmtPrice(total)}</div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="applyPromoCombo(${i})"><i class="ti ti-shopping-cart"></i>Agregar este combo</button>
-    </div>`;
-  }).join('')+`<div style="text-align:center;margin:14px 0"><button onclick="applyPromoCombo(-1)" style="background:none;border:none;color:var(--text-secondary);text-decoration:underline;font-size:12.5px;cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">Prefiero elegir manualmente</button></div>`;
+  const tipo=document.getElementById('promo-tipo-asistente')?.value;
+
+  resultsEl.classList.remove('show');
+
+  setTimeout(()=>{
+    if(!tipo||!promoPath||!promoSub){
+      resultsEl.innerHTML='';
+      return;
+    }
+    const combos=generatePromoResult(tipo,promoPath,promoSub);
+    lastPromoCombos=combos;
+
+    if(!combos.length){
+      resultsEl.innerHTML=`
+        <div class="card promo-fade" style="text-align:center">
+          <div style="font-size:26px;margin-bottom:6px">🤔</div>
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">No hay opciones para esa combinación</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Probá otro camino arriba, o elegí manualmente.</div>
+          <button class="btn" style="width:100%;justify-content:center" onclick="applyPromoCombo(-1)">Elegir manualmente</button>
+        </div>`;
+    }else{
+      resultsEl.innerHTML=combos.map((combo,i)=>{
+        const comboActive=combo.talleres.length>=2;
+        const total=combo.talleres.reduce((s,w)=>s+getWorkshopPrice(w,comboActive),0);
+        const regularTotal=combo.talleres.reduce((s,w)=>s+w.precioRegular,0);
+        const itemsHtml=combo.talleres.map(w=>`
+          <div style="margin-bottom:10px">
+            <div style="font-weight:700;font-size:13.5px">${w.nombre}</div>
+            <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px">${w.horario} · ${w.speaker}</div>
+          </div>`).join('');
+        return `
+        <div class="card promo-fade" style="margin-bottom:12px;border:1.5px solid ${i===0?'var(--accent)':'var(--border)'}">
+          <div style="font-size:12px;color:var(--text-secondary);font-style:italic;margin-bottom:10px;line-height:1.4">💬 ${combo.reason}</div>
+          ${itemsHtml}
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:12px;border-top:1px solid var(--border)">
+            <div style="font-size:11.5px;color:var(--green);font-weight:700">${comboActive?'🎉 Combo -15% aplicado':''}</div>
+            <div style="font-size:17px;font-weight:700;text-align:right">${comboActive?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(regularTotal)}</span>`:''}${fmtPrice(total)}</div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="applyPromoCombo(${i})"><i class="ti ti-shopping-cart"></i>Agregar${comboActive?' este combo':''}</button>
+        </div>`;
+      }).join('')+`<div style="text-align:center;margin:14px 0"><button onclick="applyPromoCombo(-1)" style="background:none;border:none;color:var(--text-secondary);text-decoration:underline;font-size:12.5px;cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">Prefiero elegir manualmente</button></div>`;
+    }
+    requestAnimationFrame(()=>resultsEl.classList.add('show'));
+  },tipo&&promoPath&&promoSub?180:0);
 }
 
 function applyPromoCombo(index){
@@ -4849,7 +4915,13 @@ function goPage(id){
   document.getElementById(id).classList.add('active');
   const nav=document.getElementById('nav-'+id.replace('page-',''));if(nav)nav.classList.add('active');
   if(id==='page-agenda')renderAgenda();
-  if(id==='page-promo'){populatePromoDropdowns();renderPromoResults();}
+  if(id==='page-promo'){
+    promoPath=null;promoSub=null;
+    const tipoSel=document.getElementById('promo-tipo-asistente');if(tipoSel)tipoSel.value='';
+    document.getElementById('promo-path-card').style.display='none';
+    document.getElementById('promo-subchoice-card').style.display='none';
+    document.getElementById('promo-results').innerHTML='';
+  }
   history.replaceState(null,'','#'+id.replace('page-',''));
   window.scrollTo(0,0);
 }
