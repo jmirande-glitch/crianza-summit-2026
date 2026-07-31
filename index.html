@@ -4185,8 +4185,15 @@ function getCartItems(){
   // Acompañantes: cada ítem lleva su propio nombre/mail/tipo — así el
   // backend sabe a quién registrar en vez de metérselo todo al comprador.
   // El combo de cada acompañante se calcula SOLO con sus propios ítems.
+  //
+  // OJO: acá NO se exige que nombre/mail estén completos — si se exigiera,
+  // mientras la persona todavía está tipeando esos datos, sus actividades
+  // elegidas desaparecían del total en pantalla (aunque ya las hubiera
+  // tildado), lo cual confundía. El bloqueo real de "no dejar pagar sin
+  // mail" ya está cubierto aparte por validateCompanionsForSubmit(), que
+  // se ejecuta antes de mandar cualquier pago — acá solo importa sumar
+  // bien lo que ya está tildado.
   companions.forEach(c=>{
-    if(!c.nombre||!c.email)return;
     const companionCombo=isCompanionComboActive(c);
     if(c.selectedDia1){
       const precio=getDia1Price(companionCombo,false);
