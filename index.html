@@ -3716,15 +3716,19 @@ function renderCompanions(){
       <input type="number" min="1" max="99" placeholder="Edad" value="${c.edad||''}" oninput="updateCompanionField(${c.id},'edad',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
       `:''}
 
-      ${c.tipoAsistente==='adolescente'?'':`
+      ${c.tipoAsistente==='adolescente'?'':(()=>{
+        const companionDia1Price=getDia1Price(isCompanionComboActive(c),false);
+        const companionHasDiscount=companionDia1Price<DIA1_REGULAR_PRICE;
+        return `
       <button type="button" onclick="toggleCompanionDia1(${c.id})" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid ${c.selectedDia1?'var(--green)':'transparent'};background:var(--bg-primary);border-radius:var(--radius-md);padding:9px 10px;cursor:pointer;text-align:left;font-family:'Gotham Rounded','DM Sans',sans-serif">
         <div style="display:flex;align-items:center;gap:8px">
           <i class="ti ${c.selectedDia1?'ti-square-rounded-check-filled':'ti-square'}" style="font-size:16px;color:${c.selectedDia1?'var(--green)':'var(--text-secondary)'};flex-shrink:0"></i>
           <div style="font-size:12.5px;font-weight:600">🗣 Martes 4/8 — Jornada Abierta de Impacto</div>
         </div>
-        <div style="font-size:13px;font-weight:700;flex-shrink:0">${fmtPrice(getDia1Price(isCompanionComboActive(c),false))}</div>
+        <div style="font-size:13px;font-weight:700;flex-shrink:0;text-align:right;line-height:1.15">${companionHasDiscount?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(DIA1_REGULAR_PRICE)}</span>`:''}${fmtPrice(companionDia1Price)}</div>
       </button>
-      `}
+      `;
+      })()}
 
       <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin:10px 0 2px">🎓 Miércoles 5/8 — Talleres</div>
       ${workshopsHtml}
