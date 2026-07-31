@@ -1429,7 +1429,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <div class="card" id="promo-subchoice-card" style="display:none"></div>
 
-    <div id="promo-results"></div>
+    <div id="promo-results" class="promo-fade"></div>
   </div>
 
   <!-- ACREDITACIÓN (admin) -->
@@ -3794,7 +3794,7 @@ function renderPromoCombos(){
 
     if(!combos.length){
       resultsEl.innerHTML=`
-        <div class="card promo-fade" style="text-align:center">
+        <div class="card" style="text-align:center">
           <div style="font-size:26px;margin-bottom:6px">🤔</div>
           <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">No hay opciones para esa combinación</div>
           <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Probá otro camino arriba, o elegí manualmente.</div>
@@ -3811,7 +3811,7 @@ function renderPromoCombos(){
             <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px">${w.horario} · ${w.speaker}</div>
           </div>`).join('');
         return `
-        <div class="card promo-fade" style="margin-bottom:12px;border:1.5px solid ${i===0?'var(--accent)':'var(--border)'}">
+        <div class="card" style="margin-bottom:12px;border:1.5px solid ${i===0?'var(--accent)':'var(--border)'}">
           <div style="font-size:12px;color:var(--text-secondary);font-style:italic;margin-bottom:10px;line-height:1.4">💬 ${combo.reason}</div>
           ${itemsHtml}
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:12px;border-top:1px solid var(--border)">
@@ -4921,6 +4921,7 @@ function goPage(id){
     document.getElementById('promo-path-card').style.display='none';
     document.getElementById('promo-subchoice-card').style.display='none';
     document.getElementById('promo-results').innerHTML='';
+    document.getElementById('promo-results').classList.remove('show');
   }
   history.replaceState(null,'','#'+id.replace('page-',''));
   window.scrollTo(0,0);
