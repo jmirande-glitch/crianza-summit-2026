@@ -546,6 +546,12 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <button type="button" onclick="restorePendingTransfer()" style="flex-shrink:0;background:#F0A94E;color:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Retomar</button>
     </div>
 
+    <div id="post-impacto-banner" style="display:none;background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius-md);padding:16px;margin:0 20px 14px;text-align:center">
+      <div style="font-size:15px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:4px">🎉 ¡Gracias por venir hoy!</div>
+      <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">Mañana seguimos con la Jornada Formativa. Contanos qué te interesa y te armamos una selección de talleres.</div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="goPage('page-promo')"><i class="ti ti-sparkles"></i>Ver talleres recomendados para vos</button>
+    </div>
+
     <div class="cta-block">
       <button id="cta-btn" onclick="openTicketModal()" class="cta-btn">
         <i class="ti ti-ticket" style="font-size:20px"></i>
@@ -1374,6 +1380,50 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </div>
   </div>
 
+  <!-- CHECKOUT CON AYUDA (promo post-impacto) — página oculta, sin botón en
+  el nav. Se llega desde el banner del Home (una vez activa la promo) o
+  directo por URL (crianzasummit.com.ar/#promo), para poder probarla antes
+  de la fecha real sin que nadie la vea por accidente. -->
+  <div class="page" id="page-promo">
+    <div class="sec-head"><div class="sec-title-big">Elegí tus talleres</div></div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">¿Qué te interesa para mañana? 🌱</div>
+      <p style="font-size:12.5px;color:var(--text-secondary);margin:0">Contanos un poco y te armamos una selección de talleres — después la podés ajustar como quieras antes de pagar.</p>
+    </div>
+
+    <div class="card">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Cómo participás?</div>
+      <select id="promo-tipo-asistente" onchange="renderPromoResults()" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+        <option value="" disabled selected>Elegí una opción...</option>
+        <option value="familia">Familia (madre/padre)</option>
+        <option value="profesional">Profesional (educación/salud)</option>
+        <option value="adolescente">Adolescente</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Preferís mañana o tarde?</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px" id="promo-momento-buttons">
+        <button class="tab-btn" onclick="setPromoFilter('momento','manana')" style="flex:1">☀️ Mañana</button>
+        <button class="tab-btn" onclick="setPromoFilter('momento','tarde')" style="flex:1">🌇 Tarde</button>
+        <button class="tab-btn active" onclick="setPromoFilter('momento','')" style="flex:1">Cualquiera</button>
+      </div>
+
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Te interesa algún speaker en particular?</div>
+      <select id="promo-speaker" onchange="setPromoFilter('speaker',this.value)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:16px">
+        <option value="">Cualquiera</option>
+      </select>
+
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">¿Qué temática te interesa más?</div>
+      <select id="promo-tematica" onchange="setPromoFilter('tematica',this.value)" style="width:100%;padding:10px 12px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;box-sizing:border-box">
+        <option value="">Cualquiera</option>
+      </select>
+    </div>
+
+    <div id="promo-results"></div>
+  </div>
+
   <!-- ACREDITACIÓN (admin) -->
   <div class="page" id="page-acreditacion">
     <div class="sec-head"><div class="sec-title-big">Admin</div></div>
@@ -1872,6 +1922,11 @@ async function callAdminAction(action,extra={}){
 
 let enrollments=new Set(),ratings={},comments={},pubComments={},sessionCounts={},userDatos={};
 const EVENT_START=new Date('2026-08-04T09:00:00-03:00');
+// A las 17hs del 4/8 el checkout se reabre (solo para el Día 2 — la Jornada
+// de Impacto ya empezó/terminó, no tiene sentido seguir vendiéndola). Entre
+// las 9hs y las 17hs de ese día queda cerrado, como ya estaba pensado.
+const POST_IMPACTO_REOPEN=new Date('2026-08-04T17:00:00-03:00');
+function isPostImpactoActive(){return new Date()>=POST_IMPACTO_REOPEN;}
 const CUPOS_TOTAL=250;
 let totalConfirmados=0;
 
@@ -2039,7 +2094,10 @@ function sessionOverlaps(s1,s2){
 }
 function getConflicts(sid){const s=SESSIONS.find(x=>x.id===sid);return SESSIONS.filter(x=>enrollments.has(x.id)&&sessionOverlaps(s,x));}
 function isSessionPast(s){const d=s.day===1?new Date('2026-08-04T00:00:00-03:00'):new Date('2026-08-05T00:00:00-03:00');const[h,m]=(s.time||'0:0').split(':').map(Number);d.setHours(h,m,0,0);return new Date()>=d;}
-function isEventStarted(){return new Date()>=EVENT_START;}
+function isEventStarted(){
+  if(isPostImpactoActive())return false; // se reabre para la promo de talleres del Día 2
+  return new Date()>=EVENT_START;
+}
 
 function spImgHTML(sp,imgCls,initCls){
   const p=getSpPhoto(sp.id);
@@ -3588,6 +3646,139 @@ const DIA2_WORKSHOPS=[
   {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'18:30 a 20:00',desde:1110,hasta:1200,audiencia:'Madres & Padres',audiencias:['familia'],speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
 ];
 
+// ---- CHECKOUT CON AYUDA (promo post-impacto) ----
+// Agrupación temática de los talleres, a mano — no viene de ningún dato
+// cargado en otro lado, así que si se agrega/saca un taller hay que
+// actualizar esto también.
+const TEMATICAS={
+  vinculos:{label:'🧠 Vínculos y primera infancia',talleres:['poder-del-vinculo','me-descubro','crianza-respetuosa']},
+  digital:{label:'📱 Tecnología y mundo digital',talleres:['entornos','tu-huella-digital','plata-facil-juego','convivencia-digital']},
+  adolescencia:{label:'🌱 Adolescencia y desarrollo personal',talleres:['viaje-adolescente','comprender']},
+};
+
+let promoFilters={momento:'',speaker:'',tematica:''};
+let lastPromoCombos=[];
+
+function setPromoFilter(key,value){
+  promoFilters[key]=value;
+  if(key==='momento'){
+    document.querySelectorAll('#promo-momento-buttons .tab-btn').forEach(b=>b.classList.remove('active'));
+    const map={manana:0,tarde:1,'':2};
+    const btns=document.querySelectorAll('#promo-momento-buttons .tab-btn');
+    if(btns[map[value]])btns[map[value]].classList.add('active');
+  }
+  renderPromoResults();
+}
+
+function populatePromoDropdowns(){
+  const speakerSel=document.getElementById('promo-speaker');
+  if(speakerSel&&speakerSel.options.length<=1){
+    const speakers=[...new Set(DIA2_WORKSHOPS.flatMap(w=>w.speaker.split(' + ')))].sort();
+    speakerSel.innerHTML='<option value="">Cualquiera</option>'+speakers.map(s=>`<option value="${s}">${s}</option>`).join('');
+  }
+  const tematicaSel=document.getElementById('promo-tematica');
+  if(tematicaSel&&tematicaSel.options.length<=1){
+    tematicaSel.innerHTML='<option value="">Cualquiera</option>'+Object.entries(TEMATICAS).map(([key,t])=>`<option value="${key}">${t.label}</option>`).join('');
+  }
+}
+
+function scorePromoTaller(w){
+  let score=0;
+  if(promoFilters.speaker&&w.speaker.includes(promoFilters.speaker))score+=3;
+  if(promoFilters.tematica&&(TEMATICAS[promoFilters.tematica]?.talleres||[]).includes(w.id))score+=2;
+  if(promoFilters.momento){
+    const esManana=w.desde<780; // antes de las 13:00
+    if((promoFilters.momento==='manana'&&esManana)||(promoFilters.momento==='tarde'&&!esManana))score+=1;
+  }
+  return score;
+}
+
+// Arma hasta 3 combos de 2 talleres (que no se superpongan en horario),
+// priorizando los talleres que mejor puntúan según los filtros elegidos.
+// Si para esa audiencia solo hay 1 taller posible, lo ofrece solo.
+function generatePromoCombos(tipoAsistente){
+  const disponibles=DIA2_WORKSHOPS.filter(w=>w.audiencias.includes(tipoAsistente));
+  const scored=disponibles.map(w=>({w,score:scorePromoTaller(w)})).sort((a,b)=>b.score-a.score);
+  const noOverlap=(a,b)=>!(a.desde<b.hasta&&a.hasta>b.desde);
+
+  const combos=[];
+  const usedPairKeys=new Set();
+  for(let i=0;i<scored.length&&combos.length<3;i++){
+    for(let j=0;j<scored.length;j++){
+      if(i===j)continue;
+      const a=scored[i].w,b=scored[j].w;
+      if(!noOverlap(a,b))continue;
+      const pairKey=[a.id,b.id].sort().join('+');
+      if(usedPairKeys.has(pairKey))continue;
+      usedPairKeys.add(pairKey);
+      combos.push({talleres:[a,b].sort((x,y)=>x.desde-y.desde),score:scored[i].score+scored[j].score});
+      break;
+    }
+  }
+  combos.sort((a,b)=>b.score-a.score);
+
+  if(!combos.length&&scored.length){
+    return [{talleres:[scored[0].w],score:scored[0].score}];
+  }
+  return combos.slice(0,3);
+}
+
+function renderPromoResults(){
+  populatePromoDropdowns();
+  const tipo=document.getElementById('promo-tipo-asistente')?.value;
+  const resultsEl=document.getElementById('promo-results');
+  if(!resultsEl)return;
+  if(!tipo){
+    resultsEl.innerHTML='<div class="card" style="text-align:center;color:var(--text-secondary);font-size:13px">Elegí primero cómo participás, arriba 👆</div>';
+    return;
+  }
+  const combos=generatePromoCombos(tipo);
+  lastPromoCombos=combos;
+  if(!combos.length){
+    resultsEl.innerHTML='<div class="card" style="text-align:center;color:var(--text-secondary);font-size:13px">No encontramos talleres disponibles para esa combinación.</div>';
+    return;
+  }
+  resultsEl.innerHTML=combos.map((combo,i)=>{
+    const comboActive=combo.talleres.length>=2;
+    const total=combo.talleres.reduce((s,w)=>s+getWorkshopPrice(w,comboActive),0);
+    const regularTotal=combo.talleres.reduce((s,w)=>s+w.precioRegular,0);
+    const itemsHtml=combo.talleres.map(w=>`
+      <div style="margin-bottom:10px">
+        <div style="font-weight:700;font-size:13.5px">${w.nombre}</div>
+        <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px">${w.horario} · ${w.speaker}</div>
+      </div>`).join('');
+    return `
+    <div class="card" style="margin-bottom:12px;border:1.5px solid ${i===0?'var(--accent)':'var(--border)'}">
+      ${i===0?'<div style="font-size:10.5px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.03em">✨ RECOMENDADO PARA VOS</div>':''}
+      ${itemsHtml}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:11.5px;color:var(--green);font-weight:700">${comboActive?'🎉 Combo -15% aplicado':''}</div>
+        <div style="font-size:17px;font-weight:700;text-align:right">${comboActive?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(regularTotal)}</span>`:''}${fmtPrice(total)}</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="applyPromoCombo(${i})"><i class="ti ti-shopping-cart"></i>Agregar este combo</button>
+    </div>`;
+  }).join('')+`<div style="text-align:center;margin:14px 0"><button onclick="applyPromoCombo(-1)" style="background:none;border:none;color:var(--text-secondary);text-decoration:underline;font-size:12.5px;cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif">Prefiero elegir manualmente</button></div>`;
+}
+
+function applyPromoCombo(index){
+  const tipo=document.getElementById('promo-tipo-asistente')?.value;
+  if(!tipo){toast('Elegí primero cómo participás');return;}
+  openTicketModal();
+  setTimeout(()=>{
+    const tipoSelect=document.getElementById('lead-tipo-asistente-input');
+    if(tipoSelect)tipoSelect.value=tipo;
+    onTipoAsistenteChange();
+    if(index>=0&&lastPromoCombos[index]){
+      lastPromoCombos[index].talleres.forEach(w=>toggleWorkshop(w.id));
+    }
+  },50);
+}
+
+function checkPostImpactoBanner(){
+  const banner=document.getElementById('post-impacto-banner');
+  if(banner)banner.style.display=isPostImpactoActive()?'block':'none';
+}
+
 let selectedTipoAsistente='';
 let menorNombre='';
 let menorEdad='';
@@ -3716,7 +3907,7 @@ function renderCompanions(){
       <input type="number" min="1" max="99" placeholder="Edad" value="${c.edad||''}" oninput="updateCompanionField(${c.id},'edad',this.value)" style="width:100%;padding:9px 11px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
       `:''}
 
-      ${c.tipoAsistente==='adolescente'?'':(()=>{
+      ${(c.tipoAsistente==='adolescente'||isPostImpactoActive())?'':(()=>{
         const companionDia1Price=getDia1Price(isCompanionComboActive(c),false);
         const companionHasDiscount=companionDia1Price<DIA1_REGULAR_PRICE;
         return `
@@ -3806,10 +3997,11 @@ function onTipoAsistenteChange(){
   const dia1Block=document.getElementById('dia1-block');
   const edadWrap=document.getElementById('lead-edad-wrap');
   const isAdolescente=selectedTipoAsistente==='adolescente';
-  if(dia1Block)dia1Block.style.display=isAdolescente?'none':'block';
+  const hideDia1=isAdolescente||isPostImpactoActive();
+  if(dia1Block)dia1Block.style.display=hideDia1?'none':'block';
   if(edadWrap)edadWrap.style.display=isAdolescente?'block':'none';
-  if(isAdolescente&&selectedDia1){
-    selectedDia1=false; // un adolescente no puede comprar Día 1 (Jornada de Impacto)
+  if(hideDia1&&selectedDia1){
+    selectedDia1=false; // ya sea adolescente, o porque la Jornada de Impacto ya pasó
   }
 
   renderDia2Workshops();
@@ -3987,7 +4179,7 @@ function resetTicketSelection(){
   const edadWrap=document.getElementById('lead-edad-wrap');
   if(edadWrap)edadWrap.style.display='none';
   const dia1Block=document.getElementById('dia1-block');
-  if(dia1Block)dia1Block.style.display='block';
+  if(dia1Block)dia1Block.style.display=isPostImpactoActive()?'none':'block';
   selectedPaymentMethod='mp';
   const mpBtn=document.getElementById('pm-mp-btn');
   const transferBtn=document.getElementById('pm-transfer-btn');
@@ -4657,6 +4849,7 @@ function goPage(id){
   document.getElementById(id).classList.add('active');
   const nav=document.getElementById('nav-'+id.replace('page-',''));if(nav)nav.classList.add('active');
   if(id==='page-agenda')renderAgenda();
+  if(id==='page-promo'){populatePromoDropdowns();renderPromoResults();}
   history.replaceState(null,'','#'+id.replace('page-',''));
   window.scrollTo(0,0);
 }
@@ -4764,11 +4957,11 @@ function setupRevealObserver(){
 }
 
 goVideo(0);countdown();updateCTA();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
-loadSupabaseData();subscribeRealtime();logVisit();
+loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
-const validPages=['home','programa','speakers','sponsors','recursos','agenda','acreditacion'];
+const validPages=['home','programa','speakers','sponsors','recursos','agenda','acreditacion','promo'];
 if(initialHash&&validPages.includes(initialHash)){
   setTimeout(()=>{
     goPage('page-'+initialHash);
