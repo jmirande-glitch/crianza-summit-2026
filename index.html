@@ -539,10 +539,14 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <img id="hero-logo-img" src="https://gcgsgypcqysedwtsrsur.supabase.co/storage/v1/object/public/fotos/hero-logo-light.png" alt="Crianza Summit 360° — Jornada de Impacto 4 Ago, Jornada Institucional 5 Ago" style="display:block;width:100%;max-width:510px;margin:0 auto">
     </div>
 
-    <div class="hero-location">
+    <div class="hero-location" id="hero-location">
       <i class="ti ti-map-pin" style="font-size:14px;color:var(--accent)"></i>
       <span>Shopping Solar del Cerro, Yerba Buena, Tucumán</span>
       <a href="https://maps.app.goo.gl/3PkenPoBLhnhAJBZA" target="_blank">Cómo llegar</a>
+    </div>
+    <div class="hero-location" id="hero-location-agenda-notice" style="display:none">
+      <i class="ti ti-map-pin" style="font-size:14px;color:var(--accent)"></i>
+      <span>Revisá en Agenda la ubicación de tus talleres</span>
     </div>
 
 
@@ -578,7 +582,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </div>
 
     <div class="day-cards">
-      <div class="day-card" onclick="goProgramaDay('day1')">
+      <div class="day-card" id="day-card-martes" onclick="goProgramaDay('day1')">
         <div class="day-top">
           <div class="day-num">Martes 4 ago</div>
           <div class="day-date">Jornada Abierta<br>de Impacto</div>
@@ -1405,7 +1409,8 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <div class="card">
       <div style="font-size:14px;font-weight:700;margin-bottom:6px">¿Qué te interesa para mañana? 🌱</div>
-      <p style="font-size:12.5px;color:var(--text-secondary);margin:0">Dos preguntas rápidas y te sugerimos qué elegir.</p>
+      <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 10px">Dos preguntas rápidas y te sugerimos qué elegir.</p>
+      <button onclick="goManualCheckout()" style="background:none;border:none;color:var(--text-secondary);text-decoration:underline;font-size:12px;cursor:pointer;font-family:'Gotham Rounded','DM Sans',sans-serif;padding:0">Prefiero elegir manualmente</button>
     </div>
 
     <div class="card">
@@ -1713,7 +1718,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
     <div id="dia2-workshops-list" style="display:none;margin-top:2px;padding-left:20px"></div>
 
-    <button onclick="openDia2Whatsapp()" class="ticket-option" style="width:100%;border:1.5px dashed var(--border);background:transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px">
+    <button id="instituciones-block" onclick="openDia2Whatsapp()" class="ticket-option" style="width:100%;border:1.5px dashed var(--border);background:transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px">
       <div class="ticket-option-left">
         <div class="ticket-option-name" style="font-size:12.5px">🏢 Talleres para instituciones</div>
         <div class="ticket-option-desc">¿Sos institución educativa, deportiva o de salud? Escribinos.</div>
@@ -1939,11 +1944,18 @@ async function callAdminAction(action,extra={}){
 
 let enrollments=new Set(),ratings={},comments={},pubComments={},sessionCounts={},userDatos={};
 const EVENT_START=new Date('2026-08-04T09:00:00-03:00');
-// A las 17hs del 4/8 el checkout se reabre (solo para el Día 2 — la Jornada
-// de Impacto ya empezó/terminó, no tiene sentido seguir vendiéndola). Entre
-// las 9hs y las 17hs de ese día queda cerrado, como ya estaba pensado.
-const POST_IMPACTO_REOPEN=new Date('2026-08-04T17:00:00-03:00');
+// El checkout NUNCA se cierra — sigue abierto todo el día. El único cambio
+// es a las 17:30 del 4/8: ahí Día 1 deja de poder comprarse (ya empezó/
+// terminó la Jornada de Impacto, no tiene sentido seguir vendiéndola), y
+// arranca la promo de talleres del Día 2.
+const POST_IMPACTO_REOPEN=new Date('2026-08-04T17:30:00-03:00');
 function isPostImpactoActive(){return new Date()>=POST_IMPACTO_REOPEN;}
+// A las 18hs del 4/8 (una hora después de reabrir el checkout) se activa
+// la versión "con ayuda": el Home solo muestra la Jornada Formativa, la
+// Agenda oculta el Martes, "Reservá tu lugar" lleva al checkout con ayuda
+// en vez del checkout normal, y se esconde el cartel de instituciones.
+const LAUNCH_18=new Date('2026-08-04T18:00:00-03:00');
+function isLaunch18Active(){return new Date()>=LAUNCH_18;}
 const CUPOS_TOTAL=250;
 let totalConfirmados=0;
 
@@ -2112,8 +2124,7 @@ function sessionOverlaps(s1,s2){
 function getConflicts(sid){const s=SESSIONS.find(x=>x.id===sid);return SESSIONS.filter(x=>enrollments.has(x.id)&&sessionOverlaps(s,x));}
 function isSessionPast(s){const d=s.day===1?new Date('2026-08-04T00:00:00-03:00'):new Date('2026-08-05T00:00:00-03:00');const[h,m]=(s.time||'0:0').split(':').map(Number);d.setHours(h,m,0,0);return new Date()>=d;}
 function isEventStarted(){
-  if(isPostImpactoActive())return false; // se reabre para la promo de talleres del Día 2
-  return new Date()>=EVENT_START;
+  return false; // el checkout ya no se cierra nunca — ver comentario en POST_IMPACTO_REOPEN
 }
 
 function spImgHTML(sp,imgCls,initCls){
@@ -3835,6 +3846,13 @@ function renderPromoCombos(){
   },tipo&&promoPath&&promoSub?180:0);
 }
 
+// Para cuando alguien quiere saltarse todo el cuestionario de entrada —
+// no depende de haber elegido tipo de asistente todavía, se completa
+// directo en el checkout normal.
+function goManualCheckout(){
+  openTicketModal();
+}
+
 function applyPromoCombo(index){
   const tipo=document.getElementById('promo-tipo-asistente')?.value;
   if(!tipo){toast('Elegí primero cómo participás');return;}
@@ -4902,19 +4920,65 @@ async function confirmTicketPayment(){
 // ---- CTA ----
 function updateCTA(){
   const btn=document.getElementById('cta-btn'),sub=document.getElementById('cta-sub');
-  if(isEventStarted()&&btn){
-    btn.className='cta-btn disabled';
-    btn.removeAttribute('onclick');
-    btn.innerHTML='<i class="ti ti-calendar-check" style="font-size:20px"></i>¡El evento ya comenzó!';
-    if(sub)sub.textContent='Nos vemos en el Summit 🌱';
-  }
+  const clones=document.querySelectorAll('.cta-btn-clone');
+
   if(isEventStarted()){
-    document.querySelectorAll('.cta-btn-clone').forEach(b=>{
+    // Entre las 9 y las 17hs del 4/8: cerrado por completo.
+    if(btn){
+      btn.className='cta-btn disabled';
+      btn.removeAttribute('onclick');
+      btn.innerHTML='<i class="ti ti-calendar-check" style="font-size:20px"></i>¡El evento ya comenzó!';
+    }
+    if(sub)sub.textContent='Nos vemos en el Summit 🌱';
+    clones.forEach(b=>{
       b.className='cta-btn cta-btn-clone disabled';
       b.removeAttribute('onclick');
       b.innerHTML='<i class="ti ti-calendar-check" style="font-size:20px"></i>¡El evento ya comenzó!';
     });
+    return;
   }
+
+  // Se reabre a partir de las 17hs. Desde las 18hs, el botón lleva al
+  // checkout con ayuda en vez del checkout normal.
+  const goingToPromo=isLaunch18Active();
+  const label='<i class="ti ti-ticket" style="font-size:20px"></i>Reservá tu lugar';
+  if(btn){
+    btn.className='cta-btn';
+    btn.setAttribute('onclick',goingToPromo?"goPage('page-promo')":'openTicketModal()');
+    btn.innerHTML=label;
+  }
+  if(sub)sub.textContent='Cupos limitados · Pagá con MercadoPago';
+  clones.forEach(b=>{
+    b.className='cta-btn cta-btn-clone';
+    b.setAttribute('onclick',goingToPromo?"goPage('page-promo')":'openTicketModal()');
+    b.innerHTML=label;
+  });
+}
+
+// Aplica de una todos los cambios visuales que se activan a las 18hs del
+// 4/8 — se llama al cargar la página y de nuevo cada segundo (enganchado
+// al countdown), para que se prendan solos sin necesidad de que alguien
+// recargue la página justo en ese momento.
+function applyLaunch18Gate(){
+  const active=isLaunch18Active();
+
+  const martesCard=document.getElementById('day-card-martes');
+  if(martesCard)martesCard.style.display=active?'none':'';
+  const heroLoc=document.getElementById('hero-location');
+  const heroLocNotice=document.getElementById('hero-location-agenda-notice');
+  if(heroLoc)heroLoc.style.display=active?'none':'flex';
+  if(heroLocNotice)heroLocNotice.style.display=active?'flex':'none';
+
+  const ptab1=document.getElementById('ptab-day1');
+  if(ptab1){
+    ptab1.style.display=active?'none':'';
+    if(active&&ptab1.classList.contains('active'))setPTab('day2');
+  }
+
+  const institucionesBlock=document.getElementById('instituciones-block');
+  if(institucionesBlock)institucionesBlock.style.display=active?'none':'';
+
+  updateCTA();
 }
 
 // ---- NAV ----
@@ -4949,7 +5013,7 @@ applyTheme(getThemeAuto());
 
 // ---- COUNTDOWN ----
 function countdown(){
-  function u(){const diff=EVENT_START-new Date();if(diff<=0){document.getElementById('countdown').innerHTML='<div style="font-size:16px;font-weight:700;text-align:center;width:100%">¡El evento comenzó! 🌱</div>';return;}
+  function u(){applyLaunch18Gate();const diff=EVENT_START-new Date();if(diff<=0){document.getElementById('countdown').innerHTML='<div style="font-size:16px;font-weight:700;text-align:center;width:100%">¡El evento comenzó! 🌱</div>';return;}
     const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
     document.getElementById('cd-d').textContent=String(d).padStart(2,'0');document.getElementById('cd-h').textContent=String(h).padStart(2,'0');document.getElementById('cd-m').textContent=String(m).padStart(2,'0');document.getElementById('cd-s').textContent=String(s).padStart(2,'0');}
   u();setInterval(u,1000);
@@ -5038,7 +5102,7 @@ function setupRevealObserver(){
   document.querySelectorAll('#page-sponsors .reveal').forEach(el=>revealObserver.observe(el));
 }
 
-goVideo(0);countdown();updateCTA();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
+goVideo(0);countdown();applyLaunch18Gate();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
 loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();
 
 // Restaurar la sección si el usuario refresca la página
