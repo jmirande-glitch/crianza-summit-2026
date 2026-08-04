@@ -1659,6 +1659,57 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
   </nav>
 </div>
 
+<!-- MODAL ENCUESTA DE SATISFACCIÓN — Día 1. Aparece solo (sin que nadie
+la busque) a partir de las 19:30 del 4/8, una vez por navegador. -->
+<div class="modal-overlay" id="survey-modal" onclick="handleSurveyOverlayClick(event)">
+  <div class="modal" style="position:relative;max-width:380px">
+    <div class="modal-handle"></div>
+    <button onclick="dismissSurvey()" style="position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;color:var(--text-secondary);z-index:2" aria-label="Cerrar"><i class="ti ti-x" style="font-size:20px"></i></button>
+
+    <div id="survey-q1" style="padding:8px 4px 4px">
+      <div style="font-size:11.5px;color:var(--text-secondary);font-weight:700;margin-bottom:6px">Pregunta 1 de 3</div>
+      <div style="font-size:17px;font-weight:700;line-height:1.35;margin-bottom:20px;font-family:'Gotham Rounded','DM Sans',sans-serif">¿Cómo te pareció la Jornada de Impacto de hoy?</div>
+      <div style="display:flex;justify-content:space-between;gap:6px" id="survey-faces">
+        <button class="survey-face" data-val="1" onclick="surveyPickFace(this)" style="flex:1;aspect-ratio:1;font-size:24px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer">😞</button>
+        <button class="survey-face" data-val="2" onclick="surveyPickFace(this)" style="flex:1;aspect-ratio:1;font-size:24px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer">🙁</button>
+        <button class="survey-face" data-val="3" onclick="surveyPickFace(this)" style="flex:1;aspect-ratio:1;font-size:24px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer">😐</button>
+        <button class="survey-face" data-val="4" onclick="surveyPickFace(this)" style="flex:1;aspect-ratio:1;font-size:24px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer">🙂</button>
+        <button class="survey-face" data-val="5" onclick="surveyPickFace(this)" style="flex:1;aspect-ratio:1;font-size:24px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-secondary);cursor:pointer">😍</button>
+      </div>
+    </div>
+
+    <div id="survey-q2" style="display:none;padding:8px 4px 4px">
+      <div style="font-size:11.5px;color:var(--text-secondary);font-weight:700;margin-bottom:6px">Pregunta 2 de 3</div>
+      <div style="font-size:17px;font-weight:700;line-height:1.35;margin-bottom:20px;font-family:'Gotham Rounded','DM Sans',sans-serif">¿Qué tan probable es que recomiendes este evento a un colega?</div>
+      <div style="display:flex;gap:5px" id="survey-nps-row1"></div>
+      <div style="display:flex;gap:5px;margin-top:5px" id="survey-nps-row2"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-secondary);margin-top:8px">
+        <span>Nada probable</span><span>Muy probable</span>
+      </div>
+    </div>
+
+    <div id="survey-q3" style="display:none;padding:8px 4px 4px">
+      <div style="font-size:11.5px;color:var(--text-secondary);font-weight:700;margin-bottom:6px">Pregunta 3 de 3</div>
+      <div style="font-size:17px;font-weight:700;line-height:1.35;margin-bottom:4px;font-family:'Gotham Rounded','DM Sans',sans-serif">¿Algo que quieras contarnos?</div>
+      <div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:12px">Opcional — podés enviar sin completar esto</div>
+      <textarea id="survey-comentario" placeholder="Lo que más te gustó, o algo para mejorar..." style="width:100%;height:80px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-secondary);padding:12px;font-size:14px;box-sizing:border-box;font-family:'Gotham Rounded','DM Sans',sans-serif;color:var(--text-primary);resize:none"></textarea>
+      <button onclick="submitSurvey()" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px" id="survey-submit-btn"><i class="ti ti-send"></i>Enviar</button>
+    </div>
+
+    <div id="survey-q4" style="display:none;text-align:center;padding:20px 4px">
+      <i class="ti ti-check" style="font-size:38px;color:var(--green)"></i>
+      <div style="font-size:17px;font-weight:700;margin-top:10px;font-family:'Gotham Rounded','DM Sans',sans-serif">¡Gracias por tu respuesta!</div>
+      <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px">Nos vemos mañana en la Jornada Formativa</div>
+    </div>
+
+    <div style="display:flex;justify-content:center;gap:6px;margin-top:22px" id="survey-dots">
+      <div class="survey-dot" style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></div>
+      <div class="survey-dot" style="width:6px;height:6px;border-radius:50%;background:var(--border)"></div>
+      <div class="survey-dot" style="width:6px;height:6px;border-radius:50%;background:var(--border)"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TICKETS -->
 <div class="modal-overlay" id="ticket-modal" onclick="handleModalOverlayClick(event)">
   <div class="modal" style="position:relative">
@@ -3655,6 +3706,106 @@ function closeTicketModal(){
   document.getElementById('ticket-modal').classList.remove('open');
   document.body.style.overflow='';
 }
+// ---- ENCUESTA DE SATISFACCIÓN (Día 1) ----
+// Se activa sola a partir de las 19:30 del 4/8. Totalmente anónima: no
+// pide mail ni nada identificable — el único "freno" para que no la vea
+// dos veces la misma persona es una marca en localStorage de ESE
+// navegador puntual (no es a prueba de balas: si alguien borra los datos
+// del navegador, usa modo incógnito, o entra desde otro dispositivo, la
+// va a volver a ver — decisión consciente para priorizar cero fricción
+// por sobre un control estricto de "una respuesta por persona").
+const SURVEY_ACTIVATION=new Date('2026-08-04T19:30:00-03:00');
+function isSurveyActive(){return new Date()>=SURVEY_ACTIVATION;}
+
+let surveyData={satisfaccion:null,nps:null};
+
+function checkShowSurvey(){
+  if(!isSurveyActive())return;
+  if(localStorage.getItem('cs26_survey_done'))return;
+  setTimeout(openSurveyModal,1200); // pequeño delay para no ser invasivo apenas carga
+}
+
+function openSurveyModal(){
+  document.getElementById('survey-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  buildSurveyNpsButtons();
+}
+
+function closeSurveyModalRaw(){
+  document.getElementById('survey-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function dismissSurvey(){
+  // Cerrar sin terminar también cuenta como "ya la vio" — para no
+  // insistirle a alguien que activamente eligió no responder.
+  localStorage.setItem('cs26_survey_done','1');
+  closeSurveyModalRaw();
+}
+
+function handleSurveyOverlayClick(e){
+  if(e.target===document.getElementById('survey-modal'))dismissSurvey();
+}
+
+function surveyShowStep(n){
+  document.getElementById('survey-q1').style.display=n===1?'block':'none';
+  document.getElementById('survey-q2').style.display=n===2?'block':'none';
+  document.getElementById('survey-q3').style.display=n===3?'block':'none';
+  document.getElementById('survey-q4').style.display=n===4?'block':'none';
+  const dots=document.querySelectorAll('.survey-dot');
+  dots.forEach((d,i)=>d.style.background=i===(n-1)?'var(--accent)':'var(--border)');
+}
+
+function surveyPickFace(el){
+  document.querySelectorAll('.survey-face').forEach(b=>{b.style.borderColor='var(--border)';b.style.background='var(--bg-secondary)'});
+  el.style.borderColor='var(--accent)';
+  el.style.background='var(--accent-light)';
+  surveyData.satisfaccion=Number(el.dataset.val);
+  setTimeout(()=>surveyShowStep(2),300);
+}
+
+function buildSurveyNpsButtons(){
+  const row1=document.getElementById('survey-nps-row1');
+  const row2=document.getElementById('survey-nps-row2');
+  if(row1.children.length)return; // ya armado, no lo rehacemos
+  for(let i=0;i<=10;i++){
+    const b=document.createElement('button');
+    b.textContent=i;
+    b.dataset.val=i;
+    b.style.cssText='flex:1;height:38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg-secondary);font-size:13px;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:\'Gotham Rounded\',\'DM Sans\',sans-serif';
+    b.onclick=()=>surveyPickNps(b);
+    (i<6?row1:row2).appendChild(b);
+  }
+}
+
+function surveyPickNps(el){
+  document.querySelectorAll('#survey-nps-row1 button,#survey-nps-row2 button').forEach(b=>{
+    b.style.borderColor='var(--border)';b.style.background='var(--bg-secondary)';b.style.color='var(--text-primary)';
+  });
+  el.style.borderColor='var(--accent)';el.style.background='var(--accent)';el.style.color='#fff';
+  surveyData.nps=Number(el.dataset.val);
+  setTimeout(()=>surveyShowStep(3),300);
+}
+
+async function submitSurvey(){
+  const btn=document.getElementById('survey-submit-btn');
+  const comentario=(document.getElementById('survey-comentario')?.value||'').trim();
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i>Enviando...';}
+  try{
+    await sb.from('cs26_encuesta_dia1').insert({
+      satisfaccion:surveyData.satisfaccion,
+      nps:surveyData.nps,
+      comentario:comentario||null
+    });
+  }catch(err){
+    console.warn('No se pudo guardar la respuesta de la encuesta:',err);
+  }
+  localStorage.setItem('cs26_survey_done','1');
+  surveyShowStep(4);
+  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-send"></i>Enviar';}
+  setTimeout(closeSurveyModalRaw,2200);
+}
+
 function handleModalOverlayClick(e){
   if(e.target===document.getElementById('ticket-modal'))closeTicketModal();
 }
@@ -5103,7 +5254,7 @@ function setupRevealObserver(){
 }
 
 goVideo(0);countdown();applyLaunch18Gate();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
-loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();
+loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();checkShowSurvey();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
