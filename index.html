@@ -132,6 +132,21 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .cd-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;opacity:.5;margin-top:2px}
 .cd-sep{font-size:24px;opacity:.3;padding:0 2px}
 
+/* CUPOS DISPONIBLES (hoy) */
+.cupos-widget{display:flex;align-items:center;gap:12px;background:var(--bg-primary);border:1.5px solid var(--accent);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px}
+.cupos-widget.sold-out{border-color:var(--red)}
+.cupos-widget-icon{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px}
+.cupos-widget.sold-out .cupos-widget-icon{background:var(--red-light);color:var(--red)}
+.cupos-widget-body{flex:1;min-width:0}
+.cupos-widget-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.cupos-widget-num{font-family:'Gotham Rounded','DM Sans',sans-serif;font-size:19px;font-weight:800;color:var(--text-primary);white-space:nowrap}
+.cupos-widget-num b{color:var(--accent)}
+.cupos-widget.sold-out .cupos-widget-num b{color:var(--red)}
+.cupos-widget-lbl{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.cupos-bar-track{height:6px;border-radius:10px;background:var(--bg-secondary);overflow:hidden}
+.cupos-bar-fill{height:100%;width:0%;background:var(--accent);border-radius:10px;transition:width .5s ease}
+.cupos-widget.sold-out .cupos-bar-fill{background:var(--red)}
+
 /* DAY CARDS */
 .day-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;align-items:stretch}
 .day-card{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;justify-content:space-between;height:100%}
@@ -579,6 +594,17 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div class="cd-item"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">min</div></div>
       <div class="cd-sep">:</div>
       <div class="cd-item"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">seg</div></div>
+    </div>
+
+    <div class="cupos-widget" id="cupos-widget" style="display:none">
+      <div class="cupos-widget-icon"><i class="ti ti-users" id="cupos-widget-icon-i"></i></div>
+      <div class="cupos-widget-body">
+        <div class="cupos-widget-top">
+          <div class="cupos-widget-num"><b id="m-inscriptos">--</b> cupos disponibles</div>
+          <div class="cupos-widget-lbl">Jornada de hoy</div>
+        </div>
+        <div class="cupos-bar-track"><div class="cupos-bar-fill" id="cupos-bar-fill"></div></div>
+      </div>
     </div>
 
     <div class="day-cards">
@@ -2007,7 +2033,7 @@ function isPostImpactoActive(){return new Date()>=POST_IMPACTO_REOPEN;}
 // en vez del checkout normal, y se esconde el cartel de instituciones.
 const LAUNCH_18=new Date('2026-08-04T18:00:00-03:00');
 function isLaunch18Active(){return new Date()>=LAUNCH_18;}
-const CUPOS_TOTAL=250;
+const CUPOS_TOTAL=150;
 let totalConfirmados=0;
 
 const SB_STORAGE=SB_URL+'/storage/v1/object/public/fotos';
@@ -2101,10 +2127,22 @@ async function loadSupabaseData(){
     if(myR)myR.forEach(r=>{ratings[r.session_id]=r.stars;if(r.comment)comments[r.session_id]={text:r.comment,isPublic:r.is_public};});
     const {data:pubR}=await sb.from('cs26_ratings').select('session_id,stars,comment,created_at').eq('is_public',true).not('comment','is',null);
     if(pubR){pubComments={};pubR.forEach(r=>{if(!pubComments[r.session_id])pubComments[r.session_id]=[];pubComments[r.session_id].push(r);});}
-    const {count:confirmedCount}=await sb.from('cs26_inscriptos_pagos').select('id',{count:'exact',head:true});
-    totalConfirmados=confirmedCount||0;
+    await refreshCuposCount();
     setSyncState('ok');renderAll();updateHomeMetrics();
   }catch(e){setSyncState('error');renderAll();}
+}
+
+// Vuelve a contar los inscriptos al Día 1 directo contra la base — se usa
+// al cargar la página, cada vez que llega un evento de realtime, y además
+// cada 20s como red de seguridad por si algún evento de realtime se
+// pierde (ej. corte de wifi momentáneo). Con pocos cupos restantes el
+// número necesita ser exacto siempre, no solo "eventualmente correcto".
+async function refreshCuposCount(){
+  try{
+    const {count:confirmedCount}=await sb.from('cs26_inscriptos_pagos').select('id',{count:'exact',head:true});
+    totalConfirmados=confirmedCount??totalConfirmados;
+    updateHomeMetrics();
+  }catch(e){/* silencioso: si falla, se reintenta en el próximo ciclo de 20s */}
 }
 
 async function doEnroll(sessionId){
@@ -2686,8 +2724,19 @@ function renderAgenda(){
 }
 
 function updateHomeMetrics(){
+  const widget=document.getElementById('cupos-widget');
+  if(widget)widget.style.display=isPostImpactoActive()?'none':'flex';
+  const restantes=Math.max(0,CUPOS_TOTAL-totalConfirmados);
   const m=document.getElementById('m-inscriptos');
-  if(m)m.textContent=Math.max(0,CUPOS_TOTAL-totalConfirmados);
+  if(m)m.textContent=restantes;
+  const fill=document.getElementById('cupos-bar-fill');
+  const pct=CUPOS_TOTAL>0?Math.min(100,Math.max(0,(totalConfirmados/CUPOS_TOTAL)*100)):0;
+  if(fill)fill.style.width=pct+'%';
+  if(widget)widget.classList.toggle('sold-out',restantes<=0);
+  const icon=document.getElementById('cupos-widget-icon-i');
+  if(icon)icon.className=restantes<=0?'ti ti-ban':'ti ti-users';
+  const numLbl=document.querySelector('#cupos-widget .cupos-widget-num');
+  if(numLbl)numLbl.innerHTML=restantes<=0?'<b>¡Cupos agotados!</b>':`<b>${restantes}</b> cupos disponibles`;
 }
 
 function showVenueInfo(key){
@@ -5164,7 +5213,7 @@ applyTheme(getThemeAuto());
 
 // ---- COUNTDOWN ----
 function countdown(){
-  function u(){applyLaunch18Gate();const diff=EVENT_START-new Date();if(diff<=0){document.getElementById('countdown').innerHTML='<div style="font-size:16px;font-weight:700;text-align:center;width:100%">¡El evento comenzó! 🌱</div>';return;}
+  function u(){applyLaunch18Gate();updateHomeMetrics();const diff=EVENT_START-new Date();if(diff<=0){document.getElementById('countdown').innerHTML='<div style="font-size:16px;font-weight:700;text-align:center;width:100%">¡El evento comenzó! 🌱</div>';return;}
     const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
     document.getElementById('cd-d').textContent=String(d).padStart(2,'0');document.getElementById('cd-h').textContent=String(h).padStart(2,'0');document.getElementById('cd-m').textContent=String(m).padStart(2,'0');document.getElementById('cd-s').textContent=String(s).padStart(2,'0');}
   u();setInterval(u,1000);
@@ -5183,7 +5232,13 @@ function subscribeRealtime(){
         renderMyQrCard();
       }
     })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'cs26_inscriptos_pagos'},()=>{refreshCuposCount();})
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'cs26_inscriptos_pagos'},()=>{refreshCuposCount();})
     .subscribe();
+
+  // Red de seguridad: además del realtime, resincroniza el conteo de
+  // cupos cada 20s por si se pierde algún evento (ej. corte de wifi).
+  setInterval(refreshCuposCount,20000);
 }
 
 // ---- ONESIGNAL PUSH NOTIFICATIONS ----
