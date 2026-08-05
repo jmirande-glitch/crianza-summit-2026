@@ -3924,6 +3924,29 @@ const DIA2_WORKSHOPS=[
   {id:'crianza-respetuosa',nombre:'Crianza respetuosa y límites',horario:'18:30 a 20:00',desde:1110,hasta:1200,audiencia:'Madres & Padres',audiencias:['familia'],speaker:'Brenda Tróccoli',precioRegular:50000,precioEarly:32000},
 ];
 
+// ---- CUPO POR TALLER (tope 30) ----
+// tallerCounts se llena con la cantidad real de inscriptos por taller
+// (cs26_dia2_inscripciones) y se refresca solo, igual que el contador de
+// cupos del Día 1: al cargar la página, por realtime cuando entra/sale una
+// fila, y cada 20s como red de seguridad. Si un taller YA tenía más de 30
+// inscriptos de antes, se deja como está — el tope solo bloquea SUMAR
+// gente nueva a partir de ahí. La validación real (la que no se puede
+// eludir) vive en mp-create-preference; esto es solo para que la persona
+// ni intente elegir un taller lleno.
+const TALLER_CUPO_MAX=30;
+let tallerCounts={};
+
+async function refreshTallerCupos(){
+  try{
+    const {data}=await sb.from('cs26_dia2_inscripciones').select('taller_id');
+    const counts={};
+    (data||[]).forEach(r=>{counts[r.taller_id]=(counts[r.taller_id]||0)+1;});
+    tallerCounts=counts;
+    renderDia2Workshops();
+  }catch(e){/* silencioso: se reintenta en el próximo ciclo */}
+}
+function tallerSinCupo(id){return (tallerCounts[id]||0)>=TALLER_CUPO_MAX;}
+
 // ---- CHECKOUT CON AYUDA (promo post-impacto) ----
 // Agrupación temática de los talleres, a mano — no viene de ningún dato
 // cargado en otro lado, así que si se agrega/saca un taller hay que
@@ -4299,8 +4322,9 @@ function renderDia2Workshops(){
   el.innerHTML=disponibles.map(w=>{
     const precio=getWorkshopPrice(w,primaryCombo);
     const hasDiscount=precio<w.precioRegular;
+    const sinCupo=tallerSinCupo(w.id)&&!selectedWorkshops.has(w.id);
     return`
-    <button onclick="toggleWorkshop('${w.id}')" class="ticket-option" id="opt-${w.id}" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px;text-align:left">
+    <button onclick="toggleWorkshop('${w.id}')" class="ticket-option" id="opt-${w.id}" style="width:100%;border:1.5px solid transparent;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-top:6px;text-align:left${sinCupo?';opacity:.55;cursor:not-allowed':''}">
       <div class="ticket-option-left" style="display:flex;align-items:center;gap:10px">
         <i class="ti ti-square" id="check-${w.id}" style="font-size:19px;color:var(--text-secondary);flex-shrink:0"></i>
         <div style="text-align:left">
@@ -4310,7 +4334,7 @@ function renderDia2Workshops(){
           ${w.nota?`<div class="ticket-option-desc" style="font-style:italic;margin-top:1px;text-align:left">${w.nota}</div>`:''}
         </div>
       </div>
-      <div class="ticket-option-price" id="price-${w.id}" style="font-size:16px;text-align:right;flex-shrink:0;margin-left:8px;line-height:1.15">${hasDiscount?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(w.precioRegular)}</span>`:''}${fmtPrice(precio)}</div>
+      <div class="ticket-option-price" id="price-${w.id}" style="font-size:16px;text-align:right;flex-shrink:0;margin-left:8px;line-height:1.15">${sinCupo?`<span style="color:var(--red);font-size:12px;font-weight:700">Sin cupo</span>`:`${hasDiscount?`<span style="text-decoration:line-through;font-size:11px;opacity:.5;font-weight:400;display:block">${fmtPrice(w.precioRegular)}</span>`:''}${fmtPrice(precio)}`}</div>
     </button>`;
   }).join('');
 
@@ -4365,6 +4389,10 @@ function toggleWorkshop(id){
   }
   const w=DIA2_WORKSHOPS.find(x=>x.id===id);
   if(!w)return;
+  if(tallerSinCupo(id)){
+    toast(`😔 "${w.nombre}" ya no tiene cupo disponible.`);
+    return;
+  }
   // Chequeo de superposición horaria contra lo que ya está elegido.
   const conflicto=DIA2_WORKSHOPS.find(other=>
     selectedWorkshops.has(other.id) && w.desde<other.hasta && w.hasta>other.desde
@@ -5142,6 +5170,15 @@ async function confirmTicketPayment(){
       })
     });
     const data=await res.json();
+    if(res.status===409&&data.error==='sin cupo'){
+      const nombresLlenos=(data.talleres_sin_cupo||[]).map(k=>DIA2_WORKSHOPS.find(w=>w.id===k)?.nombre||k).join(', ');
+      toast(`😔 Justo se agotó el cupo de: ${nombresLlenos}. Sacalo del carrito para poder continuar.`);
+      (data.talleres_sin_cupo||[]).forEach(k=>selectedWorkshops.delete(k));
+      renderDia2Workshops();
+      refreshTallerCupos();
+      updateCartUI();
+      return;
+    }
     if(!res.ok||!data.init_point){
       throw new Error(data.error||'No se pudo generar el pago');
     }
@@ -5286,9 +5323,15 @@ function subscribeRealtime(){
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'cs26_inscriptos_pagos'},()=>{refreshCuposCount();})
     .subscribe();
 
+  sb.channel('cs26_dia2_changes')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'cs26_dia2_inscripciones'},()=>{refreshTallerCupos();})
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'cs26_dia2_inscripciones'},()=>{refreshTallerCupos();})
+    .subscribe();
+
   // Red de seguridad: además del realtime, resincroniza el conteo de
   // cupos cada 20s por si se pierde algún evento (ej. corte de wifi).
   setInterval(refreshCuposCount,20000);
+  setInterval(refreshTallerCupos,20000);
 }
 
 // ---- ONESIGNAL PUSH NOTIFICATIONS ----
@@ -5359,7 +5402,7 @@ function setupRevealObserver(){
 }
 
 goVideo(0);countdown();applyLaunch18Gate();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
-loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();checkShowSurvey();
+loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();checkShowSurvey();refreshTallerCupos();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
