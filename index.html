@@ -3155,8 +3155,17 @@ function renderAcredTallerOptions(){
     DIA2_WORKSHOPS.map(w=>`<option value="${w.id}">${w.nombre} (${w.horario})</option>`).join('');
   if(current){
     sel.value=current;
-    if(sel.value===current)acredTallerId=current;
+  }else{
+    // Nada guardado todavía: algunos navegadores dejan seleccionada
+    // visualmente la primera opción real de la lista aunque nadie la
+    // haya tocado. Forzamos el placeholder para que quede claro que
+    // hace falta una elección explícita — nunca un default silencioso.
+    sel.selectedIndex=0;
   }
+  // Sincroniza siempre la variable interna con lo que el <select>
+  // termina mostrando de verdad, para que nunca queden desincronizados.
+  acredTallerId=sel.value||null;
+  if(acredTallerId)localStorage.setItem('cs26_acred_taller_id',acredTallerId);
 }
 
 function onAcredTallerChange(){
