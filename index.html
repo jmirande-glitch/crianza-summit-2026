@@ -3113,6 +3113,8 @@ let lastAcredStats=null;
 // del evento) queda en Día 1 por defecto, pero el staff lo puede cambiar
 // libremente en cualquier momento.
 function initAcredDefaults(){
+  const stored=localStorage.getItem('cs26_acred_dia');
+  if(stored==='1'||stored==='2'){setAcredDia(Number(stored));return;}
   const now=new Date();
   const gmt3=new Date(now.getTime()-3*60*60*1000); // aproximación simple a hora de Tucumán
   const y=gmt3.getUTCFullYear(),m=gmt3.getUTCMonth()+1,d=gmt3.getUTCDate();
@@ -3122,6 +3124,7 @@ function initAcredDefaults(){
 
 function setAcredDia(dia){
   acredDia=dia;
+  localStorage.setItem('cs26_acred_dia',String(dia));
   document.getElementById('acred-dia1-btn').className='tab-btn'+(dia===1?' active':'');
   document.getElementById('acred-dia2-btn').className='tab-btn'+(dia===2?' active':'');
   const wrap=document.getElementById('acred-taller-select-wrap');
@@ -3143,14 +3146,23 @@ function setAcredDia(dia){
 function renderAcredTallerOptions(){
   const sel=document.getElementById('acred-taller-select');
   if(!sel)return;
-  const current=sel.value;
+  // Esta sala/dispositivo casi siempre acredita SIEMPRE el mismo taller
+  // durante todo el evento — se recuerda entre recargas de página para
+  // no tener que volver a elegirlo cada vez que se refresca o se
+  // reabre la tablet.
+  const current=sel.value||acredTallerId||localStorage.getItem('cs26_acred_taller_id')||'';
   sel.innerHTML='<option value="" disabled>¿Qué taller es esta sala?</option>'+
     DIA2_WORKSHOPS.map(w=>`<option value="${w.id}">${w.nombre} (${w.horario})</option>`).join('');
-  if(current)sel.value=current;
+  if(current){
+    sel.value=current;
+    if(sel.value===current)acredTallerId=current;
+  }
 }
 
 function onAcredTallerChange(){
   acredTallerId=document.getElementById('acred-taller-select').value||null;
+  if(acredTallerId)localStorage.setItem('cs26_acred_taller_id',acredTallerId);
+  else localStorage.removeItem('cs26_acred_taller_id');
   acredListOpen=false;
   document.getElementById('acred-list-panel').style.display='none';
   backToAcredModes();
