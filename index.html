@@ -573,10 +573,9 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
     </div>
 
     <div id="post-impacto-banner" style="display:none;background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius-md);padding:16px;margin:0 20px 14px;text-align:center">
-      <div style="font-size:15px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:4px">🎉 ¡Gracias por venir hoy!</div>
-      <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">Mañana seguimos con la Jornada Formativa. Contanos qué te interesa y te armamos una selección de talleres.</div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="goPage('page-promo')"><i class="ti ti-sparkles"></i>Ver talleres recomendados para vos</button>
-      <button id="banner-survey-btn" style="display:none;width:100%;justify-content:center;margin-top:8px" class="btn btn-primary" onclick="openSurveyModal()"><i class="ti ti-message-2"></i>Contanos qué te pareció hoy</button>
+      <div style="font-size:15px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:4px">🎉 ¡Gracias por venir a la Jornada de Impacto!</div>
+      <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">Mañana seguimos con la Jornada Formativa. Contanos qué te pareció hoy.</div>
+      <button id="banner-survey-btn" style="display:none;width:100%;justify-content:center" class="btn btn-primary" onclick="openSurveyModal()"><i class="ti ti-message-2"></i>Contanos qué te pareció hoy</button>
     </div>
 
     <div class="cta-block">
@@ -5405,7 +5404,16 @@ function setupRevealObserver(){
 }
 
 goVideo(0);countdown();applyLaunch18Gate();loadSponsorsData();showWelcomeVideo();setupRevealObserver();checkPendingTransferBanner();checkVisitPopup();
-loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();checkShowSurvey();refreshTallerCupos();
+// Link directo compartible para la encuesta: crianzasummit.com.ar/#encuesta
+// — la abre sola apenas carga, sin pasar por el popup automático ni por
+// el banner. Pensado para mandar por WhatsApp/mail directo.
+function checkEncuestaDirectLink(){
+  if(location.hash.replace('#','').toLowerCase()==='encuesta'){
+    setTimeout(openSurveyModal,400);
+  }
+}
+
+loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();checkShowSurvey();refreshTallerCupos();checkEncuestaDirectLink();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
