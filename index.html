@@ -576,6 +576,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <div style="font-size:15px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:4px">🎉 ¡Gracias por venir hoy!</div>
       <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">Mañana seguimos con la Jornada Formativa. Contanos qué te interesa y te armamos una selección de talleres.</div>
       <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="goPage('page-promo')"><i class="ti ti-sparkles"></i>Ver talleres recomendados para vos</button>
+      <button id="banner-survey-btn" style="display:none;width:100%;justify-content:center;margin-top:8px" class="btn btn-primary" onclick="openSurveyModal()"><i class="ti ti-message-2"></i>Contanos qué te pareció hoy</button>
     </div>
 
     <div class="cta-block">
@@ -4143,6 +4144,8 @@ function applyPromoCombo(index){
 function checkPostImpactoBanner(){
   const banner=document.getElementById('post-impacto-banner');
   if(banner)banner.style.display=isPostImpactoActive()?'block':'none';
+  const surveyBtn=document.getElementById('banner-survey-btn');
+  if(surveyBtn)surveyBtn.style.display=isSurveyActive()?'flex':'none';
 }
 
 let selectedTipoAsistente='';
@@ -5300,7 +5303,7 @@ applyTheme(getThemeAuto());
 
 // ---- COUNTDOWN ----
 function countdown(){
-  function u(){applyLaunch18Gate();updateHomeMetrics();const diff=EVENT_START-new Date();if(diff<=0){document.getElementById('countdown').innerHTML='<div style="font-size:16px;font-weight:700;text-align:center;width:100%">¡El evento comenzó! 🌱</div>';return;}
+  function u(){applyLaunch18Gate();updateHomeMetrics();checkPostImpactoBanner();const diff=EVENT_START-new Date();if(diff<=0){document.getElementById('countdown').innerHTML='<div style="font-size:16px;font-weight:700;text-align:center;width:100%">¡El evento comenzó! 🌱</div>';return;}
     const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
     document.getElementById('cd-d').textContent=String(d).padStart(2,'0');document.getElementById('cd-h').textContent=String(h).padStart(2,'0');document.getElementById('cd-m').textContent=String(m).padStart(2,'0');document.getElementById('cd-s').textContent=String(s).padStart(2,'0');}
   u();setInterval(u,1000);
