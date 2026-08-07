@@ -4019,6 +4019,7 @@ function renderCertEncuestaStep(){
   if(step==='nps'){
     html=`
       <div style="font-size:11.5px;color:var(--text-secondary);font-weight:700;margin-bottom:6px">${progresoLbl}</div>
+      <div style="font-size:12px;color:var(--accent-dark);background:var(--accent-light);border-radius:10px;padding:8px 10px;margin-bottom:14px;line-height:1.4">📜 Para enviarte el certificado te pedimos que respondas antes esta breve encuesta</div>
       <div style="font-size:17px;font-weight:700;line-height:1.35;margin-bottom:20px;font-family:'Gotham Rounded','DM Sans',sans-serif">¿Recomendarías el Crianza Summit 360° a un amigo, conocido o colega?</div>
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px" id="cert-nps-grid">
         ${Array.from({length:11},(_,n)=>`<button onclick="certEncuestaSetNps(${n})" style="aspect-ratio:1;border-radius:10px;border:1.5px solid ${certEncuesta.nps===n?'var(--accent)':'var(--border)'};background:${certEncuesta.nps===n?'var(--accent-light)':'var(--bg-secondary)'};font-weight:700;font-size:13px;cursor:pointer">${n}</button>`).join('')}
@@ -4072,7 +4073,8 @@ function renderCertEncuestaStep(){
   if(step==='speakers_rating'){
     html=`
       <div style="font-size:11.5px;color:var(--text-secondary);font-weight:700;margin-bottom:6px">${progresoLbl}</div>
-      <div style="font-size:17px;font-weight:700;line-height:1.35;margin-bottom:16px;font-family:'Gotham Rounded','DM Sans',sans-serif">Calificá a cada speaker</div>
+      <div style="font-size:17px;font-weight:700;line-height:1.35;margin-bottom:6px;font-family:'Gotham Rounded','DM Sans',sans-serif">Calificá a cada speaker</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:16px">1 = muy malo · 5 = muy bueno</div>
       <div style="display:flex;flex-direction:column;gap:16px">
         ${SPEAKERS_ENCUESTA.map(s=>{
           const val=certEncuesta.speakers[s.id];
@@ -5505,7 +5507,7 @@ function applyLaunch18Gate(){
   const heroLoc=document.getElementById('hero-location');
   const heroLocNotice=document.getElementById('hero-location-agenda-notice');
   if(heroLoc)heroLoc.style.display=active?'none':'flex';
-  if(heroLocNotice)heroLocNotice.style.display=active?'flex':'none';
+  if(heroLocNotice)heroLocNotice.style.display='none'; // ya no se muestra — el evento terminó
 
   const institucionesBlock=document.getElementById('instituciones-block');
   if(institucionesBlock)institucionesBlock.style.display=active?'none':'';
