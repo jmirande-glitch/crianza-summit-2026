@@ -1563,6 +1563,15 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 
       <!-- ACREDITACIÓN -->
       <div id="tab-acreditacion" style="display:none">
+        <!-- Escaneo/carga temporalmente oculto — ver acred-scan-tools más abajo -->
+
+        <div class="card" style="text-align:center;margin-bottom:14px;background:var(--accent-light);border-color:var(--accent)">
+          <div style="font-size:13px;font-weight:700;color:var(--accent-dark)">📊 Panel de estadísticas — acreditación de escaneo pausada temporalmente</div>
+        </div>
+
+        <div id="acred-stats-dashboard"></div>
+
+        <div id="acred-scan-tools" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <button class="tab-btn" id="acred-dia1-btn" onclick="setAcredDia(1)" style="flex:1">🗣 Día 1</button>
           <button class="tab-btn" id="acred-dia2-btn" onclick="setAcredDia(2)" style="flex:1">🎓 Día 2</button>
@@ -1629,6 +1638,7 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
         </div>
 
         <div id="acred-result" style="display:none;border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:14px"></div>
+        </div>
       </div>
 
       <!-- DESCUENTOS -->
@@ -3496,8 +3506,76 @@ async function updateAcredStats(){
     // lo que corresponde al día/taller elegido en el selector.
     lastAcredStats=stats;
     renderAcredMetrics();
+    renderAcredStatsDashboard();
   }catch(err){console.error(err);}
   updateVisitStats();
+}
+
+// ---- Panel de estadísticas destacado (mientras el escaneo está pausado) ----
+// Compara acreditados vs inscriptos, tanto de la Jornada de Impacto como
+// de cada taller, con un gráfico de barras simple (SVG, sin librerías).
+function pct(a,b){return b>0?Math.round((a/b)*100):0;}
+
+function acredStatRow(label,acreditados,inscriptos,color){
+  const p=pct(acreditados,inscriptos);
+  return `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <div style="font-size:13px;font-weight:700">${label}</div>
+        <div style="font-size:12px;color:var(--text-secondary)"><b style="color:${color};font-size:14px">${acreditados}</b> / ${inscriptos} acreditados (${p}%)</div>
+      </div>
+      <div style="height:10px;border-radius:10px;background:var(--bg-secondary);overflow:hidden">
+        <div style="height:100%;width:${p}%;background:${color};border-radius:10px;transition:width .4s ease"></div>
+      </div>
+    </div>`;
+}
+
+function renderAcredStatsDashboard(){
+  const el=document.getElementById('acred-stats-dashboard');
+  if(!el||!lastAcredStats||!lastAcredStats.dia1)return;
+
+  const dia1=lastAcredStats.dia1;
+  const talleres=(lastAcredStats.talleres||[]).slice();
+  const talleresAcreditados=talleres.reduce((s,t)=>s+t.acreditados,0);
+  const talleresInscriptos=talleres.reduce((s,t)=>s+t.count,0);
+
+  // Gráfico de barras horizontales, uno por taller, ordenado de mayor a
+  // menor % acreditado para que se lea de un vistazo dónde falta gente.
+  const maxCount=Math.max(1,...talleres.map(t=>t.count));
+  const ordenados=talleres.slice().sort((a,b)=>pct(b.acreditados,b.count)-pct(a.acreditados,a.count));
+
+  const barsHtml=ordenados.map(t=>{
+    const p=pct(t.acreditados,t.count);
+    const widthAcred=t.count>0?(t.acreditados/maxCount)*100:0;
+    const widthTotal=(t.count/maxCount)*100;
+    return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px">
+          <span style="font-weight:600">${t.nombre}</span>
+          <span style="color:var(--text-secondary)">${t.acreditados}/${t.count} (${p}%)</span>
+        </div>
+        <div style="position:relative;height:14px;border-radius:8px;background:var(--bg-secondary);overflow:hidden">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${widthTotal}%;background:var(--border)"></div>
+          <div style="position:absolute;left:0;top:0;height:100%;width:${widthAcred}%;background:var(--accent);border-radius:8px"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:10px"><i class="ti ti-chart-bar"></i>Comparado con inscriptos</div>
+      ${acredStatRow('🗣 Jornada de Impacto (Día 1)',dia1.acreditados,dia1.count,'var(--accent)')}
+      ${acredStatRow('🎓 Talleres (todos, Día 2)',talleresAcreditados,talleresInscriptos,'#F99E38')}
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px"><i class="ti ti-chart-bar"></i>Acreditados por taller</div>
+      <div style="display:flex;gap:14px;font-size:10.5px;color:var(--text-secondary);margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:var(--accent);display:inline-block"></span>Acreditados</div>
+        <div style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:var(--border);display:inline-block"></span>Inscriptos totales</div>
+      </div>
+      ${barsHtml||'<div style="font-size:12px;color:var(--text-secondary)">Todavía no hay inscriptos a talleres.</div>'}
+    </div>`;
 }
 
 // Trae los agregados de visitantes (hoy / totales) vía RPC. Es una
