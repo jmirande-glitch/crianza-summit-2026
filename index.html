@@ -132,6 +132,13 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
 .cd-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;opacity:.5;margin-top:2px}
 .cd-sep{font-size:24px;opacity:.3;padding:0 2px}
 
+/* REVIVÍ 2026 / SUMMIT 2027 / TALLERES FUTUROS */
+.gallery-mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.gallery-mini-item{aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden;background:var(--bg-secondary)}
+.gallery-mini-item img{width:100%;height:100%;object-fit:cover;display:block}
+#lead2027-email::placeholder{color:rgba(255,255,255,.75)}
+#lead2027-email:focus{outline:none}
+
 /* CUPOS DISPONIBLES (hoy) */
 .cupos-widget{display:flex;align-items:center;gap:12px;background:var(--bg-primary);border:1.5px solid var(--accent);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px}
 .cupos-widget.sold-out{border-color:var(--red)}
@@ -572,12 +579,42 @@ body{font-family:'Gotham Rounded','DM Sans',sans-serif;background:var(--bg-terti
       <button type="button" onclick="restorePendingTransfer()" style="flex-shrink:0;background:#F0A94E;color:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Retomar</button>
     </div>
 
-    <div style="text-align:center;font-size:20px;font-weight:800;color:var(--accent-dark);font-family:'Gotham Rounded','DM Sans',sans-serif;line-height:1.35;padding:16px 20px;margin:0 20px 10px">¿Nos vemos en el<br>Crianza Summit 2027? 🌱</div>
-
     <div id="post-impacto-banner" style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius-md);padding:16px;margin:0 20px 14px;text-align:center">
       <div style="font-size:15px;font-weight:700;font-family:'Gotham Rounded','DM Sans',sans-serif;margin-bottom:4px">🎉 ¡Gracias por venir al Crianza Summit 360°!</div>
       <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">Fuiste parte del Crianza Summit 2026 y eso nos llena de alegría. Ojalá te lleves herramientas, ideas y vínculos nuevos para seguir acompañando con más conciencia. Contanos qué te pareció.</div>
       <button id="banner-survey-btn" style="width:100%;justify-content:center" class="btn btn-primary" onclick="openCertEncuesta()"><i class="ti ti-message-2"></i>Contanos qué te pareció hoy</button>
+    </div>
+
+    <!-- REVIVÍ EL SUMMIT 2026 -->
+    <div class="card" id="revivi-2026-section">
+      <div class="card-title"><i class="ti ti-photo"></i>Reviví el Summit 2026</div>
+      <div class="gallery-mini-grid" id="galeria-2026-grid" style="display:none"></div>
+      <div id="testimonio-2026-card" style="display:none;margin-top:12px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);gap:10px;align-items:flex-start">
+        <i class="ti ti-quote" style="font-size:16px;color:var(--accent);flex-shrink:0;margin-top:2px"></i>
+        <div id="testimonio-2026-texto" style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;font-style:italic"></div>
+      </div>
+      <div onclick="goPage('page-agenda')" style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;font-weight:700;color:var(--accent);cursor:pointer">
+        <i class="ti ti-certificate"></i>Recuperá tu certificado en Mi gestión<i class="ti ti-chevron-right" style="margin-left:auto;opacity:.6"></i>
+      </div>
+    </div>
+
+    <!-- SUMMIT 2027 (bloque editable desde admin-contenido.html) -->
+    <div class="card" id="bloque-2027" style="display:none;background:linear-gradient(180deg,#7FC8A9,#6DB897);border:none;color:#fff">
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.85;margin-bottom:6px">Próximamente</div>
+      <div id="bloque-2027-titulo" style="font-size:19px;font-weight:900;margin-bottom:6px;font-family:'Gotham Rounded','DM Sans',sans-serif"></div>
+      <div id="bloque-2027-texto" style="font-size:12.5px;line-height:1.6;opacity:.95;margin-bottom:6px"></div>
+      <div id="bloque-2027-fecha" style="font-size:11px;font-weight:700;opacity:.9;margin-bottom:12px;display:none"></div>
+      <div id="lead2027-form" style="display:flex;gap:8px">
+        <input id="lead2027-email" type="email" placeholder="tu@mail.com" style="flex:1;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:9px 11px;font-size:12px;color:#fff">
+        <button id="lead2027-btn" onclick="submitLead2027()" style="background:#fff;color:#3f8a68;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer">Avisenme</button>
+      </div>
+      <div id="lead2027-ok" style="display:none;font-size:12px;font-weight:700">¡Listo! Te avisamos apenas tengamos fecha 🌱</div>
+    </div>
+
+    <!-- TALLERES DISPONIBLES (cargados desde admin-contenido.html) -->
+    <div class="card" id="talleres-futuros-section" style="display:none">
+      <div class="card-title"><i class="ti ti-calendar-event"></i>Talleres disponibles</div>
+      <div id="talleres-futuros-list"></div>
     </div>
 
     <div class="cta-block" style="display:none">
@@ -5725,6 +5762,136 @@ function closeWelcomeVideo(){
   localStorage.setItem('cs26_video_visto','1');
 }
 
+// ---- REVIVÍ 2026 / SUMMIT 2027 / TALLERES FUTUROS ----
+// Todo esto lee de tablas que se editan desde admin-contenido.html.
+// Si algo falla (tabla vacía, sin conexión) no debe romper el resto de
+// la home: cada loader atrapa sus propios errores y esconde su sección.
+
+function escapeHtmlFront(str){
+  return String(str||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+async function loadPostEventoContent(){
+  loadBloque2027();
+  loadGaleria2026();
+  loadTestimonios2026();
+  loadTalleresFuturos();
+}
+
+// ---- Bloque Summit 2027 ----
+async function loadBloque2027(){
+  const wrap=document.getElementById('bloque-2027');
+  try{
+    const {data,error}=await sb.from('cs26_config_site').select('*').eq('id',1).single();
+    if(error||!data||!data.bloque_2027_activo){wrap.style.display='none';return;}
+    wrap.style.display='block';
+    document.getElementById('bloque-2027-titulo').textContent=data.bloque_2027_titulo||'Crianza Summit 2027';
+    document.getElementById('bloque-2027-texto').textContent=data.bloque_2027_texto||'';
+    const fechaEl=document.getElementById('bloque-2027-fecha');
+    if(data.bloque_2027_fecha_tentativa){
+      fechaEl.textContent=data.bloque_2027_fecha_tentativa;
+      fechaEl.style.display='block';
+    }
+    if(localStorage.getItem('cs26_lead2027_enviado'))showLead2027Ok();
+  }catch(e){console.warn('bloque 2027',e);wrap.style.display='none';}
+}
+
+function showLead2027Ok(){
+  document.getElementById('lead2027-form').style.display='none';
+  document.getElementById('lead2027-ok').style.display='block';
+}
+
+async function submitLead2027(){
+  const input=document.getElementById('lead2027-email');
+  const btn=document.getElementById('lead2027-btn');
+  const email=(input.value||'').trim();
+  if(!email||!email.includes('@')){toast('Poné un mail válido');return;}
+  btn.disabled=true;
+  try{
+    await sb.from('cs26_leads_2027').insert({email});
+    localStorage.setItem('cs26_lead2027_enviado','1');
+    showLead2027Ok();
+  }catch(e){
+    toast('No se pudo guardar, probá de nuevo');
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+// ---- Galería 2026 (bucket "fotos", carpeta "evento-2026") ----
+async function loadGaleria2026(){
+  const grid=document.getElementById('galeria-2026-grid');
+  try{
+    const {data,error}=await sb.storage.from('fotos').list('evento-2026',{limit:8,sortBy:{column:'name',order:'asc'}});
+    const fotos=(data||[]).filter(f=>f.name&&!f.name.startsWith('.'));
+    if(error||!fotos.length){grid.style.display='none';return;}
+    grid.style.display='grid';
+    grid.innerHTML=fotos.map(f=>{
+      const {data:pub}=sb.storage.from('fotos').getPublicUrl('evento-2026/'+f.name);
+      return `<div class="gallery-mini-item"><img src="${pub.publicUrl}" loading="lazy" alt="Foto Crianza Summit 2026"></div>`;
+    }).join('');
+  }catch(e){console.warn('galeria 2026',e);grid.style.display='none';}
+}
+
+// ---- Testimonios curados (rotan cada 7s si hay más de uno) ----
+let testimonios2026=[];
+let testimonioIdx2026=0;
+async function loadTestimonios2026(){
+  const card=document.getElementById('testimonio-2026-card');
+  try{
+    const {data,error}=await sb.from('cs26_testimonios_destacados').select('texto').eq('activo',true).order('orden',{ascending:true});
+    if(error||!data||!data.length){card.style.display='none';return;}
+    testimonios2026=data;
+    card.style.display='flex';
+    renderTestimonio2026();
+    if(testimonios2026.length>1){
+      setInterval(()=>{
+        testimonioIdx2026=(testimonioIdx2026+1)%testimonios2026.length;
+        renderTestimonio2026();
+      },7000);
+    }
+  }catch(e){console.warn('testimonios 2026',e);card.style.display='none';}
+}
+function renderTestimonio2026(){
+  const el=document.getElementById('testimonio-2026-texto');
+  if(el&&testimonios2026[testimonioIdx2026])el.textContent='"'+testimonios2026[testimonioIdx2026].texto+'"';
+}
+
+// ---- Talleres futuros esporádicos ----
+async function loadTalleresFuturos(){
+  const section=document.getElementById('talleres-futuros-section');
+  try{
+    const {data,error}=await sb.from('cs26_talleres_futuros').select('*').eq('activo',true).order('orden',{ascending:true});
+    if(error||!data||!data.length){section.style.display='none';return;}
+    section.style.display='block';
+    document.getElementById('talleres-futuros-list').innerHTML=data.map(tallerCardHtml).join('');
+  }catch(e){console.warn('talleres futuros',e);section.style.display='none';}
+}
+
+function tallerCardHtml(t){
+  const esMP=t.modo_inscripcion==='mp';
+  const badge=esMP
+    ?`<span class="badge badge-accent">Próximamente</span>`
+    :`<span class="badge" style="background:var(--bg-secondary);color:var(--text-secondary)">Anotate</span>`;
+  const meta=[t.fecha,t.sede].filter(Boolean).join(' · ');
+  // El modo "mp" todavía no cobra de verdad — falta generalizar
+  // mp-create-preference para leer talleres de esta tabla. Hasta que
+  // eso exista, el botón queda deshabilitado para no romper nada.
+  const btn=esMP
+    ?`<button class="btn" disabled style="width:100%;justify-content:center;opacity:.55;cursor:not-allowed;background:var(--bg-secondary);color:var(--text-secondary);border:none">Muy pronto: inscripción online</button>`
+    :`<a href="${escapeHtmlFront(t.link_externo||'#')}" target="_blank" rel="noopener" class="btn" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;background:#fff;color:var(--text-primary);border:1.5px solid var(--border)"><i class="ti ti-brand-whatsapp"></i>Anotarme</a>`;
+  return `
+    <div class="card" style="margin-bottom:10px;background:var(--bg-secondary)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:700">${escapeHtmlFront(t.titulo)}</div>
+        ${badge}
+      </div>
+      ${meta?`<div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:8px">${escapeHtmlFront(meta)}</div>`:''}
+      ${t.descripcion?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5">${escapeHtmlFront(t.descripcion)}</div>`:''}
+      ${btn}
+    </div>`;
+}
+
 // ---- INIT ----
 // ---- SCROLL REVEAL (Sponsors) ----
 let revealObserver=null;
@@ -5758,7 +5925,7 @@ function checkCertificadoDirectLink(){
   }
 }
 
-loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();refreshTallerCupos();checkEncuestaDirectLink();checkCertificadoDirectLink();
+loadSupabaseData();subscribeRealtime();logVisit();checkPostImpactoBanner();refreshTallerCupos();checkEncuestaDirectLink();checkCertificadoDirectLink();loadPostEventoContent();
 
 // Restaurar la sección si el usuario refresca la página
 const initialHash=window.location.hash.replace('#','');
