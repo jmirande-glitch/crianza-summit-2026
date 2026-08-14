@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Contenido — Crianza Summit</title>
+<style>
+  :root{
+    --bg:#F7F3EC;
+    --bg-card:#FFFFFF;
+    --text:#1A1208;
+    --text-secondary:#6B6258;
+    --accent:#D85A30;
+    --accent-dark:#B84823;
+    --border:#E5DDD0;
+    --green:#3D7A4F;
+    --green-light:#E8F3EA;
+    --red:#C44536;
+    --red-light:#FBEAE7;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:22px;font-weight:700;margin:0 0 4px}
+  h2{font-size:16px;font-weight:700;margin:0 0 4px}
+  .subtitle{color:var(--text-secondary);font-size:14px;margin:0 0 28px}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  .card-sub{color:var(--text-secondary);font-size:13px;margin:0 0 16px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:16px}
+  label:first-child{margin-top:0}
+  input,select,textarea{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    background:var(--bg);
+    color:var(--text);
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{min-height:80px;resize:vertical;line-height:1.5}
+  .hint{font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.5}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:white;border:none;border-radius:8px;
+    padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:inherit;transition:background .15s;
+  }
+  .btn:hover{background:var(--accent-dark)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg);color:var(--text)}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red-light)}
+  .btn-danger:hover{background:var(--red-light)}
+  .btn-block{width:100%;margin-top:18px}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+  #gate{text-align:center;padding-top:60px}
+  #gate input{text-align:center;letter-spacing:.1em;max-width:280px;margin:0 auto}
+  #gate .btn{max-width:280px;margin:16px auto 0;width:100%}
+  .error-text{color:var(--red);font-size:13px;margin-top:8px;display:none}
+  #app{display:none}
+  .tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab-btn{background:none;border:none;padding:10px 14px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:10px}
+  .item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .item-title{font-weight:700;font-size:14px}
+  .item-meta{font-size:12px;color:var(--text-secondary);margin-top:2px}
+  .item-actions{display:flex;gap:6px;flex-shrink:0}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px}
+  .badge-ok{background:var(--green-light);color:var(--green)}
+  .badge-off{background:var(--border);color:var(--text-secondary)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:200;display:none}
+  .comentario-item{border-bottom:1px solid var(--border);padding:12px 0;display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+  .comentario-item:last-child{border-bottom:none}
+  .comentario-txt{font-size:13px;line-height:1.5;flex:1}
+  .comentario-meta{font-size:11px;color:var(--text-secondary);margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase}
+  td{padding:8px;border-bottom:1px solid var(--border)}
+  .empty{color:var(--text-secondary);font-size:13px;padding:12px 0}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:16px}
+  .checkbox-row input{width:auto}
+  .checkbox-row label{margin:0;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div id="gate">
+    <h1>Contenido del sitio</h1>
+    <p class="subtitle">Acceso restringido — Crianza Summit</p>
+    <input type="password" id="pass-input" placeholder="Clave de administrador" onkeydown="if(event.key==='Enter')checkAccess()">
+    <div class="error-text" id="pass-error">Clave incorrecta.</div>
+    <button class="btn" onclick="checkAccess()">Ingresar</button>
+  </div>
+
+  <div id="app">
+    <h1>Contenido del sitio</h1>
+    <p class="subtitle">Bloque 2027, talleres esporádicos, testimonios y leads.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="config" onclick="showTab('config')">Bloque 2027</button>
+      <button class="tab-btn" data-tab="talleres" onclick="showTab('talleres')">Talleres</button>
+      <button class="tab-btn" data-tab="testimonios" onclick="showTab('testimonios')">Testimonios</button>
+      <button class="tab-btn" data-tab="leads" onclick="showTab('leads')">Leads 2027</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-config">
+      <div class="card">
+        <h2>Bloque "Summit 2027"</h2>
+        <p class="card-sub">Lo que se ve en la home mientras no hay fecha confirmada.</p>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="cfg-activo">
+          <label for="cfg-activo" style="margin:0">Mostrar este bloque en la web</label>
+        </div>
+
+        <label for="cfg-titulo">Título</label>
+        <input type="text" id="cfg-titulo" placeholder="Crianza Summit 2027">
+
+        <label for="cfg-texto">Texto</label>
+        <textarea id="cfg-texto" placeholder="Ya estamos planeando la próxima edición..."></textarea>
+
+        <label for="cfg-fecha">Fecha tentativa (opcional, texto libre)</label>
+        <input type="text" id="cfg-fecha" placeholder="Agosto 2027">
+
+        <button class="btn btn-block" onclick="saveConfig()">Guardar</button>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-talleres">
+      <div class="card">
+        <h2 id="taller-form-title">Nuevo taller</h2>
+        <p class="card-sub">Los que tengan "Cobro con Mercado Pago" muestran botón de pago. Los de "Link externo" mandan a WhatsApp, Google Form, etc.</p>
+        <input type="hidden" id="taller-id">
+
+        <div class="row">
+          <div>
+            <label for="taller-titulo">Título</label>
+            <input type="text" id="taller-titulo" placeholder="Convivencia digital en familia">
+          </div>
+          <div>
+            <label for="taller-slug">Slug (identificador único, sin espacios)</label>
+            <input type="text" id="taller-slug" placeholder="convivencia-digital-sept">
+          </div>
+        </div>
+
+        <label for="taller-descripcion">Descripción</label>
+        <textarea id="taller-descripcion" placeholder="De qué trata el taller"></textarea>
+
+        <div class="row">
+          <div>
+            <label for="taller-fecha">Fecha (texto libre)</label>
+            <input type="text" id="taller-fecha" placeholder="Sáb 12 sept, 10hs">
+          </div>
+          <div>
+            <label for="taller-sede">Sede</label>
+            <input type="text" id="taller-sede" placeholder="Tiendida, Yerba Buena">
+          </div>
+        </div>
+
+        <label for="taller-imagen">URL de imagen (opcional)</label>
+        <input type="text" id="taller-imagen" placeholder="https://...">
+
+        <div class="row">
+          <div>
+            <label for="taller-modo">Modo de inscripción</label>
+            <select id="taller-modo" onchange="toggleTallerModo()">
+              <option value="externo">Link externo (WhatsApp, form, etc.)</option>
+              <option value="mp">Cobro con Mercado Pago</option>
+            </select>
+          </div>
+          <div>
+            <label for="taller-precio">Precio (solo si es con Mercado Pago)</label>
+            <input type="number" id="taller-precio" placeholder="0">
+          </div>
+        </div>
+
+        <div id="taller-link-wrap">
+          <label for="taller-link">Link externo</label>
+          <input type="text" id="taller-link" placeholder="https://wa.me/549...">
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="taller-orden">Orden (menor = aparece primero)</label>
+            <input type="number" id="taller-orden" value="0">
+          </div>
+          <div class="checkbox-row" style="margin-top:34px">
+            <input type="checkbox" id="taller-activo" checked>
+            <label for="taller-activo" style="margin:0">Visible en la web</label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn" onclick="saveTaller()">Guardar taller</button>
+          <button class="btn btn-secondary" onclick="resetTallerForm()">Cancelar edición</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Talleres cargados</h2>
+        <div id="talleres-list"><div class="empty">Cargando...</div></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-testimonios">
+      <div class="card">
+        <h2>Comentarios de la encuesta</h2>
+        <p class="card-sub">Son anónimos — elegí cuáles publicar como testimonio en la web.</p>
+        <div id="comentarios-list"><div class="empty">Cargando...</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Testimonios publicados</h2>
+        <div id="testimonios-list"><div class="empty">Cargando...</div></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-leads">
+      <div class="card">
+        <h2>Mails interesados en 2027</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <p class="card-sub" style="margin:0" id="leads-count">Cargando...</p>
+          <button class="btn btn-secondary btn-sm" onclick="exportLeadsCSV()">Descargar CSV</button>
+        </div>
+        <table id="leads-table" style="display:none">
+          <thead><tr><th>Mail</th><th>Fecha</th></tr></thead>
+          <tbody id="leads-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CONTENIDO_ACTION_URL='https://gcgsgypcqysedwtsrsur.functions.supabase.co/contenido-action';
+let adminPass='';
+let leadsCache=[];
+
+async function callAction(action,extra={}){
+  const res=await fetch(CONTENIDO_ACTION_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,password:adminPass,...extra})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.error||'Error de administración');
+  return data;
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.display='block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>{t.style.display='none'},2500);
+}
+
+async function checkAccess(){
+  const val=document.getElementById('pass-input').value.trim();
+  const err=document.getElementById('pass-error');
+  err.style.display='none';
+  try{
+    adminPass=val;
+    await callAction('check_password');
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadAll();
+  }catch(e){
+    adminPass='';
+    err.style.display='block';
+  }
+}
+
+function showTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+}
+
+function loadAll(){
+  loadConfig();
+  loadTalleres();
+  loadComentarios();
+  loadTestimonios();
+  loadLeads();
+}
+
+// ---------- Bloque 2027 ----------
+async function loadConfig(){
+  try{
+    const {config}=await callAction('get_config');
+    document.getElementById('cfg-activo').checked=!!config.bloque_2027_activo;
+    document.getElementById('cfg-titulo').value=config.bloque_2027_titulo||'';
+    document.getElementById('cfg-texto').value=config.bloque_2027_texto||'';
+    document.getElementById('cfg-fecha').value=config.bloque_2027_fecha_tentativa||'';
+  }catch(e){showToast(e.message)}
+}
+
+async function saveConfig(){
+  try{
+    await callAction('save_config',{
+      bloque_2027_activo:document.getElementById('cfg-activo').checked,
+      bloque_2027_titulo:document.getElementById('cfg-titulo').value.trim(),
+      bloque_2027_texto:document.getElementById('cfg-texto').value.trim(),
+      bloque_2027_fecha_tentativa:document.getElementById('cfg-fecha').value.trim(),
+    });
+    showToast('Guardado');
+  }catch(e){showToast(e.message)}
+}
+
+// ---------- Talleres ----------
+function toggleTallerModo(){
+  const modo=document.getElementById('taller-modo').value;
+  document.getElementById('taller-link-wrap').style.display=modo==='externo'?'block':'none';
+}
+
+function resetTallerForm(){
+  document.getElementById('taller-id').value='';
+  document.getElementById('taller-titulo').value='';
+  document.getElementById('taller-slug').value='';
+  document.getElementById('taller-descripcion').value='';
+  document.getElementById('taller-fecha').value='';
+  document.getElementById('taller-sede').value='';
+  document.getElementById('taller-imagen').value='';
+  document.getElementById('taller-modo').value='externo';
+  document.getElementById('taller-precio').value='';
+  document.getElementById('taller-link').value='';
+  document.getElementById('taller-orden').value='0';
+  document.getElementById('taller-activo').checked=true;
+  document.getElementById('taller-form-title').textContent='Nuevo taller';
+  toggleTallerModo();
+}
+
+function editTaller(t){
+  document.getElementById('taller-id').value=t.id;
+  document.getElementById('taller-titulo').value=t.titulo||'';
+  document.getElementById('taller-slug').value=t.slug||'';
+  document.getElementById('taller-descripcion').value=t.descripcion||'';
+  document.getElementById('taller-fecha').value=t.fecha||'';
+  document.getElementById('taller-sede').value=t.sede||'';
+  document.getElementById('taller-imagen').value=t.imagen_url||'';
+  document.getElementById('taller-modo').value=t.modo_inscripcion||'externo';
+  document.getElementById('taller-precio').value=t.precio ?? '';
+  document.getElementById('taller-link').value=t.link_externo||'';
+  document.getElementById('taller-orden').value=t.orden ?? 0;
+  document.getElementById('taller-activo').checked=!!t.activo;
+  document.getElementById('taller-form-title').textContent='Editando: '+t.titulo;
+  toggleTallerModo();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveTaller(){
+  try{
+    const id=document.getElementById('taller-id').value||undefined;
+    await callAction('save_taller',{
+      id,
+      slug:document.getElementById('taller-slug').value.trim(),
+      titulo:document.getElementById('taller-titulo').value.trim(),
+      descripcion:document.getElementById('taller-descripcion').value.trim(),
+      fecha:document.getElementById('taller-fecha').value.trim(),
+      sede:document.getElementById('taller-sede').value.trim(),
+      imagen_url:document.getElementById('taller-imagen').value.trim(),
+      modo_inscripcion:document.getElementById('taller-modo').value,
+      precio:document.getElementById('taller-precio').value,
+      link_externo:document.getElementById('taller-link').value.trim(),
+      orden:document.getElementById('taller-orden').value,
+      activo:document.getElementById('taller-activo').checked,
+    });
+    showToast('Taller guardado');
+    resetTallerForm();
+    loadTalleres();
+  }catch(e){showToast(e.message)}
+}
+
+async function deleteTaller(id,titulo){
+  if(!confirm('¿Borrar el taller "'+titulo+'"? No se puede deshacer.'))return;
+  try{
+    await callAction('delete_taller',{id});
+    showToast('Borrado');
+    loadTalleres();
+  }catch(e){showToast(e.message)}
+}
+
+async function loadTalleres(){
+  const el=document.getElementById('talleres-list');
+  try{
+    const {talleres}=await callAction('list_talleres');
+    if(!talleres.length){el.innerHTML='<div class="empty">Todavía no cargaste ningún taller.</div>';return}
+    el.innerHTML=talleres.map(t=>`
+      <div class="item">
+        <div class="item-head">
+          <div>
+            <div class="item-title">${escapeHtml(t.titulo)}</div>
+            <div class="item-meta">${escapeHtml(t.fecha||'sin fecha')} · ${escapeHtml(t.sede||'sin sede')} · ${t.modo_inscripcion==='mp'?'Mercado Pago':'Link externo'}</div>
+          </div>
+          <div class="item-actions">
+            <span class="badge ${t.activo?'badge-ok':'badge-off'}">${t.activo?'Visible':'Oculto'}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick='editTaller(${JSON.stringify(t).replace(/'/g,"&apos;")})'>Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTaller('${t.id}','${escapeHtml(t.titulo).replace(/'/g,"\\'")}')">Borrar</button>
+        </div>
+      </div>
+    `).join('');
+  }catch(e){el.innerHTML='<div class="empty">Error al cargar.</div>';showToast(e.message)}
+}
+
+// ---------- Testimonios ----------
+async function loadComentarios(){
+  const el=document.getElementById('comentarios-list');
+  try{
+    const {comentarios}=await callAction('list_encuesta_comentarios');
+    if(!comentarios.length){el.innerHTML='<div class="empty">No hay comentarios con texto todavía.</div>';return}
+    el.innerHTML=comentarios.map(c=>`
+      <div class="comentario-item">
+        <div style="flex:1">
+          <div class="comentario-txt">"${escapeHtml(c.comentario)}"</div>
+          <div class="comentario-meta">Satisfacción ${c.satisfaccion ?? '-'}/5 · NPS ${c.nps ?? '-'}</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="promoverComentario(${JSON.stringify(c.comentario)})">Publicar</button>
+      </div>
+    `).join('');
+  }catch(e){el.innerHTML='<div class="empty">Error al cargar.</div>';showToast(e.message)}
+}
+
+async function promoverComentario(texto){
+  try{
+    await callAction('save_testimonio',{texto,activo:true,orden:0});
+    showToast('Publicado como testimonio');
+    loadTestimonios();
+  }catch(e){showToast(e.message)}
+}
+
+async function loadTestimonios(){
+  const el=document.getElementById('testimonios-list');
+  try{
+    const {testimonios}=await callAction('list_testimonios');
+    if(!testimonios.length){el.innerHTML='<div class="empty">Todavía no publicaste ningún testimonio.</div>';return}
+    el.innerHTML=testimonios.map(t=>`
+      <div class="item">
+        <div class="item-head">
+          <div class="comentario-txt" style="flex:1">"${escapeHtml(t.texto)}"</div>
+          <span class="badge ${t.activo?'badge-ok':'badge-off'}">${t.activo?'Activo':'Oculto'}</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="toggleTestimonio('${t.id}',${!t.activo})">${t.activo?'Ocultar':'Reactivar'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTestimonio('${t.id}')">Borrar</button>
+        </div>
+      </div>
+    `).join('');
+  }catch(e){el.innerHTML='<div class="empty">Error al cargar.</div>';showToast(e.message)}
+}
+
+async function toggleTestimonio(id,activo){
+  try{
+    await callAction('save_testimonio',{id,activo});
+    showToast(activo?'Reactivado':'Oculto');
+  }catch(e){showToast(e.message)}
+  loadTestimonios();
+}
+
+async function deleteTestimonio(id){
+  if(!confirm('¿Borrar este testimonio?'))return;
+  try{
+    await callAction('delete_testimonio',{id});
+    showToast('Borrado');
+    loadTestimonios();
+  }catch(e){showToast(e.message)}
+}
+
+// ---------- Leads ----------
+async function loadLeads(){
+  const countEl=document.getElementById('leads-count');
+  const table=document.getElementById('leads-table');
+  const tbody=document.getElementById('leads-tbody');
+  try{
+    const {leads}=await callAction('list_leads');
+    leadsCache=leads;
+    countEl.textContent=leads.length+' mail'+(leads.length===1?'':'es')+' cargados';
+    if(!leads.length){table.style.display='none';return}
+    tbody.innerHTML=leads.map(l=>`<tr><td>${escapeHtml(l.email)}</td><td>${new Date(l.created_at).toLocaleDateString('es-AR')}</td></tr>`).join('');
+    table.style.display='table';
+  }catch(e){countEl.textContent='Error al cargar';showToast(e.message)}
+}
+
+function exportLeadsCSV(){
+  if(!leadsCache.length){showToast('No hay leads para exportar');return}
+  const rows=[['email','fecha'],...leadsCache.map(l=>[l.email,l.created_at])];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='leads-2027.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(str){
+  return String(str??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+</script>
+</body>
+</html>
