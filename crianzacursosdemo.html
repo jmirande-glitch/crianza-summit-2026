@@ -1,0 +1,571 @@
+<meta charset="UTF-8">
+<title>Crianza Cursos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#F7F3EC;
+  --text-primary:#1A1208;--text-secondary:#7A6E5F;
+  --border:rgba(26,18,8,0.1);--border-md:rgba(26,18,8,0.2);
+  --radius-md:8px;--radius-lg:12px;
+  --accent:#D85A30;--accent-light:#FAECE7;--accent-dark:#993C1D;
+  --cta:#E8736B;
+  --green-light:#EAF3DE;--green:#3B6D11;
+  --amber-light:#FAEEDA;--amber:#854F0B;
+  --red-light:#FCEBEB;--red:#A32D2D;
+  --teal-light:#E1F5EE;--teal:#0F6E56;
+  --blue-light:#E6F1FB;--blue:#185FA5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-primary:#1e1e1c;--bg-secondary:#2a2a27;--bg-tertiary:#141412;
+    --text-primary:#f0efe8;--text-secondary:#999990;
+    --border:rgba(255,255,255,0.1);--border-md:rgba(255,255,255,0.2);
+    --accent-light:#4A1B0C;
+    --green-light:#173404;--green:#C0DD97;
+    --amber-light:#412402;--amber:#FAC775;
+    --red-light:#501313;--red:#F7C1C1;
+    --teal-light:#04342C;--teal:#5DCAA5;
+    --blue-light:#042C53;--blue:#85B7EB;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-primary:#1e1e1c;--bg-secondary:#2a2a27;--bg-tertiary:#141412;
+  --text-primary:#f0efe8;--text-secondary:#999990;
+  --border:rgba(255,255,255,0.1);--border-md:rgba(255,255,255,0.2);
+  --accent-light:#4A1B0C;
+  --green-light:#173404;--green:#C0DD97;
+  --amber-light:#412402;--amber:#FAC775;
+  --red-light:#501313;--red:#F7C1C1;
+  --teal-light:#04342C;--teal:#5DCAA5;
+  --blue-light:#042C53;--blue:#85B7EB;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;transition-duration:.01ms !important} }
+html,body{background:var(--bg-tertiary)}
+body{font-family:'Gotham Rounded','DM Sans',sans-serif;color:var(--text-primary);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit}
+.app{max-width:480px;margin:0 auto;background:var(--bg-tertiary);min-height:100vh;padding-bottom:78px;position:relative}
+
+/* ---------- topbar ---------- */
+.topbar{background:var(--bg-primary);border-bottom:0.5px solid var(--border);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-mark{width:28px;height:28px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;flex-shrink:0}
+.brand-txt{font-weight:800;font-size:15.5px;line-height:1.15}
+.brand-txt small{display:block;font-weight:500;font-size:10.5px;color:var(--text-secondary)}
+.demo-flag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-light);border-radius:100px;padding:4px 10px}
+
+.demo-banner{margin:12px 18px 0;background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;font-size:11.5px;color:var(--text-secondary);line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+
+/* ---------- hero ---------- */
+.hero{padding:26px 18px 6px}
+.hero-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.hero-title{font-size:30px;font-weight:800;line-height:1.08;color:var(--text-primary);margin-bottom:9px}
+.hero-title em{color:var(--accent);font-style:normal}
+.hero-sub{font-size:13.5px;color:var(--text-secondary);line-height:1.6}
+
+/* ---------- section head ---------- */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:20px 18px 10px}
+.sec-head h2{font-size:15px;font-weight:700}
+.sec-head .count{font-size:11.5px;color:var(--text-secondary)}
+
+.list{padding:0 18px}
+
+/* ---------- card (course) ---------- */
+.card{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;text-align:left;width:100%;box-sizing:border-box;display:block;color:inherit}
+.card:hover{border-color:var(--border-md)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.card-title{font-size:15px;font-weight:700;line-height:1.25}
+.card-date{font-size:12px;color:var(--text-secondary);margin-top:3px}
+.card-date b{color:var(--text-primary);font-weight:600}
+.chip-row{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}
+.chip{font-size:10.5px;background:var(--bg-secondary);color:var(--text-secondary);border-radius:100px;padding:3px 9px;font-weight:600}
+
+.cupos-widget{display:flex;align-items:center;gap:10px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:9px 11px;margin:9px 0}
+.cupos-widget.sold-out{border-color:var(--red)}
+.cupos-widget-icon{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px}
+.cupos-widget.sold-out .cupos-widget-icon{background:var(--red-light);color:var(--red)}
+.cupos-widget-body{flex:1;min-width:0}
+.cupos-widget-num{font-size:11.5px;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+.cupos-widget-num b{color:var(--accent)}
+.cupos-widget.sold-out .cupos-widget-num b{color:var(--red)}
+.cupos-bar-track{height:4px;border-radius:10px;background:var(--border);overflow:hidden}
+.cupos-bar-fill{height:100%;background:var(--accent);border-radius:10px}
+.cupos-widget.sold-out .cupos-bar-fill{background:var(--red)}
+
+.card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
+.price{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;flex-shrink:0;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.price small{font-weight:500;font-size:10.5px;color:var(--text-secondary)}
+.modalidad-tag{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--text-secondary);background:var(--bg-secondary);border-radius:100px;padding:3px 9px;white-space:nowrap;flex-shrink:0}
+
+.empty{margin:0 18px;padding:26px 16px;text-align:center;color:var(--text-secondary);font-size:12.5px;border:1px dashed var(--border-md);border-radius:var(--radius-lg)}
+
+/* ---------- past ---------- */
+.past-toggle{margin:14px 18px 0;background:none;border:none;color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:6px}
+.past-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);font-size:11.5px;color:var(--text-secondary);margin-bottom:6px}
+.past-row b{color:var(--text-primary);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:transparent;color:var(--text-primary);font-size:12px;font-weight:600;padding:7px 13px;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--bg-secondary)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-accent:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.btn-cta{width:100%;padding:14px;background:var(--cta);color:#fff;border:none;border-radius:var(--radius-lg);font-size:14.5px;font-weight:700;cursor:pointer}
+.btn-cta:hover{opacity:.92}
+
+/* ---------- badge / pill ---------- */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;padding:3px 9px;border-radius:100px}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-borrador{background:var(--bg-secondary);color:var(--text-secondary)}
+.badge-activo{background:var(--green-light);color:var(--green)}
+.badge-pausado{background:var(--amber-light);color:var(--amber)}
+.badge-finalizado{background:var(--bg-secondary);color:var(--text-secondary)}
+
+/* ---------- admin ---------- */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px}
+.kpi{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:11px 12px}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary);font-weight:700;margin-bottom:5px}
+.kpi-value{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+
+.arow{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:13px 14px;margin-bottom:9px}
+.arow-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.arow-title h4{font-size:14px;font-weight:700}
+.arow-meta{font-size:11.5px;color:var(--text-secondary);line-height:1.5}
+.arow-note{font-size:11px;color:var(--amber);margin-top:4px;font-weight:600}
+.arow-stats{font-size:11px;color:var(--text-secondary);margin-top:7px;font-variant-numeric:tabular-nums}
+.arow-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.arow-actions .btn{padding:6px 11px;font-size:11px}
+
+.new-course-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;font-size:12px}
+
+/* ---------- tab-bar (segmented, mirrors admin tab-bar in the real app) ---------- */
+.tab-bar{display:flex;gap:3px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:3px;margin:14px 18px 0}
+.tab-btn{flex:1;padding:7px;border:none;background:none;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all .15s}
+.tab-btn.active{background:var(--bg-primary);color:var(--text-primary)}
+.tab-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* ---------- bottom navbar ---------- */
+.navbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg-primary);border-top:0.5px solid var(--border);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 2px 10px;gap:4px;border:none;background:none;color:var(--text-secondary);font-size:10.5px;font-weight:600;cursor:pointer}
+.nav-item svg{display:block}
+.nav-item.active{color:var(--accent)}
+
+footer.note{padding:22px 18px 8px;font-size:10.5px;color:var(--text-secondary);text-align:center;line-height:1.6}
+
+.view{display:none}
+.view.active{display:block}
+
+/* ---------- modal (bottom sheet, mirrors the real app's sheets) ---------- */
+.overlay{position:fixed;inset:0;background:rgba(20,14,8,.45);display:flex;align-items:flex-end;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:auto}
+.sheet{background:var(--bg-tertiary);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:10px 18px 26px;transform:translateY(100%);transition:transform .25s cubic-bezier(.32,.72,0,1)}
+.overlay.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border-md);border-radius:2px;margin:6px auto 16px}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px}
+.sheet-close{border:none;background:var(--bg-secondary);color:var(--text-secondary);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sheet h2{font-size:19px;font-weight:800;line-height:1.15;margin-bottom:3px}
+.sheet-sub{font-size:12px;color:var(--text-secondary)}
+.sheet-body p{font-size:13.5px;line-height:1.65;color:var(--text-primary);margin-top:14px}
+.sheet-section{margin-top:18px}
+.sheet-section h5{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary);font-weight:700;margin-bottom:9px}
+.disertante{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.disertante-ini{width:32px;height:32px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.disertante-name{font-size:13px;font-weight:700}
+.disertante-role{font-size:11px;color:var(--text-secondary)}
+.hl-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.hl-list li{font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.hl-list li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.sheet-cta{margin-top:20px;padding-top:16px;border-top:0.5px solid var(--border)}
+.sheet-cta-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+
+/* ---------- form ---------- */
+.field{margin-bottom:11px;display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;color:var(--text-secondary)}
+.field input,.field select,.field textarea{font-size:13px;padding:9px 11px;border-radius:var(--radius-md);border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-primary)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.field textarea{resize:vertical;min-height:56px}
+.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,14px);background:var(--text-primary);color:var(--bg-primary);padding:10px 16px;border-radius:100px;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:300;max-width:88%;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-mark">CS</span>
+      <span class="brand-txt">Crianza Cursos<small>Prototipo de arquitectura</small></span>
+    </div>
+    <span class="demo-flag">Demo</span>
+  </div>
+
+  <div class="demo-banner">👋 <span>Datos ficticios, sin backend real — para mostrarle el concepto a Carolina antes de decidir cómo construirlo.</span></div>
+
+  <!-- ============ VISTA PÚBLICA ============ -->
+  <div class="view active" id="view-public">
+    <div class="hero">
+      <p class="hero-eyebrow">Crianza Summit · Entre ediciones</p>
+      <h1 class="hero-title">Cursos cortos con <em>Carolina Ferreyra</em> y otros especialistas</h1>
+      <p class="hero-sub">Encuentros puntuales entre el Summit 2026 y el 2027 — distintas fechas, sedes y disertantes, todos disponibles al mismo tiempo para que elijas el que te sirve.</p>
+    </div>
+
+    <div class="sec-head"><h2>Próximos cursos</h2><span class="count" id="public-count"></span></div>
+    <div class="list" id="public-grid"></div>
+
+    <button class="past-toggle" id="past-toggle" onclick="togglePast()"><span id="past-chevron">▸</span> Ver ediciones ya realizadas</button>
+    <div class="list" id="past-list" style="display:none;margin-top:8px"></div>
+
+    <footer class="note">Vista de ejemplo — así vería la gente la biblioteca de cursos en crianzasummit.com.ar</footer>
+  </div>
+
+  <!-- ============ PANEL DE CAROLINA ============ -->
+  <div class="view" id="view-admin">
+    <div class="hero" style="padding-top:22px">
+      <p class="hero-eyebrow">Panel de administración</p>
+      <h1 class="hero-title" style="font-size:24px">Así armás y publicás cada curso</h1>
+      <p class="hero-sub">Cargás un curso, lo activás cuando esté listo, y lo vas apagando a medida que pasa o se completa — sin pedirle nada a Javier.</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Activos ahora</div><div class="kpi-value" id="kpi-activos">0</div></div>
+      <div class="kpi"><div class="kpi-label">En la biblioteca</div><div class="kpi-value" id="kpi-total">0</div></div>
+      <div class="kpi"><div class="kpi-label">Inscriptos totales</div><div class="kpi-value" id="kpi-inscriptos">0</div></div>
+      <div class="kpi"><div class="kpi-label">Recaudado (demo)</div><div class="kpi-value" id="kpi-recaudado">$0</div></div>
+    </div>
+
+    <div class="sec-head"><h2>Todos los cursos</h2><button class="btn btn-accent new-course-btn" onclick="openForm()">＋ Nuevo curso</button></div>
+    <div class="list" id="admin-list"></div>
+
+    <footer class="note">Panel de ejemplo — en la versión real, cada acción de acá pega contra Supabase en vez de una lista en memoria.</footer>
+  </div>
+
+  <div class="navbar">
+    <button class="nav-item active" id="nav-public" onclick="setView('public')">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Cursos
+    </button>
+    <button class="nav-item" id="nav-admin" onclick="setView('admin')">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 8.7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H2.5a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.2 8.7a1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 6.7 3.8l.1.1a1.7 1.7 0 0 0 1.9.3H8.9a1.7 1.7 0 0 0 1-1.6V2.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9V8.9a1.7 1.7 0 0 0 1.6 1H21.5a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
+      Panel de Carolina
+    </button>
+  </div>
+</div>
+
+<!-- ============ SHEET: detalle público ============ -->
+<div class="overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="sheet" id="detail-sheet" role="dialog" aria-modal="true"><div class="sheet-handle"></div></div>
+</div>
+
+<!-- ============ SHEET: alta / edición de curso ============ -->
+<div class="overlay" id="form-overlay" onclick="if(event.target===this)closeForm()">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div><h2 id="form-title">Nuevo curso</h2><p class="sheet-sub">Se guarda como borrador — vos elegís cuándo activarlo.</p></div>
+      <button class="sheet-close" onclick="closeForm()" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <form id="course-form" onsubmit="submitForm(event)" style="margin-top:16px">
+      <div class="field"><label for="f-nombre">Nombre del curso</label><input id="f-nombre" required placeholder="Ej: Límites sin gritos"></div>
+      <div class="field-row">
+        <div class="field"><label for="f-fecha">Fecha</label><input id="f-fecha" type="date"></div>
+        <div class="field"><label for="f-horario">Horario</label><input id="f-horario" placeholder="10:00 a 13:00"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="f-lugar">Lugar / sede</label><input id="f-lugar" placeholder="Ej: Tiendida"></div>
+        <div class="field"><label for="f-modalidad">Modalidad</label><select id="f-modalidad"><option value="Presencial">Presencial</option><option value="Online">Online</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="f-precio">Precio (ARS)</label><input id="f-precio" type="number" min="0" step="500" placeholder="18000"></div>
+        <div class="field"><label for="f-cupo">Cupo total</label><input id="f-cupo" type="number" min="0" step="1" placeholder="40"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="f-dis-nombre">Disertante</label><input id="f-dis-nombre" placeholder="Ej: Carolina Ferreyra"></div>
+        <div class="field"><label for="f-dis-rol">Su rol / especialidad</label><input id="f-dis-rol" placeholder="Lic. en Psicología"></div>
+      </div>
+      <div class="field"><label for="f-desc">Descripción</label><textarea id="f-desc" placeholder="De qué se trata el curso, en 2-3 líneas"></textarea></div>
+      <div class="field"><label for="f-hl">Qué incluye (una idea por línea)</label><textarea id="f-hl" placeholder="Material impreso&#10;Certificado de participación"></textarea></div>
+      <div class="form-actions">
+        <button type="button" class="btn" onclick="closeForm()">Cancelar</button>
+        <button type="submit" class="btn btn-accent">Guardar como borrador</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var money = new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0});
+
+  var courses = [
+    {id:1, slug:'limites-sin-gritos', nombre:'Límites sin gritos',
+     fecha:'2026-09-19', fechaLabel:'Sáb 19 de septiembre, 2026', horario:'10:00 a 13:00',
+     lugar:'Espacio Tiendida', ciudad:'Yerba Buena, Tucumán', modalidad:'Presencial',
+     precio:18000, cupoTotal:40, cupoVendido:27,
+     disertantes:[{nombre:'Carolina Ferreyra', rol:'Lic. en Psicología · directora de Crianza Summit'}],
+     descripcion:'Un taller intensivo de una mañana para transformar los límites en algo que se sostiene sin pelear todos los días — con herramientas concretas para aplicar desde el lunes siguiente, no solo teoría.',
+     highlights:['Guía imprimible de frases para momentos de crisis','Grupo de seguimiento por 30 días','Certificado de participación'],
+     estado:'activo'},
+    {id:2, slug:'pantallas-con-cabeza', nombre:'Pantallas con cabeza',
+     fecha:'2026-10-08', fechaLabel:'Jue 8 de octubre, 2026', horario:'19:00 a 21:00',
+     lugar:'Modalidad online', ciudad:'Vía Zoom', modalidad:'Online',
+     precio:12000, cupoTotal:120, cupoVendido:64,
+     disertantes:[{nombre:'Santiago Stura', rol:'Especialista en convivencia digital'}],
+     descripcion:'Cómo poner reglas de pantallas que se cumplan, sin convertir la casa en un campo de batalla — pensado para familias con chicos de 8 a 15 años.',
+     highlights:['Grabación disponible por 15 días','Planilla de acuerdos familiares','Espacio de preguntas en vivo'],
+     estado:'activo'},
+    {id:3, slug:'adolescencia-manual-de-uso', nombre:'Adolescencia, manual de uso',
+     fecha:'2026-11-07', fechaLabel:'Sáb 7 de noviembre, 2026', horario:'9:30 a 13:00',
+     lugar:'Matternity', ciudad:'Yerba Buena, Tucumán', modalidad:'Presencial',
+     precio:22000, cupoTotal:35, cupoVendido:9,
+     disertantes:[{nombre:'Maritchu Seitún', rol:'Lic. en Psicología'},{nombre:'Lucas Raspall', rol:'Especialista en adolescencia'}],
+     descripcion:'Dos miradas complementarias sobre el tema más consultado por las familias: qué hacer (y qué no) durante la adolescencia.',
+     highlights:['Coffee break incluido','Preguntas en vivo con ambos disertantes','Material impreso'],
+     estado:'activo'},
+    {id:4, slug:'primeros-anios-primeros-vinculos', nombre:'Primeros años, primeros vínculos',
+     fecha:'', fechaLabel:'Fecha a confirmar', horario:'—',
+     lugar:'A confirmar', ciudad:'Yerba Buena, Tucumán', modalidad:'Presencial',
+     precio:0, cupoTotal:0, cupoVendido:0,
+     disertantes:[{nombre:'Brenda Tróccoli', rol:'Especialista en primera infancia'}],
+     descripcion:'Apego, sueño y regulación emocional en los primeros tres años — todavía en armado, falta cerrar fecha y sede.',
+     highlights:[],
+     estado:'borrador'},
+    {id:5, slug:'plata-en-casa', nombre:'Plata en casa: hablar de dinero con los hijos',
+     fecha:'2026-12-05', fechaLabel:'Sáb 5 de diciembre, 2026', horario:'10:00 a 12:30',
+     lugar:'Tiendida', ciudad:'Yerba Buena, Tucumán', modalidad:'Presencial',
+     precio:16000, cupoTotal:30, cupoVendido:30,
+     disertantes:[{nombre:'Juan Pablo Ventura', rol:'Educador financiero'}],
+     descripcion:'Herramientas para hablar de plata en casa sin tabú — de la mesada a las apuestas online.',
+     highlights:['Kit de actividades para hacer en familia'],
+     estado:'pausado', nota:'Cupo completo — en pausa mientras se evalúa una segunda fecha.'},
+    {id:6, slug:'conectar-sin-pelear', nombre:'Conectar sin pelear',
+     fecha:'2026-06-27', fechaLabel:'Sáb 27 de junio, 2026', horario:'10:00 a 13:00',
+     lugar:'Puentecito', ciudad:'Yerba Buena, Tucumán', modalidad:'Presencial',
+     precio:15000, cupoTotal:35, cupoVendido:35,
+     disertantes:[{nombre:'Sofía Chas', rol:'Terapeuta familiar'}],
+     descripcion:'El primer curso corto de esta temporada — agotado y ya realizado.',
+     highlights:[],
+     estado:'finalizado'}
+  ];
+  var nextId = 7;
+  var editingId = null;
+  var STATE_LABEL = {borrador:'Borrador', activo:'Activo', pausado:'Pausado', finalizado:'Finalizado'};
+
+  function initials(name){ return name.split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+  function byDate(a,b){ return (a.fecha||'9999').localeCompare(b.fecha||'9999'); }
+  function speakerNames(c){ return c.disertantes.map(function(d){return d.nombre;}).join(' · '); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); }
+
+  function toast(msg){
+    var t=document.getElementById('toast');
+    t.textContent=msg;
+    t.classList.add('show');
+    clearTimeout(toast._h);
+    toast._h=setTimeout(function(){t.classList.remove('show');},2600);
+  }
+
+  window.setView=function(which){
+    document.getElementById('view-public').classList.toggle('active', which==='public');
+    document.getElementById('view-admin').classList.toggle('active', which==='admin');
+    document.getElementById('nav-public').classList.toggle('active', which==='public');
+    document.getElementById('nav-admin').classList.toggle('active', which==='admin');
+  };
+
+  function cupoWidget(c){
+    if(!c.cupoTotal) return '';
+    var quedan = Math.max(0, c.cupoTotal - c.cupoVendido);
+    var pct = Math.min(100, Math.round(c.cupoVendido/c.cupoTotal*100));
+    var soldOut = quedan===0;
+    var ICON_USERS = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    var ICON_XCIRCLE = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg>';
+    return '<div class="cupos-widget'+(soldOut?' sold-out':'')+'"><div class="cupos-widget-icon">'+(soldOut?ICON_XCIRCLE:ICON_USERS)+'</div>' +
+      '<div class="cupos-widget-body"><div class="cupos-widget-num">'+(soldOut?'Cupo completo':('<b>'+quedan+'</b> lugares disponibles'))+'</div>' +
+      '<div class="cupos-bar-track"><div class="cupos-bar-fill" style="width:'+pct+'%"></div></div></div></div>';
+  }
+
+  function renderPublic(){
+    var active = courses.filter(function(c){return c.estado==='activo';}).sort(byDate);
+    var grid = document.getElementById('public-grid');
+    document.getElementById('public-count').textContent = active.length + (active.length===1?' curso abierto':' cursos abiertos');
+
+    if(!active.length){
+      grid.innerHTML='<div class="empty">No hay cursos activos en este momento.</div>';
+    } else {
+      grid.innerHTML = active.map(function(c){
+        return '' +
+          '<div class="card" role="button" tabindex="0" onclick="openDetail('+c.id+')" onkeydown="cardKeyOpen(event,'+c.id+')">' +
+            '<div class="card-top"><div><div class="card-title">'+esc(c.nombre)+'</div><div class="card-date"><b>'+esc(c.fechaLabel)+'</b><br>'+esc(c.lugar)+' · '+esc(c.ciudad)+'</div></div><span class="modalidad-tag">'+esc(c.modalidad)+'</span></div>' +
+            '<div class="chip-row">'+c.disertantes.map(function(d){return '<span class="chip">'+esc(d.nombre)+'</span>';}).join('')+'</div>' +
+            cupoWidget(c) +
+            '<div class="card-foot"><div class="price">'+money.format(c.precio)+'<small>por persona</small></div><span class="btn btn-accent">Ver detalle</span></div>' +
+          '</div>';
+      }).join('');
+    }
+
+    var past = courses.filter(function(c){return c.estado==='finalizado';}).sort(byDate).reverse();
+    document.getElementById('past-list').innerHTML = past.length ? past.map(function(c){
+      return '<div class="past-row"><span><b>'+esc(c.nombre)+'</b> — '+esc(c.fechaLabel)+'</span><span>'+esc(speakerNames(c))+'</span></div>';
+    }).join('') : '<div class="past-row">Todavía no hay ediciones anteriores.</div>';
+  }
+
+  window.togglePast=function(){
+    var list=document.getElementById('past-list');
+    var chev=document.getElementById('past-chevron');
+    var open = list.style.display!=='none';
+    list.style.display = open?'none':'block';
+    chev.textContent = open?'▸':'▾';
+  };
+
+  window.cardKeyOpen=function(ev,id){
+    if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); openDetail(id); }
+  };
+  window.openDetail=function(id){
+    var c = courses.filter(function(x){return x.id===id;})[0];
+    if(!c) return;
+    var sheet = document.getElementById('detail-sheet');
+    sheet.innerHTML = '<div class="sheet-handle"></div>' +
+      '<div class="sheet-head"><div><span class="modalidad-tag">'+esc(c.modalidad)+'</span>' +
+        '<h2 style="margin-top:8px">'+esc(c.nombre)+'</h2>' +
+        '<p class="sheet-sub">'+esc(c.fechaLabel)+' · '+esc(c.horario)+' · '+esc(c.lugar)+', '+esc(c.ciudad)+'</p></div>' +
+        '<button class="sheet-close" onclick="closeDetail()" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>' +
+      '<div class="sheet-body"><p>'+esc(c.descripcion)+'</p></div>' +
+      '<div class="sheet-section"><h5>Disertantes</h5>' +
+        c.disertantes.map(function(d){
+          return '<div class="disertante"><div class="disertante-ini">'+esc(initials(d.nombre))+'</div>' +
+                 '<div><div class="disertante-name">'+esc(d.nombre)+'</div><div class="disertante-role">'+esc(d.rol)+'</div></div></div>';
+        }).join('') + '</div>' +
+      (c.highlights.length ? '<div class="sheet-section"><h5>Qué incluye</h5><ul class="hl-list">'+c.highlights.map(function(h){return '<li>'+esc(h)+'</li>';}).join('')+'</ul></div>' : '') +
+      '<div class="sheet-cta">' + cupoWidget(c) +
+        '<div class="sheet-cta-row"><div class="price">'+money.format(c.precio)+'<small>por persona</small></div></div>' +
+        '<button class="btn-cta" onclick="fakeCheckout(\''+esc(c.nombre).replace(/'/g,"\\'")+'\')">Reservar mi lugar</button>' +
+      '</div>';
+    document.getElementById('detail-overlay').classList.add('open');
+  };
+  window.closeDetail=function(){ document.getElementById('detail-overlay').classList.remove('open'); };
+  window.fakeCheckout=function(nombre){ toast('En la versión real esto abriría el checkout de MercadoPago para "'+nombre+'".'); };
+
+  function renderAdmin(){
+    var total = courses.length;
+    var activos = courses.filter(function(c){return c.estado==='activo';}).length;
+    var inscriptos = courses.reduce(function(s,c){return s+(c.cupoVendido||0);},0);
+    var recaudado = courses.reduce(function(s,c){return s+(c.cupoVendido||0)*(c.precio||0);},0);
+
+    document.getElementById('kpi-activos').textContent = activos;
+    document.getElementById('kpi-total').textContent = total;
+    document.getElementById('kpi-inscriptos').textContent = inscriptos;
+    document.getElementById('kpi-recaudado').textContent = money.format(recaudado);
+
+    var order = {activo:0, pausado:1, borrador:2, finalizado:3};
+    var sorted = courses.slice().sort(function(a,b){ return (order[a.estado]-order[b.estado]) || byDate(a,b); });
+
+    document.getElementById('admin-list').innerHTML = sorted.map(function(c){
+      var actions = '';
+      if(c.estado==='borrador') actions += btn('Activar', "setEstado("+c.id+",'activo')", 'btn-accent');
+      if(c.estado==='activo'){ actions += btn('Pausar', "setEstado("+c.id+",'pausado')"); actions += btn('Finalizar', "setEstado("+c.id+",'finalizado')"); }
+      if(c.estado==='pausado'){ actions += btn('Reactivar', "setEstado("+c.id+",'activo')", 'btn-accent'); actions += btn('Finalizar', "setEstado("+c.id+",'finalizado')"); }
+      if(c.estado==='finalizado') actions += btn('Reabrir como borrador', "setEstado("+c.id+",'borrador')");
+      actions += btn('Editar', "openForm("+c.id+")");
+
+      return '' +
+        '<div class="arow">' +
+          '<div class="arow-title"><h4>'+esc(c.nombre)+'</h4><span class="badge badge-'+c.estado+'">'+STATE_LABEL[c.estado]+'</span></div>' +
+          '<div class="arow-meta">'+esc(c.fechaLabel)+' · '+esc(c.lugar)+' · '+esc(speakerNames(c)||'sin disertante cargado')+'</div>' +
+          (c.nota ? '<div class="arow-note">'+esc(c.nota)+'</div>' : '') +
+          '<div class="arow-stats">'+(c.cupoTotal ? (c.cupoVendido+' / '+c.cupoTotal+' cupos · '):'')+(c.precio? money.format(c.precio):'sin precio')+'</div>' +
+          '<div class="arow-actions">'+actions+'</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function btn(label, onclick, cls){ return '<button class="btn '+(cls||'')+'" onclick="'+onclick+'">'+label+'</button>'; }
+
+  window.setEstado=function(id, estado){
+    var c = courses.filter(function(x){return x.id===id;})[0];
+    if(!c) return;
+    c.estado = estado;
+    if(estado!=='pausado') delete c.nota;
+    renderAll();
+    var where = estado==='activo' ? 'ya es visible en la vista pública' :
+                estado==='pausado' ? 'se ocultó de la vista pública' :
+                estado==='finalizado' ? 'pasó al historial' : 'volvió a borrador';
+    toast('"'+c.nombre+'" ahora está '+STATE_LABEL[estado].toLowerCase()+' — '+where+'.');
+  };
+
+  window.openForm=function(id){
+    editingId = id || null;
+    var f = document.getElementById('course-form');
+    f.reset();
+    if(id){
+      var c = courses.filter(function(x){return x.id===id;})[0];
+      document.getElementById('form-title').textContent = 'Editar curso';
+      document.getElementById('f-nombre').value = c.nombre;
+      document.getElementById('f-fecha').value = c.fecha || '';
+      document.getElementById('f-horario').value = c.horario==='—' ? '' : c.horario;
+      document.getElementById('f-lugar').value = c.lugar==='A confirmar' ? '' : c.lugar;
+      document.getElementById('f-modalidad').value = c.modalidad;
+      document.getElementById('f-precio').value = c.precio || '';
+      document.getElementById('f-cupo').value = c.cupoTotal || '';
+      document.getElementById('f-dis-nombre').value = c.disertantes[0] ? c.disertantes[0].nombre : '';
+      document.getElementById('f-dis-rol').value = c.disertantes[0] ? c.disertantes[0].rol : '';
+      document.getElementById('f-desc').value = c.descripcion || '';
+      document.getElementById('f-hl').value = (c.highlights||[]).join('\n');
+    } else {
+      document.getElementById('form-title').textContent = 'Nuevo curso';
+    }
+    document.getElementById('form-overlay').classList.add('open');
+  };
+  window.closeForm=function(){ document.getElementById('form-overlay').classList.remove('open'); };
+
+  window.submitForm=function(ev){
+    ev.preventDefault();
+    var nombre = document.getElementById('f-nombre').value.trim();
+    if(!nombre) return;
+    var fecha = document.getElementById('f-fecha').value;
+    var data = {
+      nombre: nombre,
+      fecha: fecha,
+      fechaLabel: fecha ? new Date(fecha+'T00:00:00').toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'long',year:'numeric'}) : 'Fecha a confirmar',
+      horario: document.getElementById('f-horario').value.trim() || '—',
+      lugar: document.getElementById('f-lugar').value.trim() || 'A confirmar',
+      ciudad: 'Yerba Buena, Tucumán',
+      modalidad: document.getElementById('f-modalidad').value,
+      precio: Number(document.getElementById('f-precio').value) || 0,
+      cupoTotal: Number(document.getElementById('f-cupo').value) || 0,
+      descripcion: document.getElementById('f-desc').value.trim(),
+      highlights: document.getElementById('f-hl').value.split('\n').map(function(s){return s.trim();}).filter(Boolean),
+      disertantes: document.getElementById('f-dis-nombre').value.trim() ? [{nombre:document.getElementById('f-dis-nombre').value.trim(), rol:document.getElementById('f-dis-rol').value.trim()}] : []
+    };
+    if(editingId){
+      var c = courses.filter(function(x){return x.id===editingId;})[0];
+      Object.assign(c, data);
+      toast('Se guardaron los cambios de "'+nombre+'".');
+    } else {
+      data.id = nextId++;
+      data.slug = nombre.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      data.cupoVendido = 0;
+      data.estado = 'borrador';
+      courses.push(data);
+      toast('"'+nombre+'" se guardó como borrador — activalo cuando quieras publicarlo.');
+    }
+    closeForm();
+    renderAll();
+  };
+
+  function renderAll(){ renderPublic(); renderAdmin(); }
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeDetail(); closeForm(); } });
+
+  renderAll();
+})();
+</script>
